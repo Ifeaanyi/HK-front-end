@@ -305,7 +305,7 @@ export default function Friends() {
                     <p className="text-gray-400 text-sm">No to-dos yet</p>
                   ) : (
                     <div className="space-y-2">
-                      {friendTodos.map((todo) => (
+                      {friendTodos.sort((a, b) => new Date(a.task_date) - new Date(b.task_date)).map((todo) => (
                         <div key={todo.id} className="bg-gray-50 rounded-lg p-3 flex items-center gap-3">
                           <span className="text-lg">
                             {todo.completed ? '✅' : '⬜'}
