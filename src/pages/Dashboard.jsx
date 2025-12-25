@@ -77,6 +77,12 @@ export default function Dashboard() {
     return log?.completed || false;
   };
 
+  const changeDate = (days) => {
+    const currentDate = new Date(selectedDate);
+    currentDate.setDate(currentDate.getDate() + days);
+    setSelectedDate(currentDate.toISOString().split('T')[0]);
+  };
+
   const teamHabits = habits.filter(h => h.category === 'Team');
   const personalHabits = habits.filter(h => h.category === 'Personal');
   const teamCompleted = teamHabits.filter(h => getHabitStatus(h)).length;
@@ -202,11 +208,7 @@ export default function Dashboard() {
         {/* Date Selector */}
         <div className="mb-6 flex justify-between items-center">
           <button
-            onClick={() => {
-              const date = new Date(selectedDate);
-              date.setDate(date.getDate() - 1);
-              setSelectedDate(date.toISOString().split('T')[0]);
-            }}
+            onClick={() => changeDate(-1)}
             className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
           >
             ← Previous
@@ -220,11 +222,7 @@ export default function Dashboard() {
           />
           
           <button
-            onClick={() => {
-              const date = new Date(selectedDate);
-              date.setDate(date.getDate() + 1);
-              setSelectedDate(date.toISOString().split('T')[0]);
-            }}
+            onClick={() => changeDate(1)}
             className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
           >
             Next →
