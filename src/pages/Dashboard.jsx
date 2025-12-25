@@ -9,6 +9,7 @@ export default function Dashboard() {
   const [habits, setHabits] = useState([]);
   const [streak, setStreak] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
   const [testMode, setTestMode] = useState(false);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -77,10 +78,20 @@ export default function Dashboard() {
     return log?.completed || false;
   };
 
-  const changeDate = (days) => {
-    const currentDate = new Date(selectedDate);
-    currentDate.setDate(currentDate.getDate() + days);
-    setSelectedDate(currentDate.toISOString().split('T')[0]);
+  const changeMonth = (direction) => {
+    const newMonth = new Date(currentMonth);
+    newMonth.setMonth(newMonth.getMonth() + direction);
+    setCurrentMonth(newMonth);
+  };
+
+  const getMonthName = () => {
+    return currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  };
+
+  const getDaysInMonth = () => {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    return new Date(year, month + 1, 0).getDate();
   };
 
   const teamHabits = habits.filter(h => h.category === 'Team');
@@ -205,13 +216,13 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Date Selector */}
+        {/* Month Navigation */}
         <div className="mb-6 flex justify-between items-center">
           <button
-            onClick={() => changeDate(-1)}
+            onClick={() => changeMonth(-1)}
             className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
           >
-            ← Previous
+            ← Previous Month
           </button>
           
           <input
@@ -222,16 +233,16 @@ export default function Dashboard() {
           />
           
           <button
-            onClick={() => changeDate(1)}
+            onClick={() => changeMonth(1)}
             className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
           >
-            Next →
+            Next Month →
           </button>
         </div>
 
         {/* Habit Calendar */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">December 2025</h3>
+          <h3 className="text-xl font-bold text-gray-900 mb-4">{getMonthName()}</h3>
           
           <div className="mb-6 flex gap-4">
             <button className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
@@ -248,7 +259,7 @@ export default function Dashboard() {
               <thead>
                 <tr>
                   <th className="text-left py-2 px-2 text-sm font-medium text-gray-600">Habit</th>
-                  {Array.from({ length: 31 }, (_, i) => (
+                  {Array.from({ length: getDaysInMonth() }, (_, i) => (
                     <th key={i} className="text-center py-2 px-1 text-sm font-medium text-gray-600">
                       {i + 1}
                     </th>
@@ -258,7 +269,7 @@ export default function Dashboard() {
               <tbody>
                 {/* Team Habits Section */}
                 <tr className="bg-purple-600 text-white">
-                  <td colSpan="32" className="py-3 px-4 text-center font-bold">
+                  <td colSpan={getDaysInMonth() + 1} className="py-3 px-4 text-center font-bold">
                     👑 TEAM HABITS
                     <p className="text-sm font-normal">Everyone must complete • Fixed points</p>
                   </td>
@@ -266,8 +277,11 @@ export default function Dashboard() {
                 {teamHabits.map((habit) => (
                   <tr key={habit.id} className="border-b hover:bg-gray-50">
                     <td className="py-3 px-2 font-medium text-gray-900">{habit.name}</td>
-                    {Array.from({ length: 31 }, (_, i) => {
-                      const date = `2025-12-${String(i + 1).padStart(2, '0')}`;
+                    {Array.from({ length: getDaysInMonth() }, (_, i) => {
+                      const year = currentMonth.getFullYear();
+                      const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
+                      const day = String(i + 1).padStart(2, '0');
+                      const date = `${year}-${month}-${day}`;
                       const log = habit.logs?.find(l => l.log_date === date);
                       const isToday = date === selectedDate;
                       return (
@@ -288,7 +302,7 @@ export default function Dashboard() {
 
                 {/* Personal Habits Section */}
                 <tr className="bg-yellow-400 text-gray-900">
-                  <td colSpan="32" className="py-3 px-4 text-center font-bold">
+                  <td colSpan={getDaysInMonth() + 1} className="py-3 px-4 text-center font-bold">
                     ⭐ PERSONAL HABITS
                     <p className="text-sm font-normal">Optional • Earn extra points</p>
                   </td>
@@ -296,8 +310,11 @@ export default function Dashboard() {
                 {personalHabits.map((habit) => (
                   <tr key={habit.id} className="border-b hover:bg-gray-50">
                     <td className="py-3 px-2 font-medium text-gray-900">{habit.name}</td>
-                    {Array.from({ length: 31 }, (_, i) => {
-                      const date = `2025-12-${String(i + 1).padStart(2, '0')}`;
+                    {Array.from({ length: getDaysInMonth() }, (_, i) => {
+                      const year = currentMonth.getFullYear();
+                      const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
+                      const day = String(i + 1).padStart(2, '0');
+                      const date = `${year}-${month}-${day}`;
                       const log = habit.logs?.find(l => l.log_date === date);
                       const isToday = date === selectedDate;
                       return (
