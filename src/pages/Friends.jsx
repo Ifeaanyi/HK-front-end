@@ -12,6 +12,7 @@ export default function Friends() {
   const [friendTodos, setFriendTodos] = useState([]);
   const [addFriendEmail, setAddFriendEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [currentMonth, setCurrentMonth] = useState(new Date());
   const navigate = useNavigate();
 
   const getToken = () => localStorage.getItem('token');
@@ -125,6 +126,28 @@ export default function Friends() {
       }
     }
   };
+
+  const changeMonth = (direction) => {
+    const newMonth = new Date(currentMonth);
+    newMonth.setMonth(newMonth.getMonth() + direction);
+    setCurrentMonth(newMonth);
+  };
+
+  const getMonthName = () => {
+    return currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  };
+
+  const getMonthTodos = () => {
+    const year = currentMonth.getFullYear();
+    const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
+    
+    return friendTodos.filter(todo => {
+      const todoMonth = todo.task_date.substring(0, 7);
+      return todoMonth === `${year}-${month}`;
+    }).sort((a, b) => new Date(a.task_date) - new Date(b.task_date));
+  };
+
+  const monthTodos = getMonthTodos();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
@@ -298,14 +321,34 @@ export default function Friends() {
                   )}
                 </div>
 
-                {/* To-Dos */}
+                {/* To-Dos with Month Filter */}
                 <div>
-                  <h3 className="font-bold text-gray-700 mb-2">To-Dos ({friendTodos.length})</h3>
-                  {friendTodos.length === 0 ? (
-                    <p className="text-gray-400 text-sm">No to-dos yet</p>
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="font-bold text-gray-700">To-Dos ({monthTodos.length})</h3>
+                  </div>
+                  
+                  {/* Month Navigation */}
+                  <div className="mb-3 flex justify-between items-center text-sm">
+                    <button
+                      onClick={() => changeMonth(-1)}
+                      className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                    >
+                      ← Prev
+                    </button>
+                    <span className="font-semibold text-gray-700">{getMonthName()}</span>
+                    <button
+                      onClick={() => changeMonth(1)}
+                      className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                    >
+                      Next →
+                    </button>
+                  </div>
+
+                  {monthTodos.length === 0 ? (
+                    <p className="text-gray-400 text-sm">No to-dos for {getMonthName()}</p>
                   ) : (
                     <div className="space-y-2">
-                      {friendTodos.sort((a, b) => new Date(a.task_date) - new Date(b.task_date)).map((todo) => (
+                      {monthTodos.map((todo) => (
                         <div key={todo.id} className="bg-gray-50 rounded-lg p-3 flex items-center gap-3">
                           <span className="text-lg">
                             {todo.completed ? '✅' : '⬜'}
