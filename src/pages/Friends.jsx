@@ -14,12 +14,12 @@ export default function Friends() {
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
+  const getToken = () => localStorage.getItem('token');
+
   useEffect(() => {
     fetchFriends();
     fetchRequests();
   }, []);
-
-  const getToken = () => localStorage.getItem('token');
 
   const fetchFriends = async () => {
     try {
@@ -307,7 +307,7 @@ export default function Friends() {
                     <div className="space-y-2">
                       {friendTodos.map((todo) => (
                         <div key={todo.id} className="bg-gray-50 rounded-lg p-3 flex items-center gap-3">
-                          <span className={`text-lg ${todo.completed ? '✅' : '⬜'}`}>
+                          <span className="text-lg">
                             {todo.completed ? '✅' : '⬜'}
                           </span>
                           <div className="flex-1">
