@@ -125,7 +125,18 @@ export default function Dashboard() {
               >
                 👥 Friends
               </button>
-              <span className="text-gray-700">{user?.full_name || 'Test User'}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-gray-700">{user?.full_name || 'Test User'}</span>
+                {user?.subscription_tier === 'pro' ? (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+                    ✨ PRO
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-gray-200 text-gray-700">
+                    FREE
+                  </span>
+                )}
+              </div>
               <button
                 onClick={logout}
                 className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600"
