@@ -54,13 +54,13 @@ export default function Dashboard() {
     }
   };
 
-  const toggleHabit = async (habitId, currentStatus) => {
+  const toggleHabit = async (habitId, date, currentStatus) => {
     try {
       await axios.post(
         `${API_URL}/habits/log`,
         {
           habit_id: habitId,
-          log_date: selectedDate,
+          log_date: date,
           completed: !currentStatus,
           hours: 0
         },
@@ -98,6 +98,8 @@ export default function Dashboard() {
   const personalHabits = habits.filter(h => h.category === 'Personal');
   const teamCompleted = teamHabits.filter(h => getHabitStatus(h)).length;
   const personalCompleted = personalHabits.filter(h => getHabitStatus(h)).length;
+
+  const today = new Date().toISOString().split('T')[0];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
@@ -270,11 +272,19 @@ export default function Dashboard() {
               <thead>
                 <tr>
                   <th className="text-left py-2 px-2 text-sm font-medium text-gray-600">Habit</th>
-                  {Array.from({ length: getDaysInMonth() }, (_, i) => (
-                    <th key={i} className="text-center py-2 px-1 text-sm font-medium text-gray-600">
-                      {i + 1}
-                    </th>
-                  ))}
+                  {Array.from({ length: getDaysInMonth() }, (_, i) => {
+                    const year = currentMonth.getFullYear();
+                    const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
+                    const day = String(i + 1).padStart(2, '0');
+                    const cellDate = `${year}-${month}-${day}`;
+                    const isToday = cellDate === today;
+                    
+                    return (
+                      <th key={i} className={`text-center py-2 px-1 text-sm font-medium ${isToday ? 'bg-blue-200 text-blue-900' : 'text-gray-600'}`}>
+                        {i + 1}
+                      </th>
+                    );
+                  })}
                 </tr>
               </thead>
               <tbody>
@@ -294,11 +304,11 @@ export default function Dashboard() {
                       const day = String(i + 1).padStart(2, '0');
                       const date = `${year}-${month}-${day}`;
                       const log = habit.logs?.find(l => l.log_date === date);
-                      const isToday = date === selectedDate;
+                      const isToday = date === today;
                       return (
-                        <td key={i} className={`text-center py-2 px-1 ${isToday ? 'bg-blue-50' : ''}`}>
+                        <td key={i} className={`text-center py-2 px-1 ${isToday ? 'bg-blue-100' : ''}`}>
                           <button
-                            onClick={() => toggleHabit(habit.id, log?.completed)}
+                            onClick={() => toggleHabit(habit.id, date, log?.completed)}
                             className={`w-6 h-6 rounded ${
                               log?.completed ? 'bg-green-500' : 'bg-gray-200'
                             }`}
@@ -327,11 +337,11 @@ export default function Dashboard() {
                       const day = String(i + 1).padStart(2, '0');
                       const date = `${year}-${month}-${day}`;
                       const log = habit.logs?.find(l => l.log_date === date);
-                      const isToday = date === selectedDate;
+                      const isToday = date === today;
                       return (
-                        <td key={i} className={`text-center py-2 px-1 ${isToday ? 'bg-blue-50' : ''}`}>
+                        <td key={i} className={`text-center py-2 px-1 ${isToday ? 'bg-blue-100' : ''}`}>
                           <button
-                            onClick={() => toggleHabit(habit.id, log?.completed)}
+                            onClick={() => toggleHabit(habit.id, date, log?.completed)}
                             className={`w-6 h-6 rounded ${
                               log?.completed ? 'bg-green-500' : 'bg-gray-200'
                             }`}
