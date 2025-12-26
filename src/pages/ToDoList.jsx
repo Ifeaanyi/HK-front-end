@@ -177,11 +177,18 @@ function ToDoList() {
     }
   };
 
+  // Get today's date in YYYY-MM-DD format
+  const getTodayString = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+
   const monthName = currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   const monthTodos = getMonthTodos();
   const productivity = calculateProductivity();
   const bonus = getProductivityBonus();
   const nextLevel = getNextLevelInfo();
+  const todayString = getTodayString();
 
   if (loading) {
     return (
@@ -341,35 +348,44 @@ function ToDoList() {
               ) : (
                 monthTodos
                   .sort((a, b) => new Date(a.task_date) - new Date(b.task_date))
-                  .map((todo, idx) => (
-                    <tr
-                      key={todo.id}
-                      className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'} ${
-                        todo.completed ? 'opacity-60' : ''
-                      } hover:bg-orange-50 transition`}
-                    >
-                      <td className="p-4">
-                        <div className={`font-semibold ${todo.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>
-                          {todo.task_name}
-                        </div>
-                      </td>
-                      <td className="p-4 text-center text-sm text-gray-600">
-                        {new Date(todo.task_date + 'T00:00:00').toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric'
-                        })}
-                      </td>
-                      <td className="p-4 text-center">
-                        <input
-                          type="checkbox"
-                          checked={todo.completed}
-                          onChange={() => toggleTodo(todo.id, todo.completed)}
-                          className="w-6 h-6 cursor-pointer accent-green-600"
-                        />
-                      </td>
-                    </tr>
-                  ))
+                  .map((todo, idx) => {
+                    const isToday = todo.task_date === todayString;
+                    return (
+                      <tr
+                        key={todo.id}
+                        className={`border-b ${
+                          isToday 
+                            ? 'bg-blue-50' 
+                            : idx % 2 === 0 
+                            ? 'bg-white' 
+                            : 'bg-gray-50'
+                        } ${
+                          todo.completed ? 'opacity-60' : ''
+                        } hover:bg-orange-50 transition`}
+                      >
+                        <td className="p-4">
+                          <div className={`font-semibold ${todo.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>
+                            {todo.task_name}
+                          </div>
+                        </td>
+                        <td className="p-4 text-center text-sm text-gray-600">
+                          {new Date(todo.task_date + 'T00:00:00').toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
+                        </td>
+                        <td className="p-4 text-center">
+                          <input
+                            type="checkbox"
+                            checked={todo.completed}
+                            onChange={() => toggleTodo(todo.id, todo.completed)}
+                            className="w-6 h-6 cursor-pointer accent-green-600"
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })
               )}
             </tbody>
           </table>
