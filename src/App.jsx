@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import ToDoList from './pages/ToDoList';
 import Leaderboard from './pages/Leaderboard';
+import HallOfFame from './pages/HallOfFame';
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -19,6 +20,7 @@ function App() {
       <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
       <Route path="/todos" element={<PrivateRoute><ToDoList /></PrivateRoute>} />
       <Route path="/leaderboard" element={<PrivateRoute><Leaderboard /></PrivateRoute>} />
+      <Route path="/hall-of-fame/:groupId" element={<PrivateRoute><HallOfFame /></PrivateRoute>} />
       <Route path="/" element={<Navigate to="/dashboard" />} />
     </Routes>
   );

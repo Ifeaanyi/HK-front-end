@@ -128,12 +128,23 @@ function Leaderboard() {
       </nav>
 
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Header */}
+        {/* Header with Hall of Fame Button */}
         <div className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-2xl p-8 text-white mb-6 shadow-lg">
-          <div className="text-center">
-            <h2 className="text-4xl font-bold mb-2">🏆 {currentMonth} LEADERBOARD</h2>
+          <div className="flex items-center justify-between">
+            <div className="flex-1 text-center">
+              <h2 className="text-4xl font-bold mb-2">🏆 {currentMonth} LEADERBOARD</h2>
+              {selectedGroup && (
+                <p className="text-yellow-100 text-lg">{selectedGroup.name} • {leaderboard.length} Participants</p>
+              )}
+            </div>
             {selectedGroup && (
-              <p className="text-yellow-100 text-lg">{selectedGroup.name} • {leaderboard.length} Participants</p>
+              <button
+                onClick={() => navigate(`/hall-of-fame/${selectedGroup.id}`)}
+                className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-6 py-3 rounded-xl font-bold text-sm transition-all hover:scale-105 flex items-center gap-2 border-2 border-white/30"
+              >
+                <span className="text-xl">🏆</span>
+                Hall of Fame
+              </button>
             )}
           </div>
         </div>
@@ -160,7 +171,6 @@ function Leaderboard() {
                 <p className="text-gray-500 text-sm">No groups yet. Create or join one!</p>
               )}
             </div>
-
             <div className="flex gap-3">
               <button
                 onClick={() => setShowCreateGroup(!showCreateGroup)}
@@ -270,7 +280,6 @@ function Leaderboard() {
                           {getMedalEmoji(index)}
                         </div>
                       </td>
-
                       {/* Name */}
                       <td className="p-4">
                         <div className="font-semibold text-gray-900">
@@ -279,25 +288,21 @@ function Leaderboard() {
                         </div>
                         <div className="text-xs text-gray-500">{person.role_title}</div>
                       </td>
-
                       {/* Habits */}
                       <td className="p-4 text-center">
                         <div className="text-lg font-bold text-purple-600">{person.habit_points}</div>
                         <div className="text-xs text-gray-500">points</div>
                       </td>
-
                       {/* Study */}
                       <td className="p-4 text-center">
                         <div className="text-lg font-bold text-blue-600">{person.study_hours}</div>
                         <div className="text-xs text-gray-500">hours</div>
                       </td>
-
                       {/* To-Do */}
                       <td className="p-4 text-center">
                         <div className="text-lg font-bold text-green-600">{person.todo_productivity}%</div>
                         <div className="text-xs text-gray-500">productivity</div>
                       </td>
-
                       {/* Total */}
                       <td className="p-4 text-center bg-yellow-50">
                         <div className="text-2xl font-bold text-gray-900">{person.total_points}</div>
