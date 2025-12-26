@@ -9,6 +9,7 @@ function Leaderboard() {
   const [groups, setGroups] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
+  const [currentWinner, setCurrentWinner] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [showJoinGroup, setShowJoinGroup] = useState(false);
@@ -45,7 +46,9 @@ function Leaderboard() {
     try {
       const response = await api.get(`/groups/${groupId}/leaderboard`);
       setLeaderboard(response.data.leaderboard || []);
+      setCurrentWinner(response.data.current_winner || null);
       console.log('Leaderboard data:', response.data.leaderboard);
+      console.log('Current winner:', response.data.current_winner);
     } catch (error) {
       console.error('Failed to fetch leaderboard:', error);
     }
@@ -148,6 +151,23 @@ function Leaderboard() {
             )}
           </div>
         </div>
+
+        {/* Current Winner Banner */}
+        {currentWinner && (
+          <div className="bg-gradient-to-r from-yellow-100 via-yellow-50 to-orange-100 border-2 border-yellow-400 rounded-2xl p-4 mb-6 shadow-md">
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-3xl">👑</span>
+              <div className="text-center">
+                <div className="text-sm font-semibold text-yellow-700">CURRENT HABIT KING</div>
+                <div className="text-xl font-black text-gray-800">{currentWinner.full_name}</div>
+                <div className="text-xs text-gray-600">
+                  {currentWinner.total_points} points • {currentWinner.win_path === 'primary' ? 'Primary Path' : 'Bonus Path'}
+                </div>
+              </div>
+              <span className="text-3xl">👑</span>
+            </div>
+          </div>
+        )}
 
         {/* Group Selection & Actions */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
@@ -266,12 +286,15 @@ function Leaderboard() {
               <tbody>
                 {leaderboard.map((person, index) => {
                   const isCurrentUser = person.user_id === user?.id;
+                  const isCurrentMonthWinner = currentWinner && currentWinner.user_id === person.user_id;
                   
                   return (
                     <tr
                       key={person.user_id}
                       className={`border-b transition-all ${
-                        isCurrentUser ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'
+                        isCurrentUser ? 'bg-blue-50 border-blue-200' : 
+                        isCurrentMonthWinner ? 'bg-yellow-50 border-yellow-200' : 
+                        'hover:bg-gray-50'
                       } ${index < 3 ? 'font-semibold' : ''}`}
                     >
                       {/* Rank */}
@@ -282,11 +305,17 @@ function Leaderboard() {
                       </td>
                       {/* Name */}
                       <td className="p-4">
-                        <div className="font-semibold text-gray-900">
-                          {person.full_name}
-                          {isCurrentUser && <span className="ml-2 text-blue-600 text-xs">(You)</span>}
+                        <div className="flex items-center gap-2">
+                          {isCurrentMonthWinner && <span className="text-2xl">👑</span>}
+                          <div>
+                            <div className="font-semibold text-gray-900">
+                              {person.full_name}
+                              {isCurrentUser && <span className="ml-2 text-blue-600 text-xs">(You)</span>}
+                              {isCurrentMonthWinner && <span className="ml-2 text-yellow-600 text-xs font-bold">KING</span>}
+                            </div>
+                            <div className="text-xs text-gray-500">{person.role_title}</div>
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-500">{person.role_title}</div>
                       </td>
                       {/* Habits */}
                       <td className="p-4 text-center">

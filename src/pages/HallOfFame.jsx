@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import confetti from 'canvas-confetti';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://habit-king-production.up.railway.app';
 
@@ -10,8 +11,15 @@ function HallOfFame() {
   const [loading, setLoading] = useState(true);
   const [hallOfFameData, setHallOfFameData] = useState(null);
   const [error, setError] = useState(null);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
+    // Get current user from localStorage
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setCurrentUser(JSON.parse(userData));
+    }
     fetchHallOfFame();
   }, [groupId]);
 
@@ -23,6 +31,9 @@ function HallOfFame() {
       });
       setHallOfFameData(response.data);
       setLoading(false);
+      
+      // Check if there's a current month winner
+      checkForCelebration(response.data);
     } catch (err) {
       console.error('Hall of Fame error:', err);
       setError(err.response?.data?.detail || 'Failed to load Hall of Fame');
@@ -30,10 +41,74 @@ function HallOfFame() {
     }
   };
 
+  const checkForCelebration = (data) => {
+    if (!data.champions || data.champions.length === 0) return;
+    
+    // Get current month in YYYY-MM format
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    
+    // Check if latest champion is from current month or last month
+    const latestChampion = data.champions[0]; // Already sorted newest first
+    const championMonth = latestChampion.month;
+    
+    // Get last month
+    const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonth = `${lastMonthDate.getFullYear()}-${String(lastMonthDate.getMonth() + 1).padStart(2, '0')}`;
+    
+    // Show celebration if winner is from current month or last month
+    if (championMonth === currentMonth || championMonth === lastMonth) {
+      // Check if we've shown celebration this session
+      const celebrationKey = `celebration_shown_${groupId}_${championMonth}`;
+      const hasShown = sessionStorage.getItem(celebrationKey);
+      
+      if (!hasShown) {
+        setShowCelebration(true);
+        sessionStorage.setItem(celebrationKey, 'true');
+        triggerConfetti();
+      }
+    }
+  };
+
+  const triggerConfetti = () => {
+    const duration = 3000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+    function randomInRange(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    const interval = setInterval(function() {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      const particleCount = 50 * (timeLeft / duration);
+      
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+      });
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+      });
+    }, 250);
+  };
+
   const formatMonth = (monthStr) => {
     const [year, month] = monthStr.split('-');
     const date = new Date(year, parseInt(month) - 1);
     return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  };
+
+  const dismissCelebration = () => {
+    setShowCelebration(false);
   };
 
   if (loading) {
@@ -66,9 +141,42 @@ function HallOfFame() {
   }
 
   const { champions, records, user_stats } = hallOfFameData;
+  const latestChampion = champions.length > 0 ? champions[0] : null;
+  const isUserTheWinner = currentUser && latestChampion && latestChampion.user_id === currentUser.id;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200">
+      {/* Celebration Banner */}
+      {showCelebration && latestChampion && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-bounce">
+          <div className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white px-8 py-6 rounded-2xl shadow-2xl max-w-2xl">
+            <div className="flex items-center justify-between">
+              <div className="flex-1 text-center">
+                {isUserTheWinner ? (
+                  <>
+                    <div className="text-5xl mb-2">🎊 CONGRATULATIONS! 🎊</div>
+                    <div className="text-2xl font-black mb-1">YOU ARE THE HABIT KING!</div>
+                    <div className="text-lg">{formatMonth(latestChampion.month)}</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-5xl mb-2">👑 ALL HAIL THE NEW CHAMPION! 👑</div>
+                    <div className="text-2xl font-black mb-1">{latestChampion.full_name}</div>
+                    <div className="text-lg">Habit King for {formatMonth(latestChampion.month)}</div>
+                  </>
+                )}
+              </div>
+              <button
+                onClick={dismissCelebration}
+                className="ml-4 text-white/80 hover:text-white text-3xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 text-white py-12 px-4 shadow-2xl">
         <div className="max-w-6xl mx-auto">
