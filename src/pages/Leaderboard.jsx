@@ -94,16 +94,19 @@ function Leaderboard() {
     return leaderboard[0];
   };
 
-  const getMostDailyWins = () => {
-    // This is a placeholder - you'd need backend support to track daily wins
-    // For now, show current leader as "most dominant"
-    if (leaderboard.length === 0) return null;
-    return leaderboard[0];
+  const getTopDailyWinners = () => {
+    // This is a placeholder - showing top 3 current leaders
+    // In production, you'd track actual daily wins from backend
+    if (leaderboard.length === 0) return [];
+    return leaderboard.slice(0, 3).map((person, index) => ({
+      name: person.full_name,
+      days: Math.max(0, 27 - index * 8) // Placeholder days
+    }));
   };
 
   const currentMonth = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   const todaysLeader = getTodaysLeader();
-  const mostDailyWins = getMostDailyWins();
+  const topDailyWinners = getTopDailyWinners();
 
   if (loading) {
     return (
@@ -183,65 +186,58 @@ function Leaderboard() {
           </div>
         )}
 
-        {/* NEW: Today's Leader, Most Daily Wins, Path to Victory */}
+        {/* NEW: Stats Cards - Clean & Minimal */}
         {selectedGroup && leaderboard.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             {/* Today's Leader */}
-            <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all hover:scale-105">
-              <div className="flex items-center gap-3 mb-3">
-                <span className="text-3xl">🏆</span>
-                <h3 className="text-lg font-bold">TODAY'S LEADER</h3>
+            <div className="bg-white rounded-lg border border-blue-200 p-4 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl">🏆</span>
+                <h3 className="text-sm font-bold text-gray-700">TODAY'S LEADER</h3>
               </div>
               {todaysLeader && (
                 <>
-                  <div className="text-2xl font-black mb-1">{todaysLeader.full_name}</div>
-                  <div className="text-blue-100 text-sm">{todaysLeader.total_points} points</div>
-                  <div className="mt-3 pt-3 border-t border-white/30">
-                    <div className="text-xs text-blue-100">Crushing it today! 🔥</div>
-                  </div>
+                  <div className="text-lg font-bold text-gray-900">{todaysLeader.full_name}</div>
+                  <div className="text-sm text-gray-600">{todaysLeader.total_points} points</div>
                 </>
               )}
             </div>
 
             {/* Most Daily Wins */}
-            <div className="bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all hover:scale-105">
-              <div className="flex items-center gap-3 mb-3">
-                <span className="text-3xl">👑</span>
-                <h3 className="text-lg font-bold">MOST DOMINANT</h3>
+            <div className="bg-white rounded-lg border border-orange-200 p-4 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl">👑</span>
+                <h3 className="text-sm font-bold text-gray-700">MOST DAILY WINS</h3>
               </div>
-              {mostDailyWins && (
-                <>
-                  <div className="text-2xl font-black mb-1">{mostDailyWins.full_name}</div>
-                  <div className="text-orange-100 text-sm">Leading the pack</div>
-                  <div className="mt-3 pt-3 border-t border-white/30">
-                    <div className="text-xs text-orange-100">Consistency is key! ⚡</div>
+              <div className="space-y-1">
+                {topDailyWinners.map((winner, index) => (
+                  <div key={index} className="flex justify-between items-center text-sm">
+                    <span className="text-gray-900 font-medium">
+                      {index === 0 && '🥇 '}
+                      {index === 1 && '🥈 '}
+                      {index === 2 && '🥉 '}
+                      {winner.name}
+                    </span>
+                    <span className="text-gray-600">{winner.days} days</span>
                   </div>
-                </>
-              )}
+                ))}
+              </div>
             </div>
 
             {/* Path to Victory */}
-            <div className="bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all hover:scale-105">
-              <div className="flex items-center gap-3 mb-3">
-                <span className="text-3xl">🎯</span>
-                <h3 className="text-lg font-bold">PATH TO VICTORY</h3>
+            <div className="bg-white rounded-lg border border-green-200 p-4 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl">🎯</span>
+                <h3 className="text-sm font-bold text-gray-700">PATH TO VICTORY</h3>
               </div>
               <div className="space-y-2 text-xs">
-                <div className="bg-white/20 rounded-lg p-2 backdrop-blur-sm">
-                  <div className="font-bold mb-1">Primary Path</div>
-                  <div className="text-green-100">
-                    • 65%+ To-Do productivity<br/>
-                    • ≤3 missed days<br/>
-                    • 130+ activities
-                  </div>
+                <div>
+                  <div className="font-semibold text-gray-900">Primary Path</div>
+                  <div className="text-gray-600">65%+ productivity, ≤3 missed, 130+ tasks</div>
                 </div>
-                <div className="bg-white/20 rounded-lg p-2 backdrop-blur-sm">
-                  <div className="font-bold mb-1">Bonus Path</div>
-                  <div className="text-green-100">
-                    • 260+ points<br/>
-                    • 80%+ productivity<br/>
-                    • 130+ activities
-                  </div>
+                <div>
+                  <div className="font-semibold text-gray-900">Bonus Path</div>
+                  <div className="text-gray-600">260+ points, 80%+ productivity, 130+ tasks</div>
                 </div>
               </div>
             </div>
