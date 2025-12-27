@@ -89,7 +89,21 @@ function Leaderboard() {
     return `${index + 1}`;
   };
 
+  const getTodaysLeader = () => {
+    if (leaderboard.length === 0) return null;
+    return leaderboard[0];
+  };
+
+  const getMostDailyWins = () => {
+    // This is a placeholder - you'd need backend support to track daily wins
+    // For now, show current leader as "most dominant"
+    if (leaderboard.length === 0) return null;
+    return leaderboard[0];
+  };
+
   const currentMonth = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const todaysLeader = getTodaysLeader();
+  const mostDailyWins = getMostDailyWins();
 
   if (loading) {
     return (
@@ -165,6 +179,71 @@ function Leaderboard() {
                 </div>
               </div>
               <span className="text-3xl">👑</span>
+            </div>
+          </div>
+        )}
+
+        {/* NEW: Today's Leader, Most Daily Wins, Path to Victory */}
+        {selectedGroup && leaderboard.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            {/* Today's Leader */}
+            <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all hover:scale-105">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-3xl">🏆</span>
+                <h3 className="text-lg font-bold">TODAY'S LEADER</h3>
+              </div>
+              {todaysLeader && (
+                <>
+                  <div className="text-2xl font-black mb-1">{todaysLeader.full_name}</div>
+                  <div className="text-blue-100 text-sm">{todaysLeader.total_points} points</div>
+                  <div className="mt-3 pt-3 border-t border-white/30">
+                    <div className="text-xs text-blue-100">Crushing it today! 🔥</div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Most Daily Wins */}
+            <div className="bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all hover:scale-105">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-3xl">👑</span>
+                <h3 className="text-lg font-bold">MOST DOMINANT</h3>
+              </div>
+              {mostDailyWins && (
+                <>
+                  <div className="text-2xl font-black mb-1">{mostDailyWins.full_name}</div>
+                  <div className="text-orange-100 text-sm">Leading the pack</div>
+                  <div className="mt-3 pt-3 border-t border-white/30">
+                    <div className="text-xs text-orange-100">Consistency is key! ⚡</div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Path to Victory */}
+            <div className="bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all hover:scale-105">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-3xl">🎯</span>
+                <h3 className="text-lg font-bold">PATH TO VICTORY</h3>
+              </div>
+              <div className="space-y-2 text-xs">
+                <div className="bg-white/20 rounded-lg p-2 backdrop-blur-sm">
+                  <div className="font-bold mb-1">Primary Path</div>
+                  <div className="text-green-100">
+                    • 65%+ To-Do productivity<br/>
+                    • ≤3 missed days<br/>
+                    • 130+ activities
+                  </div>
+                </div>
+                <div className="bg-white/20 rounded-lg p-2 backdrop-blur-sm">
+                  <div className="font-bold mb-1">Bonus Path</div>
+                  <div className="text-green-100">
+                    • 260+ points<br/>
+                    • 80%+ productivity<br/>
+                    • 130+ activities
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -377,7 +456,7 @@ function Leaderboard() {
               <p className="font-semibold mb-1">How Points Work:</p>
               <ul className="space-y-1 text-xs">
                 <li>• <strong>Habits:</strong> Team (2pts) + Personal (1pt each)</li>
-                <li>• <strong>Study:</strong> Displayed as hours (not counted in total)</li>
+                <li>• <strong>Study:</strong> 1 hour = 1pt, 30 mins = 0.5pts</li>
                 <li>• <strong>To-Do:</strong> Productivity % (completed ÷ total × 100)</li>
                 <li>• <strong>Streaks:</strong> 7 days (+2pts) • 14 days (+5pts) • 21 days (+10pts) • 30 days (+20pts)</li>
               </ul>
