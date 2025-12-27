@@ -11,6 +11,10 @@ export default function Dashboard() {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [testMode, setTestMode] = useState(false);
+  const [showPersonalForm, setShowPersonalForm] = useState(false);
+  const [showStudyForm, setShowStudyForm] = useState(false);
+  const [newHabitName, setNewHabitName] = useState('');
+  
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
@@ -51,6 +55,34 @@ export default function Dashboard() {
       setStreak(response.data);
     } catch (error) {
       console.error('Error fetching streak:', error);
+    }
+  };
+
+  const createHabit = async (category) => {
+    if (!newHabitName.trim()) {
+      alert('Please enter a habit name');
+      return;
+    }
+
+    try {
+      await axios.post(
+        `${API_URL}/habits`,
+        {
+          name: newHabitName,
+          category: category,
+          point_value: 1
+        },
+        { headers: { Authorization: `Bearer ${getToken()}` } }
+      );
+      
+      setNewHabitName('');
+      setShowPersonalForm(false);
+      setShowStudyForm(false);
+      fetchHabits();
+      alert(`${category} habit created successfully!`);
+    } catch (error) {
+      console.error('Error creating habit:', error);
+      alert(error.response?.data?.detail || 'Failed to create habit');
     }
   };
 
@@ -96,6 +128,8 @@ export default function Dashboard() {
 
   const teamHabits = habits.filter(h => h.category === 'Team');
   const personalHabits = habits.filter(h => h.category === 'Personal');
+  const studyHabits = habits.filter(h => h.category === 'Study');
+  
   const teamCompleted = teamHabits.filter(h => getHabitStatus(h)).length;
   const personalCompleted = personalHabits.filter(h => getHabitStatus(h)).length;
 
@@ -185,7 +219,6 @@ export default function Dashboard() {
             <h3 className="text-xl font-bold text-gray-900">TODAY'S PROGRESS</h3>
             <p className="text-sm text-gray-500">Locks at 11:59 PM</p>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Team Habits */}
             <div className="bg-white rounded-lg shadow-md p-6 text-center">
@@ -257,14 +290,85 @@ export default function Dashboard() {
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-xl font-bold text-gray-900 mb-4">{getMonthName()}</h3>
           
+          {/* Create Habit Buttons */}
           <div className="mb-6 flex gap-4">
-            <button className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
-              + Personal Habit (0/10)
+            <button 
+              onClick={() => setShowPersonalForm(!showPersonalForm)}
+              className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+            >
+              + Personal Habit ({personalHabits.length}/10)
             </button>
-            <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-              + Study Skill (0/5)
+            <button 
+              onClick={() => setShowStudyForm(!showStudyForm)}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            >
+              + Study Skill ({studyHabits.length}/5)
             </button>
           </div>
+
+          {/* Personal Habit Form */}
+          {showPersonalForm && (
+            <div className="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
+              <h4 className="font-semibold mb-3">Add Personal Habit</h4>
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  value={newHabitName}
+                  onChange={(e) => setNewHabitName(e.target.value)}
+                  placeholder="e.g., Read 30 minutes, Gym workout"
+                  className="flex-1 px-4 py-2 border rounded-lg text-sm"
+                  maxLength={50}
+                />
+                <button
+                  onClick={() => createHabit('Personal')}
+                  className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 text-sm font-semibold"
+                >
+                  Create
+                </button>
+                <button
+                  onClick={() => {
+                    setShowPersonalForm(false);
+                    setNewHabitName('');
+                  }}
+                  className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 text-sm"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Study Habit Form */}
+          {showStudyForm && (
+            <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <h4 className="font-semibold mb-3">Add Study Skill</h4>
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  value={newHabitName}
+                  onChange={(e) => setNewHabitName(e.target.value)}
+                  placeholder="e.g., Python, Data Analysis, SQL"
+                  className="flex-1 px-4 py-2 border rounded-lg text-sm"
+                  maxLength={50}
+                />
+                <button
+                  onClick={() => createHabit('Study')}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 text-sm font-semibold"
+                >
+                  Create
+                </button>
+                <button
+                  onClick={() => {
+                    setShowStudyForm(false);
+                    setNewHabitName('');
+                  }}
+                  className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 text-sm"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Calendar Header */}
           <div className="overflow-x-auto">
@@ -353,6 +457,43 @@ export default function Dashboard() {
                     })}
                   </tr>
                 ))}
+
+                {/* Study Habits Section */}
+                {studyHabits.length > 0 && (
+                  <>
+                    <tr className="bg-blue-500 text-white">
+                      <td colSpan={getDaysInMonth() + 1} className="py-3 px-4 text-center font-bold">
+                        📚 STUDY SKILLS
+                        <p className="text-sm font-normal">Track study hours • 1hr = 1pt</p>
+                      </td>
+                    </tr>
+                    {studyHabits.map((habit) => (
+                      <tr key={habit.id} className="border-b hover:bg-gray-50">
+                        <td className="py-3 px-2 font-medium text-gray-900">{habit.name}</td>
+                        {Array.from({ length: getDaysInMonth() }, (_, i) => {
+                          const year = currentMonth.getFullYear();
+                          const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
+                          const day = String(i + 1).padStart(2, '0');
+                          const date = `${year}-${month}-${day}`;
+                          const log = habit.logs?.find(l => l.log_date === date);
+                          const isToday = date === today;
+                          return (
+                            <td key={i} className={`text-center py-2 px-1 ${isToday ? 'bg-blue-100' : ''}`}>
+                              <button
+                                onClick={() => toggleHabit(habit.id, date, log?.completed)}
+                                className={`w-6 h-6 rounded ${
+                                  log?.completed ? 'bg-green-500' : 'bg-gray-200'
+                                }`}
+                              >
+                                {log?.completed && '✓'}
+                              </button>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </>
+                )}
               </tbody>
             </table>
           </div>
