@@ -174,9 +174,11 @@ export default function Dashboard() {
   };
 
   const canDeleteHabit = (createdAt) => {
+    if (!createdAt) return false;
     const createdTime = new Date(createdAt);
     const now = new Date();
     const hoursSinceCreation = (now - createdTime) / (1000 * 60 * 60);
+    console.log('Hours since creation:', hoursSinceCreation, 'Created at:', createdAt);
     return hoursSinceCreation <= 1;
   };
 
@@ -468,7 +470,7 @@ export default function Dashboard() {
             <table className="w-full">
               <thead>
                 <tr>
-                  <th className="text-left py-2 px-2 text-sm font-medium text-gray-600">Habit</th>
+                  <th className="text-left py-2 px-2 text-sm font-medium text-gray-600 min-w-[300px]">Habit</th>
                   {Array.from({ length: getDaysInMonth() }, (_, i) => {
                     const year = currentMonth.getFullYear();
                     const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
@@ -536,12 +538,12 @@ export default function Dashboard() {
                   >
                     <td className="py-3 px-2 font-medium text-gray-900">
                       <div className="flex items-center gap-2">
-                        <span className="cursor-move">☰</span>
-                        <span>{habit.name}</span>
+                        <span className="cursor-move text-gray-400">☰</span>
+                        <span className="flex-1">{habit.name}</span>
                         {canDeleteHabit(habit.created_at) && (
                           <button
                             onClick={() => deleteHabit(habit.id, habit.created_at)}
-                            className="text-red-500 hover:text-red-700 text-sm font-bold ml-2"
+                            className="text-red-600 hover:text-red-800 font-bold text-lg px-2"
                             title="Delete (within 1hr)"
                           >
                             ✕
@@ -592,12 +594,12 @@ export default function Dashboard() {
                       >
                         <td className="py-3 px-2 font-medium text-gray-900">
                           <div className="flex items-center gap-2">
-                            <span className="cursor-move">☰</span>
-                            <span>{habit.name}</span>
+                            <span className="cursor-move text-gray-400">☰</span>
+                            <span className="flex-1">{habit.name}</span>
                             {canDeleteHabit(habit.created_at) && (
                               <button
                                 onClick={() => deleteHabit(habit.id, habit.created_at)}
-                                className="text-red-500 hover:text-red-700 text-sm font-bold ml-2"
+                                className="text-red-600 hover:text-red-800 font-bold text-lg px-2"
                                 title="Delete (within 1hr)"
                               >
                                 ✕
