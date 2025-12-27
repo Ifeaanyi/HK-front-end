@@ -10,6 +10,7 @@ function Leaderboard() {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
   const [currentWinner, setCurrentWinner] = useState(null);
+  const [dailyStats, setDailyStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [showJoinGroup, setShowJoinGroup] = useState(false);
@@ -23,6 +24,7 @@ function Leaderboard() {
   useEffect(() => {
     if (selectedGroup) {
       fetchLeaderboard(selectedGroup.id);
+      fetchDailyStats(selectedGroup.id);
     }
   }, [selectedGroup]);
 
@@ -47,10 +49,18 @@ function Leaderboard() {
       const response = await api.get(`/groups/${groupId}/leaderboard`);
       setLeaderboard(response.data.leaderboard || []);
       setCurrentWinner(response.data.current_winner || null);
-      console.log('Leaderboard data:', response.data.leaderboard);
-      console.log('Current winner:', response.data.current_winner);
     } catch (error) {
       console.error('Failed to fetch leaderboard:', error);
+    }
+  };
+
+  const fetchDailyStats = async (groupId) => {
+    try {
+      const response = await api.get(`/groups/${groupId}/daily-stats`);
+      setDailyStats(response.data);
+      console.log('Daily stats:', response.data);
+    } catch (error) {
+      console.error('Failed to fetch daily stats:', error);
     }
   };
 
@@ -89,24 +99,7 @@ function Leaderboard() {
     return `${index + 1}`;
   };
 
-  const getTodaysLeader = () => {
-    if (leaderboard.length === 0) return null;
-    return leaderboard[0];
-  };
-
-  const getTopDailyWinners = () => {
-    // This is a placeholder - showing top 3 current leaders
-    // In production, you'd track actual daily wins from backend
-    if (leaderboard.length === 0) return [];
-    return leaderboard.slice(0, 3).map((person, index) => ({
-      name: person.full_name,
-      days: Math.max(0, 27 - index * 8) // Placeholder days
-    }));
-  };
-
   const currentMonth = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  const todaysLeader = getTodaysLeader();
-  const topDailyWinners = getTopDailyWinners();
 
   if (loading) {
     return (
@@ -186,8 +179,8 @@ function Leaderboard() {
           </div>
         )}
 
-        {/* NEW: Stats Cards - Clean & Minimal */}
-        {selectedGroup && leaderboard.length > 0 && (
+        {/* Daily Stats Cards - Clean & Minimal */}
+        {selectedGroup && dailyStats && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             {/* Today's Leader */}
             <div className="bg-white rounded-lg border border-blue-200 p-4 shadow-sm">
@@ -195,10 +188,10 @@ function Leaderboard() {
                 <span className="text-xl">🏆</span>
                 <h3 className="text-sm font-bold text-gray-700">TODAY'S LEADER</h3>
               </div>
-              {todaysLeader && (
+              {dailyStats.todays_leader && (
                 <>
-                  <div className="text-lg font-bold text-gray-900">{todaysLeader.full_name}</div>
-                  <div className="text-sm text-gray-600">{todaysLeader.total_points} points</div>
+                  <div className="text-lg font-bold text-gray-900">{dailyStats.todays_leader.full_name}</div>
+                  <div className="text-sm text-gray-600">{dailyStats.todays_leader.total_points} points</div>
                 </>
               )}
             </div>
@@ -210,34 +203,62 @@ function Leaderboard() {
                 <h3 className="text-sm font-bold text-gray-700">MOST DAILY WINS</h3>
               </div>
               <div className="space-y-1">
-                {topDailyWinners.map((winner, index) => (
-                  <div key={index} className="flex justify-between items-center text-sm">
-                    <span className="text-gray-900 font-medium">
-                      {index === 0 && '🥇 '}
-                      {index === 1 && '🥈 '}
-                      {index === 2 && '🥉 '}
-                      {winner.name}
-                    </span>
-                    <span className="text-gray-600">{winner.days} days</span>
-                  </div>
-                ))}
+                {dailyStats.most_daily_wins && dailyStats.most_daily_wins.length > 0 ? (
+                  dailyStats.most_daily_wins.map((winner, index) => (
+                    <div key={index} className="flex justify-between items-center text-sm">
+                      <span className="text-gray-900 font-medium">
+                        {index === 0 && '🥇 '}
+                        {index === 1 && '🥈 '}
+                        {index === 2 && '🥉 '}
+                        {winner.full_name}
+                      </span>
+                      <span className="text-gray-600">{winner.days} days</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-xs text-gray-500">No data yet</div>
+                )}
               </div>
             </div>
 
-            {/* Path to Victory */}
+            {/* Most Productive Today */}
             <div className="bg-white rounded-lg border border-green-200 p-4 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">🎯</span>
-                <h3 className="text-sm font-bold text-gray-700">PATH TO VICTORY</h3>
+                <span className="text-xl">⚡</span>
+                <h3 className="text-sm font-bold text-gray-700">MOST PRODUCTIVE TODAY</h3>
               </div>
-              <div className="space-y-2 text-xs">
-                <div>
-                  <div className="font-semibold text-gray-900">Primary Path</div>
-                  <div className="text-gray-600">65%+ productivity, ≤3 missed, 130+ tasks</div>
+              {dailyStats.most_productive_today && (
+                <>
+                  <div className="text-lg font-bold text-gray-900">{dailyStats.most_productive_today.full_name}</div>
+                  <div className="text-sm text-gray-600">{dailyStats.most_productive_today.todo_productivity}% productivity</div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Path to Victory - Separate Row */}
+        {selectedGroup && (
+          <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xl">🎯</span>
+              <h3 className="text-sm font-bold text-gray-700">PATH TO VICTORY</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                <div className="font-bold text-gray-900 mb-1">Primary Path</div>
+                <div className="text-gray-700 space-y-0.5">
+                  <div>• 65% or more productivity</div>
+                  <div>• 3 or less missed days</div>
+                  <div>• 130 or more activities</div>
                 </div>
-                <div>
-                  <div className="font-semibold text-gray-900">Bonus Path</div>
-                  <div className="text-gray-600">260+ points, 80%+ productivity, 130+ tasks</div>
+              </div>
+              <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+                <div className="font-bold text-gray-900 mb-1">Bonus Path</div>
+                <div className="text-gray-700 space-y-0.5">
+                  <div>• 260 or more points</div>
+                  <div>• 80% or more productivity</div>
+                  <div>• 130 or more activities</div>
                 </div>
               </div>
             </div>
