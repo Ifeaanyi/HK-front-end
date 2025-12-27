@@ -104,7 +104,6 @@ function ToDoList() {
       fetchTodos();
       console.log('Todo created successfully');
       
-      // NOTIFICATION ADDED
       toast.success('Task added', {
         duration: 2000,
         icon: '✓',
@@ -117,7 +116,6 @@ function ToDoList() {
 
   const toggleTodo = async (todoId, currentStatus) => {
     try {
-      // Get old bonus before update
       const oldBonus = getProductivityBonus();
       
       await api.patch(`/todos/${todoId}`, {
@@ -129,11 +127,9 @@ function ToDoList() {
       ));
       console.log('Todo toggled successfully');
       
-      // Calculate new bonus after update
       setTimeout(() => {
         const newBonus = getProductivityBonus();
         
-        // NOTIFICATION ADDED - Only if bonus tier increased and we're completing (not uncompleting)
         if (newBonus > oldBonus && !currentStatus) {
           if (newBonus === 20) {
             toast.success('🎉 85%+ Productivity! +20 points', {
@@ -177,7 +173,26 @@ function ToDoList() {
     }
   };
 
-  // Get today's date in YYYY-MM-DD format
+  // NEW: DELETE FUNCTION
+  const deleteTodo = async (todoId) => {
+    if (!confirm('Delete this task?')) return;
+
+    try {
+      await api.delete(`/todos/${todoId}`);
+      
+      setTodos(todos.filter(t => t.id !== todoId));
+      console.log('Todo deleted successfully');
+      
+      toast.success('Task deleted', {
+        duration: 2000,
+        icon: '🗑️',
+      });
+    } catch (error) {
+      console.error('Failed to delete todo:', error);
+      toast.error('Failed to delete task');
+    }
+  };
+
   const getTodayString = () => {
     const today = new Date();
     return today.toISOString().split('T')[0];
@@ -336,12 +351,13 @@ function ToDoList() {
                 <th className="p-4 text-left font-bold">Task</th>
                 <th className="p-4 text-center font-bold w-40">Date</th>
                 <th className="p-4 text-center font-bold w-24">Done</th>
+                <th className="p-4 text-center font-bold w-20">Delete</th>
               </tr>
             </thead>
             <tbody>
               {monthTodos.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="p-8 text-center text-gray-400 italic">
+                  <td colSpan={4} className="p-8 text-center text-gray-400 italic">
                     No tasks for {monthName} yet. Click "Add New Task" to create one!
                   </td>
                 </tr>
@@ -382,6 +398,15 @@ function ToDoList() {
                             onChange={() => toggleTodo(todo.id, todo.completed)}
                             className="w-6 h-6 cursor-pointer accent-green-600"
                           />
+                        </td>
+                        <td className="p-4 text-center">
+                          <button
+                            onClick={() => deleteTodo(todo.id)}
+                            className="text-red-600 hover:text-red-800 font-bold text-xl transition"
+                            title="Delete task"
+                          >
+                            ✕
+                          </button>
                         </td>
                       </tr>
                     );
