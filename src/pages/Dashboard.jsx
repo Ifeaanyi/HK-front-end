@@ -14,6 +14,7 @@ export default function Dashboard() {
   const [showPersonalForm, setShowPersonalForm] = useState(false);
   const [showStudyForm, setShowStudyForm] = useState(false);
   const [newHabitName, setNewHabitName] = useState('');
+  const [draggedHabit, setDraggedHabit] = useState(null);
   
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -177,6 +178,45 @@ export default function Dashboard() {
     const now = new Date();
     const hoursSinceCreation = (now - createdTime) / (1000 * 60 * 60);
     return hoursSinceCreation <= 1;
+  };
+
+  const handleDragStart = (e, habit) => {
+    setDraggedHabit(habit);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e, targetHabit) => {
+    e.preventDefault();
+    
+    if (!draggedHabit || draggedHabit.id === targetHabit.id) {
+      setDraggedHabit(null);
+      return;
+    }
+
+    // Only allow reordering within same category
+    if (draggedHabit.category !== targetHabit.category) {
+      alert('Can only reorder habits within the same section');
+      setDraggedHabit(null);
+      return;
+    }
+
+    const categoryHabits = habits.filter(h => h.category === draggedHabit.category);
+    const otherHabits = habits.filter(h => h.category !== draggedHabit.category);
+    
+    const draggedIndex = categoryHabits.findIndex(h => h.id === draggedHabit.id);
+    const targetIndex = categoryHabits.findIndex(h => h.id === targetHabit.id);
+    
+    const reordered = [...categoryHabits];
+    const [removed] = reordered.splice(draggedIndex, 1);
+    reordered.splice(targetIndex, 0, removed);
+    
+    setHabits([...otherHabits, ...reordered]);
+    setDraggedHabit(null);
   };
 
   const teamHabits = habits.filter(h => h.category === 'Team');
@@ -482,18 +522,26 @@ export default function Dashboard() {
                 <tr className="bg-yellow-400 text-gray-900">
                   <td colSpan={getDaysInMonth() + 1} className="py-3 px-4 text-center font-bold">
                     ⭐ PERSONAL HABITS
-                    <p className="text-sm font-normal">Optional • Earn extra points</p>
+                    <p className="text-sm font-normal">Optional • Earn extra points • Drag to reorder</p>
                   </td>
                 </tr>
                 {personalHabits.map((habit) => (
-                  <tr key={habit.id} className="border-b hover:bg-gray-50">
+                  <tr 
+                    key={habit.id} 
+                    className="border-b hover:bg-gray-50 cursor-move"
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, habit)}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, habit)}
+                  >
                     <td className="py-3 px-2 font-medium text-gray-900">
                       <div className="flex items-center gap-2">
+                        <span className="cursor-move">☰</span>
                         <span>{habit.name}</span>
                         {canDeleteHabit(habit.created_at) && (
                           <button
                             onClick={() => deleteHabit(habit.id, habit.created_at)}
-                            className="text-red-500 hover:text-red-700 text-xs"
+                            className="text-red-500 hover:text-red-700 text-sm font-bold ml-2"
                             title="Delete (within 1hr)"
                           >
                             ✕
@@ -530,18 +578,26 @@ export default function Dashboard() {
                     <tr className="bg-blue-500 text-white">
                       <td colSpan={getDaysInMonth() + 1} className="py-3 px-4 text-center font-bold">
                         📚 STUDY SKILLS
-                        <p className="text-sm font-normal">Track study hours • 1hr = 1pt</p>
+                        <p className="text-sm font-normal">Track study hours • 1hr = 1pt • Drag to reorder</p>
                       </td>
                     </tr>
                     {studyHabits.map((habit) => (
-                      <tr key={habit.id} className="border-b hover:bg-gray-50">
+                      <tr 
+                        key={habit.id} 
+                        className="border-b hover:bg-gray-50 cursor-move"
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, habit)}
+                        onDragOver={handleDragOver}
+                        onDrop={(e) => handleDrop(e, habit)}
+                      >
                         <td className="py-3 px-2 font-medium text-gray-900">
                           <div className="flex items-center gap-2">
+                            <span className="cursor-move">☰</span>
                             <span>{habit.name}</span>
                             {canDeleteHabit(habit.created_at) && (
                               <button
                                 onClick={() => deleteHabit(habit.id, habit.created_at)}
-                                className="text-red-500 hover:text-red-700 text-xs"
+                                className="text-red-500 hover:text-red-700 text-sm font-bold ml-2"
                                 title="Delete (within 1hr)"
                               >
                                 ✕
