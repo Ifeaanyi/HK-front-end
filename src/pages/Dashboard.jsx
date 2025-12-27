@@ -86,6 +86,32 @@ export default function Dashboard() {
     }
   };
 
+  const deleteHabit = async (habitId, habitCreatedAt) => {
+    const createdTime = new Date(habitCreatedAt);
+    const now = new Date();
+    const hoursSinceCreation = (now - createdTime) / (1000 * 60 * 60);
+
+    if (hoursSinceCreation > 1) {
+      alert('Can only delete habits within 1 hour of creation');
+      return;
+    }
+
+    if (!confirm('Delete this habit? This cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await axios.delete(`${API_URL}/habits/${habitId}`, {
+        headers: { Authorization: `Bearer ${getToken()}` }
+      });
+      fetchHabits();
+      alert('Habit deleted successfully');
+    } catch (error) {
+      console.error('Error deleting habit:', error);
+      alert('Failed to delete habit');
+    }
+  };
+
   const toggleHabit = async (habitId, date, currentStatus) => {
     try {
       await axios.post(
@@ -102,6 +128,26 @@ export default function Dashboard() {
       fetchStreak();
     } catch (error) {
       console.error('Error toggling habit:', error);
+      alert(error.response?.data?.detail || 'Cannot modify past dates');
+    }
+  };
+
+  const logStudyHours = async (habitId, date, hours) => {
+    try {
+      await axios.post(
+        `${API_URL}/habits/log`,
+        {
+          habit_id: habitId,
+          log_date: date,
+          completed: hours > 0,
+          hours: parseFloat(hours) || 0
+        },
+        { headers: { Authorization: `Bearer ${getToken()}` } }
+      );
+      fetchHabits();
+    } catch (error) {
+      console.error('Error logging study hours:', error);
+      alert(error.response?.data?.detail || 'Cannot modify past dates');
     }
   };
 
@@ -124,6 +170,13 @@ export default function Dashboard() {
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
     return new Date(year, month + 1, 0).getDate();
+  };
+
+  const canDeleteHabit = (createdAt) => {
+    const createdTime = new Date(createdAt);
+    const now = new Date();
+    const hoursSinceCreation = (now - createdTime) / (1000 * 60 * 60);
+    return hoursSinceCreation <= 1;
   };
 
   const teamHabits = habits.filter(h => h.category === 'Team');
@@ -347,7 +400,7 @@ export default function Dashboard() {
                   type="text"
                   value={newHabitName}
                   onChange={(e) => setNewHabitName(e.target.value)}
-                  placeholder="e.g., Python, Data Analysis, SQL"
+                  placeholder="e.g., Python, Dancing, Guitar"
                   className="flex-1 px-4 py-2 border rounded-lg text-sm"
                   maxLength={50}
                 />
@@ -434,7 +487,20 @@ export default function Dashboard() {
                 </tr>
                 {personalHabits.map((habit) => (
                   <tr key={habit.id} className="border-b hover:bg-gray-50">
-                    <td className="py-3 px-2 font-medium text-gray-900">{habit.name}</td>
+                    <td className="py-3 px-2 font-medium text-gray-900">
+                      <div className="flex items-center gap-2">
+                        <span>{habit.name}</span>
+                        {canDeleteHabit(habit.created_at) && (
+                          <button
+                            onClick={() => deleteHabit(habit.id, habit.created_at)}
+                            className="text-red-500 hover:text-red-700 text-xs"
+                            title="Delete (within 1hr)"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                    </td>
                     {Array.from({ length: getDaysInMonth() }, (_, i) => {
                       const year = currentMonth.getFullYear();
                       const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
@@ -469,7 +535,20 @@ export default function Dashboard() {
                     </tr>
                     {studyHabits.map((habit) => (
                       <tr key={habit.id} className="border-b hover:bg-gray-50">
-                        <td className="py-3 px-2 font-medium text-gray-900">{habit.name}</td>
+                        <td className="py-3 px-2 font-medium text-gray-900">
+                          <div className="flex items-center gap-2">
+                            <span>{habit.name}</span>
+                            {canDeleteHabit(habit.created_at) && (
+                              <button
+                                onClick={() => deleteHabit(habit.id, habit.created_at)}
+                                className="text-red-500 hover:text-red-700 text-xs"
+                                title="Delete (within 1hr)"
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </div>
+                        </td>
                         {Array.from({ length: getDaysInMonth() }, (_, i) => {
                           const year = currentMonth.getFullYear();
                           const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
@@ -479,14 +558,16 @@ export default function Dashboard() {
                           const isToday = date === today;
                           return (
                             <td key={i} className={`text-center py-2 px-1 ${isToday ? 'bg-blue-100' : ''}`}>
-                              <button
-                                onClick={() => toggleHabit(habit.id, date, log?.completed)}
-                                className={`w-6 h-6 rounded ${
-                                  log?.completed ? 'bg-green-500' : 'bg-gray-200'
-                                }`}
-                              >
-                                {log?.completed && '✓'}
-                              </button>
+                              <input
+                                type="number"
+                                min="0"
+                                max="24"
+                                step="0.5"
+                                value={log?.hours || ''}
+                                onChange={(e) => logStudyHours(habit.id, date, e.target.value)}
+                                placeholder="0"
+                                className="w-10 h-6 text-center border rounded text-xs"
+                              />
                             </td>
                           );
                         })}
