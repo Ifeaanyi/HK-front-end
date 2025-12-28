@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import api from '../utils/api';
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -12,7 +12,6 @@ function Register() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
   const navigate = useNavigate();
 
   const timezones = [
@@ -38,18 +37,28 @@ function Register() {
     setLoading(true);
 
     try {
-      await register(formData);
+      // Register user
+      const response = await api.post('/auth/register', formData);
+      
+      // Auto-login after registration
+      const loginFormData = new FormData();
+      loginFormData.append('username', formData.email);
+      loginFormData.append('password', formData.password);
+      
+      const loginResponse = await api.post('/auth/login', loginFormData, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      });
+      
+      localStorage.setItem('token', loginResponse.data.access_token);
       navigate('/dashboard');
+      
     } catch (err) {
       console.error('Registration error:', err);
       
-      // Handle different error formats
       if (err.response?.data?.detail) {
-        // Backend returned a detail message
         if (typeof err.response.data.detail === 'string') {
           setError(err.response.data.detail);
         } else if (Array.isArray(err.response.data.detail)) {
-          // Validation errors array
           setError(err.response.data.detail.map(e => e.msg).join(', '));
         } else {
           setError('Registration failed. Please try again.');

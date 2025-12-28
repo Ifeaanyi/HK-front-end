@@ -173,7 +173,6 @@ function ToDoList() {
     }
   };
 
-  // NEW: DELETE FUNCTION
   const deleteTodo = async (todoId) => {
     if (!confirm('Delete this task?')) return;
 
