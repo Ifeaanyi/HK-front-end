@@ -1,87 +1,70 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useState, useContext, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
-export function AuthProvider({ children }) {
+export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Load saved session
-    const savedToken = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
-    
-    if (savedToken && savedUser) {
-      setToken(savedToken);
-      setUser(JSON.parse(savedUser));
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetchUser();
+    } else {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
-  const login = async (email, password) => {
+  const fetchUser = async () => {
     try {
-      // FastAPI OAuth2 expects form data with 'username' field
-      const formData = new FormData();
-      formData.append('username', email);  // Use email as username
-      formData.append('password', password);
-
-      const response = await api.post('/auth/login', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      const { access_token, user: userData } = response.data;
-      
-      setToken(access_token);
-      setUser(userData);
-      
-      localStorage.setItem('token', access_token);
-      localStorage.setItem('user', JSON.stringify(userData));
-      
-      return userData;
+      const response = await api.get('/users/me');
+      setUser(response.data);
     } catch (error) {
-      console.error('Login failed:', error);
-      throw error;
+      console.error('Failed to fetch user:', error);
+      localStorage.removeItem('token');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const register = async (userData) => {
-    try {
-      const response = await api.post('/auth/register', userData);
-      
-      // After registration, automatically log in
-      return await login(userData.email, userData.password);
-    } catch (error) {
-      console.error('Registration failed:', error);
-      throw error;
-    }
+  const login = async (email, password) => {
+    const formData = new FormData();
+    formData.append('username', email);
+    formData.append('password', password);
+
+    const response = await api.post('/auth/login', formData, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    });
+
+    localStorage.setItem('token', response.data.access_token);
+    setUser(response.data.user);
+    return response.data;
   };
 
   const logout = () => {
-    setUser(null);
-    setToken(null);
     localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    setUser(null);
+    navigate('/login'); // THIS IS THE FIX!
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  const value = {
+    user,
+    login,
+    logout,
+    loading,
+    isAuthenticated: !!user
+  };
 
-  return (
-    <AuthContext.Provider value={{ user, token, login, register, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
-}
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within AuthProvider');
   }
   return context;
-}
+};
