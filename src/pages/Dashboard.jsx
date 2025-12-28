@@ -7,6 +7,7 @@ const API_URL = 'https://habit-king-production.up.railway.app/api/v1';
 
 export default function Dashboard() {
   const [habits, setHabits] = useState([]);
+  const [todos, setTodos] = useState([]);
   const [streak, setStreak] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -21,6 +22,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchHabits();
+    fetchTodos();
     fetchStreak();
   }, [selectedDate]);
 
@@ -45,6 +47,17 @@ export default function Dashboard() {
       setHabits(habitsWithLogs);
     } catch (error) {
       console.error('Error fetching habits:', error);
+    }
+  };
+
+  const fetchTodos = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/todos`, {
+        headers: { Authorization: `Bearer ${getToken()}` }
+      });
+      setTodos(response.data.todos);
+    } catch (error) {
+      console.error('Error fetching todos:', error);
     }
   };
 
@@ -228,6 +241,9 @@ export default function Dashboard() {
   const teamCompleted = teamHabits.filter(h => getHabitStatus(h)).length;
   const personalCompleted = personalHabits.filter(h => getHabitStatus(h)).length;
 
+  const todayTodos = todos.filter(t => t.task_date === selectedDate);
+  const todayTodosCompleted = todayTodos.filter(t => t.completed).length;
+
   const today = new Date().toISOString().split('T')[0];
 
   return (
@@ -351,9 +367,11 @@ export default function Dashboard() {
               </div>
               <h4 className="text-gray-700 font-medium mb-2">To-Do</h4>
               <p className="text-4xl font-bold text-gray-900">
-                0<span className="text-gray-400">/0</span>
+                {todayTodosCompleted}<span className="text-gray-400">/{todayTodos.length}</span>
               </p>
-              <p className="text-sm text-gray-500 mt-2">Pending</p>
+              <p className="text-sm text-gray-500 mt-2">
+                {todayTodosCompleted === todayTodos.length && todayTodos.length > 0 ? '✓ Complete' : 'Pending'}
+              </p>
             </div>
           </div>
         </div>
@@ -471,7 +489,7 @@ export default function Dashboard() {
             <table className="w-full border-collapse table-fixed">
               <thead>
                 <tr>
-                  <th className="text-left py-1 px-1 text-xs font-medium text-gray-600 w-32">Habit</th>
+                  <th className="text-left py-1 px-1 text-xs font-medium text-gray-600 w-40">Habit</th>
                   {Array.from({ length: getDaysInMonth() }, (_, i) => {
                     const year = currentMonth.getFullYear();
                     const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
@@ -496,7 +514,7 @@ export default function Dashboard() {
                 </tr>
                 {teamHabits.map((habit) => (
                   <tr key={habit.id} className="border-b hover:bg-gray-50">
-                    <td className="py-1 px-1 font-medium text-gray-900 text-xs truncate">{habit.name}</td>
+                    <td className="py-1 px-1 font-medium text-gray-900 text-xs break-words">{habit.name}</td>
                     {Array.from({ length: getDaysInMonth() }, (_, i) => {
                       const year = currentMonth.getFullYear();
                       const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
@@ -538,11 +556,11 @@ export default function Dashboard() {
                     <td className="py-1 px-1 font-medium text-gray-900 text-xs">
                       <div className="flex items-center gap-1">
                         <span className="cursor-move text-gray-400 text-xs">☰</span>
-                        <span className="flex-1 truncate">{habit.name}</span>
+                        <span className="flex-1 break-words">{habit.name}</span>
                         {canDeleteHabit(habit.created_at) && (
                           <button
                             onClick={() => deleteHabit(habit.id, habit.created_at)}
-                            className="text-red-600 hover:text-red-800 font-bold text-sm"
+                            className="text-red-600 hover:text-red-800 font-bold text-sm flex-shrink-0"
                             title="Delete"
                           >
                             ✕
@@ -593,11 +611,11 @@ export default function Dashboard() {
                         <td className="py-1 px-1 font-medium text-gray-900 text-xs">
                           <div className="flex items-center gap-1">
                             <span className="cursor-move text-gray-400 text-xs">☰</span>
-                            <span className="flex-1 truncate">{habit.name}</span>
+                            <span className="flex-1 break-words">{habit.name}</span>
                             {canDeleteHabit(habit.created_at) && (
                               <button
                                 onClick={() => deleteHabit(habit.id, habit.created_at)}
-                                className="text-red-600 hover:text-red-800 font-bold text-sm"
+                                className="text-red-600 hover:text-red-800 font-bold text-sm flex-shrink-0"
                                 title="Delete"
                               >
                                 ✕
