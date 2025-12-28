@@ -314,6 +314,7 @@ export default function Dashboard() {
             <h3 className="text-xl font-bold text-gray-900">TODAY'S PROGRESS</h3>
             <p className="text-sm text-gray-500">Locks at 11:59 PM</p>
           </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Team Habits */}
             <div className="bg-white rounded-lg shadow-md p-6 text-center">
@@ -466,11 +467,11 @@ export default function Dashboard() {
           )}
 
           {/* Calendar Header */}
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div className="w-full">
+            <table className="w-full border-collapse table-fixed">
               <thead>
                 <tr>
-                  <th className="text-left py-2 px-2 text-sm font-medium text-gray-600 min-w-[300px]">Habit</th>
+                  <th className="text-left py-1 px-1 text-xs font-medium text-gray-600 w-32">Habit</th>
                   {Array.from({ length: getDaysInMonth() }, (_, i) => {
                     const year = currentMonth.getFullYear();
                     const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
@@ -479,7 +480,7 @@ export default function Dashboard() {
                     const isToday = cellDate === today;
                     
                     return (
-                      <th key={i} className={`text-center py-2 px-1 text-sm font-medium ${isToday ? 'bg-blue-200 text-blue-900' : 'text-gray-600'}`}>
+                      <th key={i} className={`text-center py-1 px-0 text-xs font-medium ${isToday ? 'bg-blue-200 text-blue-900' : 'text-gray-600'} w-7`}>
                         {i + 1}
                       </th>
                     );
@@ -489,14 +490,13 @@ export default function Dashboard() {
               <tbody>
                 {/* Team Habits Section */}
                 <tr className="bg-purple-600 text-white">
-                  <td colSpan={getDaysInMonth() + 1} className="py-3 px-4 text-center font-bold">
+                  <td colSpan={getDaysInMonth() + 1} className="py-2 px-2 text-center font-bold text-xs">
                     👑 TEAM HABITS
-                    <p className="text-sm font-normal">Everyone must complete • Fixed points</p>
                   </td>
                 </tr>
                 {teamHabits.map((habit) => (
                   <tr key={habit.id} className="border-b hover:bg-gray-50">
-                    <td className="py-3 px-2 font-medium text-gray-900">{habit.name}</td>
+                    <td className="py-1 px-1 font-medium text-gray-900 text-xs truncate">{habit.name}</td>
                     {Array.from({ length: getDaysInMonth() }, (_, i) => {
                       const year = currentMonth.getFullYear();
                       const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
@@ -505,10 +505,10 @@ export default function Dashboard() {
                       const log = habit.logs?.find(l => l.log_date === date);
                       const isToday = date === today;
                       return (
-                        <td key={i} className={`text-center py-2 px-1 ${isToday ? 'bg-blue-100' : ''}`}>
+                        <td key={i} className={`text-center py-1 px-0 ${isToday ? 'bg-blue-100' : ''}`}>
                           <button
                             onClick={() => toggleHabit(habit.id, date, log?.completed)}
-                            className={`w-6 h-6 rounded ${
+                            className={`w-5 h-5 rounded text-xs ${
                               log?.completed ? 'bg-green-500' : 'bg-gray-200'
                             }`}
                           >
@@ -522,9 +522,8 @@ export default function Dashboard() {
 
                 {/* Personal Habits Section */}
                 <tr className="bg-yellow-400 text-gray-900">
-                  <td colSpan={getDaysInMonth() + 1} className="py-3 px-4 text-center font-bold">
-                    ⭐ PERSONAL HABITS
-                    <p className="text-sm font-normal">Optional • Earn extra points • Drag to reorder</p>
+                  <td colSpan={getDaysInMonth() + 1} className="py-2 px-2 text-center font-bold text-xs">
+                    ⭐ PERSONAL
                   </td>
                 </tr>
                 {personalHabits.map((habit) => (
@@ -536,15 +535,15 @@ export default function Dashboard() {
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(e, habit)}
                   >
-                    <td className="py-3 px-2 font-medium text-gray-900">
-                      <div className="flex items-center gap-2">
-                        <span className="cursor-move text-gray-400">☰</span>
-                        <span className="flex-1">{habit.name}</span>
+                    <td className="py-1 px-1 font-medium text-gray-900 text-xs">
+                      <div className="flex items-center gap-1">
+                        <span className="cursor-move text-gray-400 text-xs">☰</span>
+                        <span className="flex-1 truncate">{habit.name}</span>
                         {canDeleteHabit(habit.created_at) && (
                           <button
                             onClick={() => deleteHabit(habit.id, habit.created_at)}
-                            className="text-red-600 hover:text-red-800 font-bold text-lg px-2"
-                            title="Delete (within 1hr)"
+                            className="text-red-600 hover:text-red-800 font-bold text-sm"
+                            title="Delete"
                           >
                             ✕
                           </button>
@@ -559,10 +558,10 @@ export default function Dashboard() {
                       const log = habit.logs?.find(l => l.log_date === date);
                       const isToday = date === today;
                       return (
-                        <td key={i} className={`text-center py-2 px-1 ${isToday ? 'bg-blue-100' : ''}`}>
+                        <td key={i} className={`text-center py-1 px-0 ${isToday ? 'bg-blue-100' : ''}`}>
                           <button
                             onClick={() => toggleHabit(habit.id, date, log?.completed)}
-                            className={`w-6 h-6 rounded ${
+                            className={`w-5 h-5 rounded text-xs ${
                               log?.completed ? 'bg-green-500' : 'bg-gray-200'
                             }`}
                           >
@@ -578,9 +577,8 @@ export default function Dashboard() {
                 {studyHabits.length > 0 && (
                   <>
                     <tr className="bg-blue-500 text-white">
-                      <td colSpan={getDaysInMonth() + 1} className="py-3 px-4 text-center font-bold">
-                        📚 STUDY SKILLS
-                        <p className="text-sm font-normal">Track study hours • 1hr = 1pt • Drag to reorder</p>
+                      <td colSpan={getDaysInMonth() + 1} className="py-2 px-2 text-center font-bold text-xs">
+                        📚 STUDY
                       </td>
                     </tr>
                     {studyHabits.map((habit) => (
@@ -592,15 +590,15 @@ export default function Dashboard() {
                         onDragOver={handleDragOver}
                         onDrop={(e) => handleDrop(e, habit)}
                       >
-                        <td className="py-3 px-2 font-medium text-gray-900">
-                          <div className="flex items-center gap-2">
-                            <span className="cursor-move text-gray-400">☰</span>
-                            <span className="flex-1">{habit.name}</span>
+                        <td className="py-1 px-1 font-medium text-gray-900 text-xs">
+                          <div className="flex items-center gap-1">
+                            <span className="cursor-move text-gray-400 text-xs">☰</span>
+                            <span className="flex-1 truncate">{habit.name}</span>
                             {canDeleteHabit(habit.created_at) && (
                               <button
                                 onClick={() => deleteHabit(habit.id, habit.created_at)}
-                                className="text-red-600 hover:text-red-800 font-bold text-lg px-2"
-                                title="Delete (within 1hr)"
+                                className="text-red-600 hover:text-red-800 font-bold text-sm"
+                                title="Delete"
                               >
                                 ✕
                               </button>
@@ -615,7 +613,7 @@ export default function Dashboard() {
                           const log = habit.logs?.find(l => l.log_date === date);
                           const isToday = date === today;
                           return (
-                            <td key={i} className={`text-center py-2 px-1 ${isToday ? 'bg-blue-100' : ''}`}>
+                            <td key={i} className={`text-center py-1 px-0 ${isToday ? 'bg-blue-100' : ''}`}>
                               <input
                                 type="number"
                                 min="0"
@@ -624,7 +622,7 @@ export default function Dashboard() {
                                 value={log?.hours || ''}
                                 onChange={(e) => logStudyHours(habit.id, date, e.target.value)}
                                 placeholder="0"
-                                className="w-10 h-6 text-center border rounded text-xs"
+                                className="w-7 h-5 text-center border rounded text-xs p-0"
                               />
                             </td>
                           );
