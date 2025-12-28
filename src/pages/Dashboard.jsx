@@ -101,15 +101,6 @@ export default function Dashboard() {
   };
 
   const deleteHabit = async (habitId, habitCreatedAt) => {
-    const createdTime = new Date(habitCreatedAt);
-    const now = new Date();
-    const hoursSinceCreation = (now - createdTime) / (1000 * 60 * 60);
-
-    if (hoursSinceCreation > 1) {
-      alert('Can only delete habits within 1 hour of creation');
-      return;
-    }
-
     if (!confirm('Delete this habit? This cannot be undone.')) {
       return;
     }
@@ -122,7 +113,7 @@ export default function Dashboard() {
       alert('Habit deleted successfully');
     } catch (error) {
       console.error('Error deleting habit:', error);
-      alert('Failed to delete habit');
+      alert(error.response?.data?.detail || 'Failed to delete habit');
     }
   };
 
@@ -191,8 +182,11 @@ export default function Dashboard() {
     const createdTime = new Date(createdAt);
     const now = new Date();
     const hoursSinceCreation = (now - createdTime) / (1000 * 60 * 60);
-    console.log('Hours since creation:', hoursSinceCreation, 'Created at:', createdAt);
-    return hoursSinceCreation <= 1;
+    const currentDay = now.getDate();
+    const isStartOfMonth = currentDay <= 3;
+    
+    // Can delete if within 1 hour OR first 3 days of month
+    return hoursSinceCreation <= 1 || isStartOfMonth;
   };
 
   const handleDragStart = (e, habit) => {
