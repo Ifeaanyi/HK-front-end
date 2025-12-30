@@ -399,6 +399,7 @@ function Leaderboard() {
                           {getMedalEmoji(index)}
                         </div>
                       </td>
+
                       {/* Name */}
                       <td className="p-4">
                         <div className="flex items-center gap-2">
@@ -413,21 +414,25 @@ function Leaderboard() {
                           </div>
                         </div>
                       </td>
+
                       {/* Habits */}
                       <td className="p-4 text-center">
                         <div className="text-lg font-bold text-purple-600">{person.habit_points}</div>
                         <div className="text-xs text-gray-500">points</div>
                       </td>
+
                       {/* Study */}
                       <td className="p-4 text-center">
                         <div className="text-lg font-bold text-blue-600">{person.study_hours}</div>
                         <div className="text-xs text-gray-500">hours</div>
                       </td>
+
                       {/* To-Do */}
                       <td className="p-4 text-center">
                         <div className="text-lg font-bold text-green-600">{person.todo_productivity}%</div>
                         <div className="text-xs text-gray-500">productivity</div>
                       </td>
+
                       {/* Total */}
                       <td className="p-4 text-center bg-yellow-50">
                         <div className="text-2xl font-bold text-gray-900">{person.total_points}</div>
@@ -476,6 +481,7 @@ function Leaderboard() {
                 <li>• <strong>Study:</strong> 1 hour = 1pt, 30 mins = 0.5pts</li>
                 <li>• <strong>To-Do:</strong> Productivity % (completed ÷ total × 100)</li>
                 <li>• <strong>Streaks:</strong> 7 days (+2pts) • 14 days (+5pts) • 21 days (+10pts) • 30 days (+20pts)</li>
+                <li>• <strong>Monthly Goals:</strong> Complete all 5 goals = +15pts bonus</li>
               </ul>
             </div>
           </div>

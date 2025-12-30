@@ -19,6 +19,13 @@ export default function Dashboard() {
   const [draggedHabit, setDraggedHabit] = useState(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   
+  // Monthly Goals State
+  const [monthlyGoals, setMonthlyGoals] = useState(null);
+  const [newGoalText, setNewGoalText] = useState('');
+  const [editingGoalId, setEditingGoalId] = useState(null);
+  const [editingGoalText, setEditingGoalText] = useState('');
+  const [goalsLoading, setGoalsLoading] = useState(true);
+  
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
@@ -26,6 +33,7 @@ export default function Dashboard() {
     fetchHabits();
     fetchTodos();
     fetchStreak();
+    fetchMonthlyGoals();
   }, [selectedDate]);
 
   const getToken = () => localStorage.getItem('token');
@@ -74,12 +82,107 @@ export default function Dashboard() {
     }
   };
 
+  // Monthly Goals Functions
+  const fetchMonthlyGoals = async () => {
+    try {
+      setGoalsLoading(true);
+      const response = await axios.get(`${API_URL}/monthly-goals`, {
+        headers: { Authorization: `Bearer ${getToken()}` }
+      });
+      setMonthlyGoals(response.data);
+    } catch (error) {
+      console.error('Error fetching monthly goals:', error);
+    } finally {
+      setGoalsLoading(false);
+    }
+  };
+
+  const createGoal = async () => {
+    if (!newGoalText.trim()) {
+      alert('Please enter a goal');
+      return;
+    }
+    try {
+      await axios.post(
+        `${API_URL}/monthly-goals`,
+        { goal_text: newGoalText },
+        { headers: { Authorization: `Bearer ${getToken()}` } }
+      );
+      setNewGoalText('');
+      fetchMonthlyGoals();
+    } catch (error) {
+      console.error('Error creating goal:', error);
+      alert(error.response?.data?.detail || 'Failed to create goal');
+    }
+  };
+
+  const toggleGoal = async (goalId) => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/monthly-goals/${goalId}/toggle`,
+        {},
+        { headers: { Authorization: `Bearer ${getToken()}` } }
+      );
+      
+      if (response.data.points_just_awarded) {
+        alert('🎉 Congratulations! You completed all 5 goals and earned 15 bonus points!');
+      }
+      
+      fetchMonthlyGoals();
+    } catch (error) {
+      console.error('Error toggling goal:', error);
+      alert(error.response?.data?.detail || 'Failed to update goal');
+    }
+  };
+
+  const deleteGoal = async (goalId) => {
+    if (!confirm('Delete this goal?')) return;
+    try {
+      await axios.delete(`${API_URL}/monthly-goals/${goalId}`, {
+        headers: { Authorization: `Bearer ${getToken()}` }
+      });
+      fetchMonthlyGoals();
+    } catch (error) {
+      console.error('Error deleting goal:', error);
+      alert(error.response?.data?.detail || 'Failed to delete goal');
+    }
+  };
+
+  const startEditingGoal = (goal) => {
+    setEditingGoalId(goal.id);
+    setEditingGoalText(goal.goal_text);
+  };
+
+  const saveEditedGoal = async (goalId) => {
+    if (!editingGoalText.trim()) {
+      alert('Goal cannot be empty');
+      return;
+    }
+    try {
+      await axios.put(
+        `${API_URL}/monthly-goals/${goalId}`,
+        { goal_text: editingGoalText },
+        { headers: { Authorization: `Bearer ${getToken()}` } }
+      );
+      setEditingGoalId(null);
+      setEditingGoalText('');
+      fetchMonthlyGoals();
+    } catch (error) {
+      console.error('Error updating goal:', error);
+      alert(error.response?.data?.detail || 'Failed to update goal');
+    }
+  };
+
+  const cancelEditing = () => {
+    setEditingGoalId(null);
+    setEditingGoalText('');
+  };
+
   const createHabit = async (category) => {
     if (!newHabitName.trim()) {
       alert('Please enter a habit name');
       return;
     }
-
     try {
       await axios.post(
         `${API_URL}/habits`,
@@ -106,7 +209,6 @@ export default function Dashboard() {
     if (!confirm('Delete this habit? This cannot be undone.')) {
       return;
     }
-
     try {
       await axios.delete(`${API_URL}/habits/${habitId}`, {
         headers: { Authorization: `Bearer ${getToken()}` }
@@ -207,13 +309,11 @@ export default function Dashboard() {
       setDraggedHabit(null);
       return;
     }
-
     if (draggedHabit.category !== targetHabit.category) {
       alert('Can only reorder habits within the same section');
       setDraggedHabit(null);
       return;
     }
-
     const categoryHabits = habits.filter(h => h.category === draggedHabit.category);
     const otherHabits = habits.filter(h => h.category !== draggedHabit.category);
     
@@ -234,10 +334,8 @@ export default function Dashboard() {
   
   const teamCompleted = teamHabits.filter(h => getHabitStatus(h)).length;
   const personalCompleted = personalHabits.filter(h => getHabitStatus(h)).length;
-
   const todayTodos = todos.filter(t => t.task_date === selectedDate);
   const todayTodosCompleted = todayTodos.filter(t => t.completed).length;
-
   const today = new Date().toISOString().split('T')[0];
 
   return (
@@ -320,6 +418,150 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Monthly Goals Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">🎯</span>
+              <h3 className="text-xl font-bold text-gray-900">Monthly Goals</h3>
+              {monthlyGoals && (
+                <span className="text-sm text-gray-500">
+                  ({monthlyGoals.completed_goals}/{monthlyGoals.total_goals} completed)
+                </span>
+              )}
+            </div>
+            {monthlyGoals?.points_awarded && (
+              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-bold">
+                🎉 +15 pts earned!
+              </span>
+            )}
+          </div>
+
+          {/* Edit Period Notice */}
+          {monthlyGoals && (
+            <div className={`mb-4 p-3 rounded-lg text-sm ${monthlyGoals.is_edit_period ? 'bg-blue-50 text-blue-800 border border-blue-200' : 'bg-gray-50 text-gray-600 border border-gray-200'}`}>
+              {monthlyGoals.is_edit_period ? (
+                <span>📝 <strong>Edit Period Active!</strong> You can create, edit, and delete goals until the 4th.</span>
+              ) : (
+                <span>🔒 Goals are locked. You can only mark them complete/incomplete. Editing opens on the 1st.</span>
+              )}
+            </div>
+          )}
+
+          {goalsLoading ? (
+            <div className="text-center py-8 text-gray-500">Loading goals...</div>
+          ) : (
+            <>
+              {/* Goals List */}
+              <div className="space-y-3 mb-4">
+                {monthlyGoals?.goals?.map((goal, index) => (
+                  <div
+                    key={goal.id}
+                    className={`flex items-center gap-3 p-3 rounded-lg border ${goal.completed ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}
+                  >
+                    <span className="text-gray-400 font-bold w-6">{index + 1}.</span>
+                    
+                    <button
+                      onClick={() => toggleGoal(goal.id)}
+                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${goal.completed ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 hover:border-green-400'}`}
+                    >
+                      {goal.completed && '✓'}
+                    </button>
+
+                    {editingGoalId === goal.id ? (
+                      <div className="flex-1 flex gap-2">
+                        <input
+                          type="text"
+                          value={editingGoalText}
+                          onChange={(e) => setEditingGoalText(e.target.value)}
+                          className="flex-1 px-3 py-1 border rounded-lg text-sm"
+                          maxLength={500}
+                        />
+                        <button
+                          onClick={() => saveEditedGoal(goal.id)}
+                          className="px-3 py-1 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={cancelEditing}
+                          className="px-3 py-1 bg-gray-300 text-gray-700 rounded-lg text-sm hover:bg-gray-400"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <span className={`flex-1 ${goal.completed ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+                          {goal.goal_text}
+                        </span>
+                        
+                        {monthlyGoals.is_edit_period && (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => startEditingGoal(goal)}
+                              className="text-blue-600 hover:text-blue-800 text-sm"
+                            >
+                              ✏️
+                            </button>
+                            <button
+                              onClick={() => deleteGoal(goal.id)}
+                              className="text-red-600 hover:text-red-800 text-sm"
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                ))}
+
+                {/* Empty Goal Slots */}
+                {monthlyGoals && monthlyGoals.total_goals < 5 && (
+                  Array.from({ length: 5 - monthlyGoals.total_goals }, (_, i) => (
+                    <div
+                      key={`empty-${i}`}
+                      className="flex items-center gap-3 p-3 rounded-lg border border-dashed border-gray-300 bg-gray-50"
+                    >
+                      <span className="text-gray-400 font-bold w-6">{monthlyGoals.total_goals + i + 1}.</span>
+                      <div className="w-6 h-6 rounded-full border-2 border-gray-300 flex-shrink-0"></div>
+                      <span className="text-gray-400 italic">Empty slot</span>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Add Goal Form */}
+              {monthlyGoals?.is_edit_period && monthlyGoals?.total_goals < 5 && (
+                <div className="flex gap-3 mt-4">
+                  <input
+                    type="text"
+                    value={newGoalText}
+                    onChange={(e) => setNewGoalText(e.target.value)}
+                    placeholder="Enter a new goal for this month..."
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                    maxLength={500}
+                  />
+                  <button
+                    onClick={createGoal}
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-sm"
+                  >
+                    + Add Goal
+                  </button>
+                </div>
+              )}
+
+              {/* Bonus Points Info */}
+              <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200 text-sm text-yellow-800">
+                <span className="font-bold">🏆 Bonus:</span> Complete all 5 goals this month to earn <strong>+15 points</strong> on the leaderboard!
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
       {/* Today's Progress */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="mb-6">
@@ -327,7 +569,6 @@ export default function Dashboard() {
             <h3 className="text-xl font-bold text-gray-900">TODAY'S PROGRESS</h3>
             <p className="text-sm text-gray-500">Locks at 11:59 PM</p>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Team Habits */}
             <div className="bg-white rounded-lg shadow-md p-6 text-center">
