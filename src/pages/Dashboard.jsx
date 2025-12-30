@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import UpgradeModal from '../components/UpgradeModal';
 
 const API_URL = 'https://habit-king-production.up.railway.app/api/v1';
 
@@ -16,6 +17,7 @@ export default function Dashboard() {
   const [showStudyForm, setShowStudyForm] = useState(false);
   const [newHabitName, setNewHabitName] = useState('');
   const [draggedHabit, setDraggedHabit] = useState(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -185,7 +187,6 @@ export default function Dashboard() {
     const currentDay = now.getDate();
     const isStartOfMonth = currentDay <= 3;
     
-    // Can delete if within 1 hour OR first 3 days of month
     return hoursSinceCreation <= 1 || isStartOfMonth;
   };
 
@@ -207,7 +208,6 @@ export default function Dashboard() {
       return;
     }
 
-    // Only allow reordering within same category
     if (draggedHabit.category !== targetHabit.category) {
       alert('Can only reorder habits within the same section');
       setDraggedHabit(null);
@@ -273,9 +273,12 @@ export default function Dashboard() {
                     ✨ PRO
                   </span>
                 ) : (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-gray-200 text-gray-700">
-                    FREE
-                  </span>
+                  <button
+                    onClick={() => setShowUpgradeModal(true)}
+                    className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-orange-500 to-pink-500 text-white hover:from-orange-600 hover:to-pink-600 transition"
+                  >
+                    ⬆️ Upgrade
+                  </button>
                 )}
               </div>
               <button
@@ -479,7 +482,7 @@ export default function Dashboard() {
           )}
 
           {/* Calendar Header */}
-          <div className="w-full">
+          <div className="w-full overflow-x-auto">
             <table className="w-full border-collapse table-fixed">
               <thead>
                 <tr>
@@ -648,6 +651,12 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Upgrade Modal */}
+      <UpgradeModal 
+        isOpen={showUpgradeModal} 
+        onClose={() => setShowUpgradeModal(false)} 
+      />
     </div>
   );
 }
