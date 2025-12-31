@@ -11,6 +11,7 @@ import Leaderboard from './pages/Leaderboard'
 import Friends from './pages/Friends'
 import HallOfFame from './pages/HallOfFame'
 import PaymentCallback from './pages/PaymentCallback'
+import Settings from './pages/Settings'
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token')
@@ -30,6 +31,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="/friends" element={<ProtectedRoute><Friends /></ProtectedRoute>} />
           <Route path="/hall-of-fame/:groupId" element={<ProtectedRoute><HallOfFame /></ProtectedRoute>} />
           <Route path="/payment/callback" element={<ProtectedRoute><PaymentCallback /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/" element={<Navigate to="/dashboard" />} />
         </Routes>
       </BrowserRouter>
