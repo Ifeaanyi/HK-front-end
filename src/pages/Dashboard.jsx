@@ -364,6 +364,12 @@ export default function Dashboard() {
               >
                 👥 Friends
               </button>
+              <button
+  onClick={() => navigate('/settings')}
+  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300"
+>
+  ⚙️ Settings
+</button>
               <div className="flex items-center gap-2">
                 <span className="text-gray-700">{user?.full_name || 'Test User'}</span>
                 {user?.subscription_tier === 'pro' ? (
