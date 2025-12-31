@@ -282,15 +282,15 @@ export default function Dashboard() {
   };
 
   const canDeleteHabit = (createdAt) => {
-    if (!createdAt) return false;
-    const createdTime = new Date(createdAt);
-    const now = new Date();
-    const hoursSinceCreation = (now - createdTime) / (1000 * 60 * 60);
-    const currentDay = now.getDate();
-    const isStartOfMonth = currentDay <= 3;
-    
-    return hoursSinceCreation <= 1 || isStartOfMonth;
-  };
+  if (!createdAt) return false;
+  const createdTime = new Date(createdAt + 'Z');
+  const now = new Date();
+  const hoursSinceCreation = (now - createdTime) / (1000 * 60 * 60);
+  const currentDay = now.getDate();
+  const isStartOfMonth = currentDay <= 3;
+  
+  return hoursSinceCreation <= 24 || isStartOfMonth;
+};
 
   const handleDragStart = (e, habit) => {
     setDraggedHabit(habit);
