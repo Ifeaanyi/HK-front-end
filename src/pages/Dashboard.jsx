@@ -321,7 +321,7 @@ export default function Dashboard() {
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <img src="/logo.jpeg" alt="Habit King" className="h-32 w-auto" />
+            <img src="/logo.png" alt="Habit King" className="h-32 w-auto" />
             <div className="flex items-center space-x-4">
               <button onClick={() => navigate('/leaderboard')} className="px-4 py-2 text-sm font-medium text-gray-700 bg-yellow-400 rounded-lg hover:bg-yellow-500">🏆 Leaderboard</button>
               <button onClick={() => navigate('/todos')} className="px-4 py-2 text-sm font-medium text-white bg-orange-500 rounded-lg hover:bg-orange-600">📋 To-Do</button>
