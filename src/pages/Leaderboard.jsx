@@ -16,6 +16,7 @@ function Leaderboard() {
   const [showJoinGroup, setShowJoinGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [inviteCode, setInviteCode] = useState('');
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
 
   useEffect(() => {
     fetchGroups();
@@ -26,7 +27,7 @@ function Leaderboard() {
       fetchLeaderboard(selectedGroup.id);
       fetchDailyStats(selectedGroup.id);
     }
-  }, [selectedGroup]);
+  }, [selectedGroup, selectedMonth]);
 
   const fetchGroups = async () => {
     try {
@@ -46,7 +47,8 @@ function Leaderboard() {
 
   const fetchLeaderboard = async (groupId) => {
     try {
-      const response = await api.get(`/groups/${groupId}/leaderboard`);
+      const monthStr = selectedMonth.getFullYear() + '-' + String(selectedMonth.getMonth() + 1).padStart(2, '0');
+      const response = await api.get('/groups/' + groupId + '/leaderboard?month=' + monthStr);
       setLeaderboard(response.data.leaderboard || []);
       setCurrentWinner(response.data.current_winner || null);
     } catch (error) {
@@ -56,9 +58,8 @@ function Leaderboard() {
 
   const fetchDailyStats = async (groupId) => {
     try {
-      const response = await api.get(`/groups/${groupId}/daily-stats`);
+      const response = await api.get('/groups/' + groupId + '/daily-stats');
       setDailyStats(response.data);
-      console.log('Daily stats:', response.data);
     } catch (error) {
       console.error('Failed to fetch daily stats:', error);
     }
@@ -71,7 +72,7 @@ function Leaderboard() {
       setNewGroupName('');
       setShowCreateGroup(false);
       fetchGroups();
-      alert(`Group created! Invite code: ${response.data.invite_code}`);
+      alert('Group created! Invite code: ' + response.data.invite_code);
     } catch (error) {
       console.error('Failed to create group:', error);
       alert('Failed to create group');
@@ -81,7 +82,7 @@ function Leaderboard() {
   const joinGroup = async (e) => {
     e.preventDefault();
     try {
-      await api.post(`/groups/join?invite_code=${inviteCode}`);
+      await api.post('/groups/join?invite_code=' + inviteCode);
       setInviteCode('');
       setShowJoinGroup(false);
       fetchGroups();
@@ -92,14 +93,47 @@ function Leaderboard() {
     }
   };
 
+  const removeMember = async (memberId, memberName) => {
+    if (!confirm('Are you sure you want to remove ' + memberName + ' from the group?')) {
+      return;
+    }
+    try {
+      await api.delete('/groups/' + selectedGroup.id + '/members/' + memberId);
+      alert(memberName + ' has been removed from the group');
+      fetchLeaderboard(selectedGroup.id);
+    } catch (error) {
+      console.error('Failed to remove member:', error);
+      alert('Failed to remove member: ' + (error.response?.data?.detail || 'Unknown error'));
+    }
+  };
+
   const getMedalEmoji = (index) => {
     if (index === 0) return '🥇';
     if (index === 1) return '🥈';
     if (index === 2) return '🥉';
-    return `${index + 1}`;
+    return String(index + 1);
   };
 
-  const currentMonth = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const goToPreviousMonth = () => {
+    setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() - 1, 1));
+  };
+
+  const goToNextMonth = () => {
+    const now = new Date();
+    const nextMonth = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 1);
+    if (nextMonth <= now) {
+      setSelectedMonth(nextMonth);
+    }
+  };
+
+  const isCurrentMonth = () => {
+    const now = new Date();
+    return selectedMonth.getMonth() === now.getMonth() && selectedMonth.getFullYear() === now.getFullYear();
+  };
+
+  const displayMonth = selectedMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+  const isGroupCreator = selectedGroup && selectedGroup.created_by === user?.id;
 
   if (loading) {
     return (
@@ -141,24 +175,42 @@ function Leaderboard() {
       </nav>
 
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Header with Hall of Fame Button */}
+        {/* Header with Month Selector and Hall of Fame Button */}
         <div className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-2xl p-8 text-white mb-6 shadow-lg">
           <div className="flex items-center justify-between">
+            <button
+              onClick={goToPreviousMonth}
+              className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-xl font-bold text-sm transition-all"
+            >
+              ← Prev
+            </button>
             <div className="flex-1 text-center">
-              <h2 className="text-4xl font-bold mb-2">🏆 {currentMonth} LEADERBOARD</h2>
+              <h2 className="text-4xl font-bold mb-2">🏆 {displayMonth.toUpperCase()} LEADERBOARD</h2>
               {selectedGroup && (
                 <p className="text-yellow-100 text-lg">{selectedGroup.name} • {leaderboard.length} Participants</p>
               )}
             </div>
-            {selectedGroup && (
+            <div className="flex items-center gap-2">
               <button
-                onClick={() => navigate(`/hall-of-fame/${selectedGroup.id}`)}
-                className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-6 py-3 rounded-xl font-bold text-sm transition-all hover:scale-105 flex items-center gap-2 border-2 border-white/30"
+                onClick={goToNextMonth}
+                disabled={isCurrentMonth()}
+                className={isCurrentMonth()
+                  ? 'bg-white/10 text-white/50 cursor-not-allowed px-4 py-2 rounded-xl font-bold text-sm'
+                  : 'bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-xl font-bold text-sm transition-all'
+                }
               >
-                <span className="text-xl">🏆</span>
-                Hall of Fame
+                Next →
               </button>
-            )}
+              {selectedGroup && (
+                <button
+                  onClick={() => navigate('/hall-of-fame/' + selectedGroup.id)}
+                  className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-6 py-3 rounded-xl font-bold text-sm transition-all hover:scale-105 flex items-center gap-2 border-2 border-white/30"
+                >
+                  <span className="text-xl">🏆</span>
+                  Hall of Fame
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -179,8 +231,8 @@ function Leaderboard() {
           </div>
         )}
 
-        {/* Daily Stats Cards - Clean & Minimal */}
-        {selectedGroup && dailyStats && (
+        {/* Daily Stats Cards - Only show for current month */}
+        {selectedGroup && dailyStats && isCurrentMonth() && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             {/* Today's Leader */}
             <div className="bg-white rounded-lg border border-blue-200 p-4 shadow-sm">
@@ -377,6 +429,7 @@ function Leaderboard() {
                   <th className="p-4 text-center font-bold text-gray-700">Study</th>
                   <th className="p-4 text-center font-bold text-gray-700">To-Do</th>
                   <th className="p-4 text-center font-bold text-gray-700 bg-yellow-50">TOTAL</th>
+                  {isGroupCreator && <th className="p-4 text-center font-bold text-gray-700 w-20">Action</th>}
                 </tr>
               </thead>
               <tbody>
@@ -387,15 +440,11 @@ function Leaderboard() {
                   return (
                     <tr
                       key={person.user_id}
-                      className={`border-b transition-all ${
-                        isCurrentUser ? 'bg-blue-50 border-blue-200' : 
-                        isCurrentMonthWinner ? 'bg-yellow-50 border-yellow-200' : 
-                        'hover:bg-gray-50'
-                      } ${index < 3 ? 'font-semibold' : ''}`}
+                      className={(isCurrentUser ? 'bg-blue-50 border-blue-200' : isCurrentMonthWinner ? 'bg-yellow-50 border-yellow-200' : 'hover:bg-gray-50') + ' border-b transition-all' + (index < 3 ? ' font-semibold' : '')}
                     >
                       {/* Rank */}
                       <td className="p-4">
-                        <div className={`text-2xl ${index < 3 ? '' : 'text-gray-600 text-lg'}`}>
+                        <div className={'text-2xl' + (index < 3 ? '' : ' text-gray-600 text-lg')}>
                           {getMedalEmoji(index)}
                         </div>
                       </td>
@@ -437,9 +486,26 @@ function Leaderboard() {
                       <td className="p-4 text-center bg-yellow-50">
                         <div className="text-2xl font-bold text-gray-900">{person.total_points}</div>
                         <div className="text-xs text-gray-500">
-                          {person.streak_bonus > 0 && `+${person.streak_bonus} streak`}
+                          {person.streak_bonus > 0 && ('+' + person.streak_bonus + ' streak')}
                         </div>
                       </td>
+
+                      {/* Remove Button - Only for group creator, not for themselves */}
+                      {isGroupCreator && (
+                        <td className="p-4 text-center">
+                          {!isCurrentUser ? (
+                            <button
+                              onClick={() => removeMember(person.user_id, person.full_name)}
+                              className="text-red-500 hover:text-red-700 text-xs font-semibold"
+                              title="Remove from group"
+                            >
+                              ❌
+                            </button>
+                          ) : (
+                            <span className="text-gray-300">—</span>
+                          )}
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
