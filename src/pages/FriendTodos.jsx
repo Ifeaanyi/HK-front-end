@@ -87,7 +87,6 @@ export default function FriendTodos() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
-      {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
@@ -105,7 +104,6 @@ export default function FriendTodos() {
         </div>
       </div>
 
-      {/* Navigation */}
       <div className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex space-x-8 py-4">
@@ -122,16 +120,13 @@ export default function FriendTodos() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Month Navigation */}
         <div className="mb-6 flex justify-between items-center">
           <button onClick={() => changeMonth(-1)} className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">← Previous Month</button>
           <h3 className="text-xl font-bold text-gray-900">{getMonthName()}</h3>
           <button onClick={() => changeMonth(1)} className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Next Month →</button>
         </div>
 
-        {/* Stats */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
@@ -149,7 +144,6 @@ export default function FriendTodos() {
           </div>
         </div>
 
-        {/* Todos by Date */}
         <div className="bg-white rounded-lg shadow-md p-6">
           {sortedDates.length === 0 ? (
             <p className="text-center text-gray-500 py-8">No to-dos for {getMonthName()}</p>
