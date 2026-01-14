@@ -3,9 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import UpgradeModal from '../components/UpgradeModal';
-
 const API_URL = 'https://habit-king-production.up.railway.app/api/v1';
-
 export default function Dashboard() {
   const [habits, setHabits] = useState([]);
   const [todos, setTodos] = useState([]);
@@ -27,16 +25,35 @@ export default function Dashboard() {
   
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-
+  
+  const [showExpiryWarning, setShowExpiryWarning] = useState(false);
+  const [daysUntilExpiry, setDaysUntilExpiry] = useState(0);
+  const [subscriptionExpired, setSubscriptionExpired] = useState(false);
+  
+  useEffect(() => {
+    if (user?.subscription_tier === 'pro' && user?.subscription_end_date) {
+      const endDate = new Date(user.subscription_end_date);
+      const now = new Date();
+      const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
+      
+      if (daysLeft < 0) {
+        setSubscriptionExpired(true);
+        setShowExpiryWarning(false);
+      } else if (daysLeft <= 3) {
+        setShowExpiryWarning(true);
+        setDaysUntilExpiry(daysLeft);
+        setSubscriptionExpired(false);
+      }
+    }
+  }, [user]);
+  
   useEffect(() => {
     fetchHabits();
     fetchTodos();
     fetchStreak();
     fetchMonthlyGoals();
   }, [selectedDate]);
-
   const getToken = () => localStorage.getItem('token');
-
   const fetchHabits = async () => {
     try {
       const response = await axios.get(API_URL + '/habits', {
@@ -58,7 +75,6 @@ export default function Dashboard() {
       console.error('Error fetching habits:', error);
     }
   };
-
   const fetchTodos = async () => {
     try {
       const response = await axios.get(API_URL + '/todos', {
@@ -69,7 +85,6 @@ export default function Dashboard() {
       console.error('Error fetching todos:', error);
     }
   };
-
   const fetchStreak = async () => {
     try {
       const response = await axios.get(API_URL + '/streaks', {
@@ -80,7 +95,6 @@ export default function Dashboard() {
       console.error('Error fetching streak:', error);
     }
   };
-
   const fetchMonthlyGoals = async () => {
     try {
       setGoalsLoading(true);
@@ -94,7 +108,6 @@ export default function Dashboard() {
       setGoalsLoading(false);
     }
   };
-
   const createGoal = async () => {
     if (!newGoalText.trim()) {
       alert('Please enter a goal');
@@ -113,7 +126,6 @@ export default function Dashboard() {
       alert(error.response?.data?.detail || 'Failed to create goal');
     }
   };
-
   const toggleGoal = async (goalId) => {
     try {
       const response = await axios.post(
@@ -132,7 +144,6 @@ export default function Dashboard() {
       alert(error.response?.data?.detail || 'Failed to update goal');
     }
   };
-
   const deleteGoal = async (goalId) => {
     if (!confirm('Delete this goal?')) return;
     try {
@@ -145,12 +156,10 @@ export default function Dashboard() {
       alert(error.response?.data?.detail || 'Failed to delete goal');
     }
   };
-
   const startEditingGoal = (goal) => {
     setEditingGoalId(goal.id);
     setEditingGoalText(goal.goal_text);
   };
-
   const saveEditedGoal = async (goalId) => {
     if (!editingGoalText.trim()) {
       alert('Goal cannot be empty');
@@ -170,12 +179,10 @@ export default function Dashboard() {
       alert(error.response?.data?.detail || 'Failed to update goal');
     }
   };
-
   const cancelEditing = () => {
     setEditingGoalId(null);
     setEditingGoalText('');
   };
-
   const createHabit = async (category) => {
     if (!newHabitName.trim()) {
       alert('Please enter a habit name');
@@ -198,7 +205,6 @@ export default function Dashboard() {
       alert(error.response?.data?.detail || 'Failed to create habit');
     }
   };
-
   const deleteHabit = async (habitId) => {
     if (!confirm('Delete this habit? This cannot be undone.')) {
       return;
@@ -214,7 +220,6 @@ export default function Dashboard() {
       alert(error.response?.data?.detail || 'Failed to delete habit');
     }
   };
-
   const toggleHabit = async (habitId, date, currentStatus) => {
     try {
       await axios.post(
@@ -229,7 +234,6 @@ export default function Dashboard() {
       alert(error.response?.data?.detail || 'Cannot modify past dates');
     }
   };
-
   const logStudyHours = async (habitId, date, hours) => {
     try {
       await axios.post(
@@ -243,28 +247,23 @@ export default function Dashboard() {
       alert(error.response?.data?.detail || 'Cannot modify past dates');
     }
   };
-
   const getHabitStatus = (habit) => {
     const log = habit.logs?.find(l => l.log_date === selectedDate);
     return log?.completed || false;
   };
-
   const changeMonth = (direction) => {
     const newMonth = new Date(currentMonth);
     newMonth.setMonth(newMonth.getMonth() + direction);
     setCurrentMonth(newMonth);
   };
-
   const getMonthName = () => {
     return currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   };
-
   const getDaysInMonth = () => {
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
     return new Date(year, month + 1, 0).getDate();
   };
-
   const canDeleteHabit = (createdAt) => {
     if (!createdAt) return false;
     const createdTime = new Date(createdAt + 'Z');
@@ -274,17 +273,14 @@ export default function Dashboard() {
     const isStartOfMonth = currentDay <= 3;
     return hoursSinceCreation <= 24 || isStartOfMonth;
   };
-
   const handleDragStart = (e, habit) => {
     setDraggedHabit(habit);
     e.dataTransfer.effectAllowed = 'move';
   };
-
   const handleDragOver = (e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
   };
-
   const handleDrop = (e, targetHabit) => {
     e.preventDefault();
     if (!draggedHabit || draggedHabit.id === targetHabit.id) {
@@ -306,7 +302,6 @@ export default function Dashboard() {
     setHabits([...otherHabits, ...reordered]);
     setDraggedHabit(null);
   };
-
   const teamHabits = habits.filter(h => h.category === 'Team');
   const personalHabits = habits.filter(h => h.category === 'Personal');
   const studyHabits = habits.filter(h => h.category === 'Study');
@@ -315,7 +310,6 @@ export default function Dashboard() {
   const todayTodos = todos.filter(t => t.task_date === selectedDate);
   const todayTodosCompleted = todayTodos.filter(t => t.completed).length;
   const today = new Date().toISOString().split('T')[0];
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
       <div className="bg-white shadow-sm border-b">
@@ -341,14 +335,47 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
+      
+      {showExpiryWarning && (
+        <div className="bg-yellow-500 border-b-4 border-yellow-600">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                <div>
+                  <p className="text-white font-bold">Your Pro subscription expires in {daysUntilExpiry} {daysUntilExpiry === 1 ? 'day' : 'days'}!</p>
+                  <p className="text-yellow-100 text-sm">Renew now to keep access to Friends, Groups, and Leaderboards.</p>
+                </div>
+              </div>
+              <button onClick={() => navigate('/settings')} className="px-6 py-2 bg-white text-yellow-600 font-bold rounded-lg hover:bg-yellow-50 transition">Renew Now</button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {subscriptionExpired && (
+        <div className="bg-red-500 border-b-4 border-red-600">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">❌</span>
+                <div>
+                  <p className="text-white font-bold">Your Pro subscription has ended</p>
+                  <p className="text-red-100 text-sm">Upgrade to Pro to access Friends, Groups, Leaderboards, and Hall of Fame.</p>
+                </div>
+              </div>
+              <button onClick={() => navigate('/settings')} className="px-6 py-2 bg-white text-red-600 font-bold rounded-lg hover:bg-red-50 transition">Upgrade to Pro</button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <h2 className="text-3xl font-bold">Welcome back, {user?.full_name || 'Test User'}! 👋</h2>
           <p className="text-blue-100 mt-1">{user?.role_title || 'Tester'} • {user?.timezone || 'Africa/Lagos'}</p>
         </div>
       </div>
-
       {streak && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="bg-white rounded-lg shadow-md p-6 text-center">
@@ -358,7 +385,6 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between mb-4">
@@ -369,7 +395,6 @@ export default function Dashboard() {
             </div>
             {monthlyGoals?.points_awarded && <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-bold">🎉 +15 pts earned!</span>}
           </div>
-
           {monthlyGoals && (
             <div className={monthlyGoals.is_edit_period ? 'mb-4 p-3 rounded-lg text-sm bg-blue-50 text-blue-800 border border-blue-200' : 'mb-4 p-3 rounded-lg text-sm bg-gray-50 text-gray-600 border border-gray-200'}>
               {monthlyGoals.is_edit_period ? (
@@ -379,7 +404,6 @@ export default function Dashboard() {
               )}
             </div>
           )}
-
           {goalsLoading ? (
             <div className="text-center py-8 text-gray-500">Loading goals...</div>
           ) : (
@@ -418,14 +442,12 @@ export default function Dashboard() {
                   </div>
                 ))}
               </div>
-
               {monthlyGoals?.is_edit_period && monthlyGoals?.total_goals < 5 && (
                 <div className="flex gap-3 mt-4">
                   <input type="text" value={newGoalText} onChange={(e) => setNewGoalText(e.target.value)} placeholder="Enter a new goal for this month..." className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500" maxLength={500} />
                   <button onClick={createGoal} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-sm">+ Add Goal</button>
                 </div>
               )}
-
               <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200 text-sm text-yellow-800">
                 <span className="font-bold">🏆 Bonus:</span> Complete all 5 goals this month to earn <strong>+15 points</strong> on the leaderboard!
               </div>
@@ -433,7 +455,6 @@ export default function Dashboard() {
           )}
         </div>
       </div>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="mb-6">
           <div className="flex justify-between items-center mb-4">
@@ -458,13 +479,11 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-
         <div className="mb-6 flex justify-between items-center">
           <button onClick={() => changeMonth(-1)} className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">← Previous Month</button>
           <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" />
           <button onClick={() => changeMonth(1)} className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Next Month →</button>
         </div>
-
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-xl font-bold text-gray-900 mb-4">{getMonthName()}</h3>
           
@@ -472,7 +491,6 @@ export default function Dashboard() {
             <button onClick={() => setShowPersonalForm(!showPersonalForm)} className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">+ Personal Habit ({personalHabits.length}/10)</button>
             <button onClick={() => setShowStudyForm(!showStudyForm)} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">+ Study Skill ({studyHabits.length}/5)</button>
           </div>
-
           {showPersonalForm && (
             <div className="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
               <h4 className="font-semibold mb-3">Add Personal Habit</h4>
@@ -483,7 +501,6 @@ export default function Dashboard() {
               </div>
             </div>
           )}
-
           {showStudyForm && (
             <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
               <h4 className="font-semibold mb-3">Add Study Skill</h4>
@@ -494,7 +511,6 @@ export default function Dashboard() {
               </div>
             </div>
           )}
-
           <div className="w-full overflow-x-auto">
             <table className="w-full border-collapse table-fixed">
               <thead>
@@ -532,7 +548,6 @@ export default function Dashboard() {
                     })}
                   </tr>
                 ))}
-
                 <tr className="bg-yellow-400 text-gray-900">
                   <td colSpan={getDaysInMonth() + 1} className="py-2 px-2 text-center font-bold text-xs">⭐ PERSONAL</td>
                 </tr>
@@ -560,7 +575,6 @@ export default function Dashboard() {
                     })}
                   </tr>
                 ))}
-
                 {studyHabits.length > 0 && (
                   <>
                     <tr className="bg-blue-500 text-white">
@@ -597,7 +611,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
       <UpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
     </div>
   );
