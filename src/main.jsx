@@ -9,6 +9,8 @@ import Dashboard from './pages/Dashboard'
 import ToDoList from './pages/ToDoList'
 import Leaderboard from './pages/Leaderboard'
 import Friends from './pages/Friends'
+import FriendDashboard from './pages/FriendDashboard'
+import FriendTodos from './pages/FriendTodos'
 import HallOfFame from './pages/HallOfFame'
 import PaymentCallback from './pages/PaymentCallback'
 import Settings from './pages/Settings'
@@ -30,6 +32,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="/todos" element={<ProtectedRoute><ToDoList /></ProtectedRoute>} />
           <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
           <Route path="/friends" element={<ProtectedRoute><Friends /></ProtectedRoute>} />
+          <Route path="/friends/:friendId/dashboard" element={<ProtectedRoute><FriendDashboard /></ProtectedRoute>} />
+          <Route path="/friends/:friendId/todos" element={<ProtectedRoute><FriendTodos /></ProtectedRoute>} />
           <Route path="/hall-of-fame/:groupId" element={<ProtectedRoute><HallOfFame /></ProtectedRoute>} />
           <Route path="/payment/callback" element={<ProtectedRoute><PaymentCallback /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
