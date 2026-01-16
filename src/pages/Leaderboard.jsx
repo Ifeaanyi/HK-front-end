@@ -486,10 +486,18 @@ function Leaderboard() {
                       {/* Total */}
                       <td className="p-4 text-center bg-yellow-50">
                         <div className="text-2xl font-bold text-gray-900">{person.total_points}</div>
-                        <div className="text-xs text-gray-500">
-                          {person.streak_bonus > 0 && ('+' + person.streak_bonus + ' streak')}
+                        <div className="text-xs text-gray-500 space-y-0.5">
+                          {person.streak_bonus > 0 && <div>+{person.streak_bonus} streak</div>}
+                          {person.todo_productivity_bonus > 0 && <div>+{person.todo_productivity_bonus} productivity</div>}
                         </div>
                       </td>
+```
+
+**This will show both bonuses stacked:**
+```
+223.2
++2 streak
++20 productivity
 
                       {/* Remove Button - Only for group creator, not for themselves */}
                       {isGroupCreator && (
