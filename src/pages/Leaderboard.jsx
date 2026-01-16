@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
-
 function Leaderboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -17,18 +16,15 @@ function Leaderboard() {
   const [newGroupName, setNewGroupName] = useState('');
   const [inviteCode, setInviteCode] = useState('');
   const [selectedMonth, setSelectedMonth] = useState(new Date());
-
   useEffect(() => {
     fetchGroups();
   }, []);
-
   useEffect(() => {
     if (selectedGroup) {
       fetchLeaderboard(selectedGroup.id);
       fetchDailyStats(selectedGroup.id);
     }
   }, [selectedGroup, selectedMonth]);
-
   const fetchGroups = async () => {
     try {
       const response = await api.get('/groups');
@@ -44,7 +40,6 @@ function Leaderboard() {
       setLoading(false);
     }
   };
-
   const fetchLeaderboard = async (groupId) => {
     try {
       const monthStr = selectedMonth.getFullYear() + '-' + String(selectedMonth.getMonth() + 1).padStart(2, '0');
@@ -55,7 +50,6 @@ function Leaderboard() {
       console.error('Failed to fetch leaderboard:', error);
     }
   };
-
   const fetchDailyStats = async (groupId) => {
     try {
       const response = await api.get('/groups/' + groupId + '/daily-stats');
@@ -64,7 +58,6 @@ function Leaderboard() {
       console.error('Failed to fetch daily stats:', error);
     }
   };
-
   const createGroup = async (e) => {
     e.preventDefault();
     try {
@@ -78,7 +71,6 @@ function Leaderboard() {
       alert('Failed to create group');
     }
   };
-
   const joinGroup = async (e) => {
     e.preventDefault();
     try {
@@ -92,7 +84,6 @@ function Leaderboard() {
       alert('Failed to join group: ' + (error.response?.data?.detail || 'Invalid code'));
     }
   };
-
   const removeMember = async (memberId, memberName) => {
     if (!confirm('Are you sure you want to remove ' + memberName + ' from the group?')) {
       return;
@@ -106,18 +97,15 @@ function Leaderboard() {
       alert('Failed to remove member: ' + (error.response?.data?.detail || 'Unknown error'));
     }
   };
-
   const getMedalEmoji = (index) => {
     if (index === 0) return '🥇';
     if (index === 1) return '🥈';
     if (index === 2) return '🥉';
     return String(index + 1);
   };
-
   const goToPreviousMonth = () => {
     setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() - 1, 1));
   };
-
   const goToNextMonth = () => {
     const now = new Date();
     const nextMonth = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 1);
@@ -125,16 +113,12 @@ function Leaderboard() {
       setSelectedMonth(nextMonth);
     }
   };
-
   const isCurrentMonth = () => {
     const now = new Date();
     return selectedMonth.getMonth() === now.getMonth() && selectedMonth.getFullYear() === now.getFullYear();
   };
-
   const displayMonth = selectedMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-
   const isGroupCreator = selectedGroup && selectedGroup.created_by === user?.id;
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -142,7 +126,6 @@ function Leaderboard() {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm border-b sticky top-0 z-20">
@@ -173,7 +156,6 @@ function Leaderboard() {
           </div>
         </div>
       </nav>
-
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Header with Month Selector and Hall of Fame Button */}
         <div className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-2xl p-8 text-white mb-6 shadow-lg">
@@ -213,7 +195,6 @@ function Leaderboard() {
             </div>
           </div>
         </div>
-
         {/* Current Winner Banner */}
         {currentWinner && (
           <div className="bg-gradient-to-r from-yellow-100 via-yellow-50 to-orange-100 border-2 border-yellow-400 rounded-2xl p-4 mb-6 shadow-md">
@@ -230,7 +211,6 @@ function Leaderboard() {
             </div>
           </div>
         )}
-
         {/* Daily Stats Cards - Only show for current month */}
         {selectedGroup && dailyStats && isCurrentMonth() && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -247,7 +227,6 @@ function Leaderboard() {
                 </>
               )}
             </div>
-
             {/* Most Daily Wins */}
             <div className="bg-white rounded-lg border border-orange-200 p-4 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
@@ -273,7 +252,6 @@ function Leaderboard() {
                 )}
               </div>
             </div>
-
             {/* Most Productive Today */}
             <div className="bg-white rounded-lg border border-green-200 p-4 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
@@ -289,7 +267,6 @@ function Leaderboard() {
             </div>
           </div>
         )}
-
         {/* Path to Victory - Separate Row */}
         {selectedGroup && (
           <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm mb-6">
@@ -317,7 +294,6 @@ function Leaderboard() {
             </div>
           </div>
         )}
-
         {/* Group Selection & Actions */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
@@ -355,7 +331,6 @@ function Leaderboard() {
               </button>
             </div>
           </div>
-
           {/* Create Group Form */}
           {showCreateGroup && (
             <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
@@ -376,7 +351,6 @@ function Leaderboard() {
               </form>
             </div>
           )}
-
           {/* Join Group Form */}
           {showJoinGroup && (
             <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
@@ -397,7 +371,6 @@ function Leaderboard() {
               </form>
             </div>
           )}
-
           {/* Show Invite Code */}
           {selectedGroup && (
             <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
@@ -417,7 +390,6 @@ function Leaderboard() {
             </div>
           )}
         </div>
-
         {/* Leaderboard Table */}
         {selectedGroup && leaderboard.length > 0 && (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -449,7 +421,6 @@ function Leaderboard() {
                           {getMedalEmoji(index)}
                         </div>
                       </td>
-
                       {/* Name */}
                       <td className="p-4">
                         <div className="flex items-center gap-2">
@@ -464,34 +435,31 @@ function Leaderboard() {
                           </div>
                         </div>
                       </td>
-
                       {/* Habits */}
                       <td className="p-4 text-center">
                         <div className="text-lg font-bold text-purple-600">{person.habit_points}</div>
                         <div className="text-xs text-gray-500">points</div>
                       </td>
-
                       {/* Study */}
                       <td className="p-4 text-center">
                         <div className="text-lg font-bold text-blue-600">{person.study_hours}</div>
                         <div className="text-xs text-gray-500">hours</div>
                       </td>
-
                       {/* To-Do */}
                       <td className="p-4 text-center">
                         <div className="text-lg font-bold text-green-600">{person.todo_productivity}%</div>
-                        <div className="text-xs text-gray-500">productivity</div>
+                        <div className="text-xs text-gray-500">
+                          <div>productivity</div>
+                          {person.todo_bonus > 0 && <div>+{person.todo_bonus} pts</div>}
+                        </div>
                       </td>
-
                       {/* Total */}
                       <td className="p-4 text-center bg-yellow-50">
                         <div className="text-2xl font-bold text-gray-900">{person.total_points}</div>
                         <div className="text-xs text-gray-500">
                           {person.streak_bonus > 0 && <div>+{person.streak_bonus} streak</div>}
-                          {person.todo_bonus > 0 && <div>+{person.todo_bonus} productivity</div>}
                         </div>
                       </td>
-
                       {/* Remove Button - Only for group creator, not for themselves */}
                       {isGroupCreator && (
                         <td className="p-4 text-center">
@@ -515,14 +483,12 @@ function Leaderboard() {
             </table>
           </div>
         )}
-
         {/* Empty State */}
         {selectedGroup && leaderboard.length === 0 && (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
             <p className="text-gray-400 text-lg">No data yet. Start tracking habits to appear on the leaderboard!</p>
           </div>
         )}
-
         {/* No Groups State */}
         {!selectedGroup && groups.length === 0 && (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
@@ -537,7 +503,6 @@ function Leaderboard() {
             </button>
           </div>
         )}
-
         {/* Info Card */}
         <div className="mt-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-200">
           <div className="flex items-start gap-2 text-sm text-gray-700">
@@ -558,5 +523,4 @@ function Leaderboard() {
     </div>
   );
 }
-
 export default Leaderboard;
