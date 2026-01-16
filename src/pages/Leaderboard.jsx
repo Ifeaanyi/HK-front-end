@@ -255,18 +255,13 @@ function Leaderboard() {
                 <h3 className="text-sm font-bold text-gray-700">MOST DAILY WINS</h3>
               </div>
               <div className="space-y-1">
-                {dailyStats.most_daily_wins && dailyStats.most_daily_wins.length > 0 ? (
-                  dailyStats.most_daily_wins.map((winner, index) => (
-                    <div key={index} className="flex justify-between items-center text-sm">
-                      <span className="text-gray-900 font-medium">
+                <span className="text-gray-900 font-medium">
                         {index === 0 && '🥇 '}
                         {index === 1 && '🥈 '}
                         {index === 2 && '🥉 '}
+                        {index >= 3 && `${index + 1}. `}
                         {winner.full_name}
                       </span>
-                      <span className="text-gray-600">{winner.days} days</span>
-                    </div>
-                  ))
                 ) : (
                   <div className="text-xs text-gray-500">No data yet</div>
                 )}
