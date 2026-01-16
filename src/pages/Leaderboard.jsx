@@ -487,7 +487,8 @@ function Leaderboard() {
                       <td className="p-4 text-center bg-yellow-50">
                         <div className="text-2xl font-bold text-gray-900">{person.total_points}</div>
                         <div className="text-xs text-gray-500">
-                          {person.streak_bonus > 0 && ('+' + person.streak_bonus + ' streak')}
+                          {person.streak_bonus > 0 && <div>+{person.streak_bonus} streak</div>}
+                          {person.todo_bonus > 0 && <div>+{person.todo_bonus} productivity</div>}
                         </div>
                       </td>
 
