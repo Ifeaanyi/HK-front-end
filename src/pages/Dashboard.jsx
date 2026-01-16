@@ -16,6 +16,7 @@ export default function Dashboard() {
   const [newHabitName, setNewHabitName] = useState('');
   const [draggedHabit, setDraggedHabit] = useState(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [toggleLoading, setToggleLoading] = useState({});
   
   const [monthlyGoals, setMonthlyGoals] = useState(null);
   const [newGoalText, setNewGoalText] = useState('');
@@ -221,6 +222,11 @@ export default function Dashboard() {
     }
   };
   const toggleHabit = async (habitId, date, currentStatus) => {
+    const toggleKey = `${habitId}-${date}`;
+    if (toggleLoading[toggleKey]) return;
+    
+    setToggleLoading(prev => ({ ...prev, [toggleKey]: true }));
+    
     try {
       await axios.post(
         API_URL + '/habits/log',
@@ -232,6 +238,8 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Error toggling habit:', error);
       alert(error.response?.data?.detail || 'Cannot modify past dates');
+    } finally {
+      setToggleLoading(prev => ({ ...prev, [toggleKey]: false }));
     }
   };
   const logStudyHours = async (habitId, date, hours) => {
@@ -540,9 +548,11 @@ export default function Dashboard() {
                       const date = year + '-' + month + '-' + day;
                       const log = habit.logs?.find(l => l.log_date === date);
                       const isToday = date === today;
+                      const toggleKey = `${habit.id}-${date}`;
+                      const isLoading = toggleLoading[toggleKey];
                       return (
                         <td key={i} className={isToday ? 'text-center py-1 px-0 bg-blue-100' : 'text-center py-1 px-0'}>
-                          <button onClick={() => toggleHabit(habit.id, date, log?.completed)} className={log?.completed ? 'w-5 h-5 rounded text-xs bg-green-500' : 'w-5 h-5 rounded text-xs bg-gray-200'}>{log?.completed && '✓'}</button>
+                          <button onClick={() => toggleHabit(habit.id, date, log?.completed)} disabled={isLoading} className={log?.completed ? 'w-5 h-5 rounded text-xs bg-green-500' : 'w-5 h-5 rounded text-xs bg-gray-200'}>{log?.completed && '✓'}</button>
                         </td>
                       );
                     })}
@@ -567,9 +577,11 @@ export default function Dashboard() {
                       const date = year + '-' + month + '-' + day;
                       const log = habit.logs?.find(l => l.log_date === date);
                       const isToday = date === today;
+                      const toggleKey = `${habit.id}-${date}`;
+                      const isLoading = toggleLoading[toggleKey];
                       return (
                         <td key={i} className={isToday ? 'text-center py-1 px-0 bg-blue-100' : 'text-center py-1 px-0'}>
-                          <button onClick={() => toggleHabit(habit.id, date, log?.completed)} className={log?.completed ? 'w-5 h-5 rounded text-xs bg-green-500' : 'w-5 h-5 rounded text-xs bg-gray-200'}>{log?.completed && '✓'}</button>
+                          <button onClick={() => toggleHabit(habit.id, date, log?.completed)} disabled={isLoading} className={log?.completed ? 'w-5 h-5 rounded text-xs bg-green-500' : 'w-5 h-5 rounded text-xs bg-gray-200'}>{log?.completed && '✓'}</button>
                         </td>
                       );
                     })}
