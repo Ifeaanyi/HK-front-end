@@ -355,7 +355,7 @@ export default function Dashboard() {
                   <p className="text-yellow-100 text-sm">Renew now to keep access to Friends, Groups, and Leaderboards.</p>
                 </div>
               </div>
-              <button onClick={() => navigate('/subscribe')} className="px-6 py-2 bg-white text-yellow-600 font-bold rounded-lg hover:bg-yellow-50 transition">Renew Now</button>
+              <button onClick={() => navigate('/settings')} className="px-6 py-2 bg-white text-yellow-600 font-bold rounded-lg hover:bg-yellow-50 transition">Renew Now</button>
             </div>
           </div>
         </div>

@@ -148,7 +148,7 @@ export default function Settings() {
                     {user?.subscription_end_date && (
                       <div>
                         <p className="text-xs text-gray-600">Expires: {new Date(user.subscription_end_date).toLocaleDateString()}</p>
-                        <button type="button" onClick={() => navigate('/dashboard')} className="text-sm text-purple-600 hover:text-purple-700 font-medium mt-1">Renew Subscription →</button>
+                        <button type="button" onClick={() => window.open('https://paystack.com/pay/habitking', '_blank')} className="text-sm text-purple-600 hover:text-purple-700 font-medium mt-1">Renew Subscription →</button>
                       </div>
                     )}
                   </div>
