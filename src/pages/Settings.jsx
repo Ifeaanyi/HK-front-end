@@ -143,7 +143,15 @@ export default function Settings() {
               <label className="block text-sm font-semibold text-gray-700 mb-2">Subscription</label>
               <div className="flex items-center gap-2">
                 {user?.subscription_tier === 'pro' ? (
-                  <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-purple-600 to-blue-600 text-white">✨ PRO Member</span>
+                  <div className="flex flex-col gap-2">
+                    <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-purple-600 to-blue-600 text-white">✨ PRO Member</span>
+                    {user?.subscription_end_date && (
+                      <div>
+                        <p className="text-xs text-gray-600">Expires: {new Date(user.subscription_end_date).toLocaleDateString()}</p>
+                        <button type="button" onClick={() => navigate('/dashboard')} className="text-sm text-purple-600 hover:text-purple-700 font-medium mt-1">Renew Subscription →</button>
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <>
                     <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700">Free Plan</span>
