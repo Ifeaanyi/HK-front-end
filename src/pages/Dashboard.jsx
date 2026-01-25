@@ -35,7 +35,7 @@ export default function Dashboard() {
     if (user?.subscription_tier === 'pro' && user?.subscription_end_date) {
       const endDate = new Date(user.subscription_end_date);
       const now = new Date();
-      const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
+      const daysLeft = Math.floor((endDate - now) / (1000 * 60 * 60 * 24));
       
       if (daysLeft < 0) {
         setSubscriptionExpired(true);
