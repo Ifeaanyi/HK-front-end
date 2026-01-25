@@ -328,7 +328,7 @@ export default function Dashboard() {
               <button onClick={() => navigate('/leaderboard')} className="px-4 py-2 text-sm font-medium text-gray-700 bg-yellow-400 rounded-lg hover:bg-yellow-500">🏆 Leaderboard</button>
               <button onClick={() => navigate('/todos')} className="px-4 py-2 text-sm font-medium text-white bg-orange-500 rounded-lg hover:bg-orange-600">📋 To-Do</button>
               <button onClick={() => navigate('/friends')} className="px-4 py-2 text-sm font-medium text-white bg-purple-500 rounded-lg hover:bg-purple-600">👥 Friends</button>
-              <button onClick={() => navigate('/settings')} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">⚙️ Settings</button>
+              <button onClick={() => navigate('/subscribe')} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">⚙️ Settings</button>
               <button onClick={() => navigate('/rules')} className="px-4 py-2 text-sm font-medium text-white bg-indigo-500 rounded-lg hover:bg-indigo-600">📖 Rules</button>
               <div className="flex items-center gap-2">
                 <span className="text-gray-700">{user?.full_name || 'Test User'}</span>
@@ -355,7 +355,7 @@ export default function Dashboard() {
                   <p className="text-yellow-100 text-sm">Renew now to keep access to Friends, Groups, and Leaderboards.</p>
                 </div>
               </div>
-              <button onClick={() => navigate('/settings')} className="px-6 py-2 bg-white text-yellow-600 font-bold rounded-lg hover:bg-yellow-50 transition">Renew Now</button>
+              <button onClick={() => navigate('/subscribe')} className="px-6 py-2 bg-white text-yellow-600 font-bold rounded-lg hover:bg-yellow-50 transition">Renew Now</button>
             </div>
           </div>
         </div>
