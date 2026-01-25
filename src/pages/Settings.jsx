@@ -148,7 +148,10 @@ export default function Settings() {
                     {user?.subscription_end_date && (
                       <div>
                         <p className="text-xs text-gray-600">Expires: {new Date(user.subscription_end_date).toLocaleDateString()}</p>
-                        <button type="button" onClick={() => window.open('https://paystack.com/pay/habitking', '_blank')} className="text-sm text-purple-600 hover:text-purple-700 font-medium mt-1">Renew Subscription →</button>
+                        <div className="flex gap-2 mt-2">
+                          <button type="button" onClick={() => window.open('https://paystack.shop/pay/n8x6mqs2vq', '_blank')} className="text-xs px-3 py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700">Monthly ₦4,500</button>
+                          <button type="button" onClick={() => window.open('https://paystack.shop/pay/l10ib7q9q9', '_blank')} className="text-xs px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Yearly ₦33,000</button>
+                        </div>
                       </div>
                     )}
                   </div>
