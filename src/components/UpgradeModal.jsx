@@ -1,39 +1,15 @@
 import { useState } from 'react';
-import axios from 'axios';
-
-const API_URL = 'https://habit-king-production.up.railway.app/api/v1';
 
 export default function UpgradeModal({ isOpen, onClose }) {
   const [loading, setLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
-  const [error, setError] = useState('');
 
-  const getToken = () => localStorage.getItem('token');
-
-  const handleUpgrade = async (plan) => {
-    setLoading(true);
-    setSelectedPlan(plan);
-    setError('');
-
-    try {
-      const response = await axios.post(
-        `${API_URL}/payments/initialize`,
-        { plan: plan },
-        { headers: { Authorization: `Bearer ${getToken()}` } }
-      );
-
-      if (response.data.success && response.data.authorization_url) {
-        window.location.href = response.data.authorization_url;
-      } else {
-        setError('Failed to initialize payment. Please try again.');
-      }
-    } catch (err) {
-      console.error('Payment error:', err);
-      setError(err.response?.data?.detail || 'Payment initialization failed. Please try again.');
-    } finally {
-      setLoading(false);
-      setSelectedPlan(null);
-    }
+  const handleUpgrade = (plan) => {
+    const paymentLinks = {
+      monthly: 'https://paystack.shop/pay/n8x6mqs2vq',
+      yearly: 'https://paystack.shop/pay/l10ib7q9q9'
+    };
+    window.open(paymentLinks[plan], '_blank');
   };
 
   if (!isOpen) return null;
@@ -57,13 +33,6 @@ export default function UpgradeModal({ isOpen, onClose }) {
           </div>
         </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-            {error}
-          </div>
-        )}
-
         {/* Pricing Cards */}
         <div className="p-6">
           <div className="grid md:grid-cols-2 gap-4">
@@ -78,20 +47,9 @@ export default function UpgradeModal({ isOpen, onClose }) {
                 <p className="text-sm text-gray-500 mt-2">Billed monthly</p>
                 <button
                   onClick={() => handleUpgrade('monthly')}
-                  disabled={loading}
-                  className="mt-6 w-full py-3 px-4 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="mt-6 w-full py-3 px-4 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition"
                 >
-                  {loading && selectedPlan === 'monthly' ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      Processing...
-                    </span>
-                  ) : (
-                    'Choose Monthly'
-                  )}
+                  Choose Monthly
                 </button>
               </div>
             </div>
@@ -114,20 +72,9 @@ export default function UpgradeModal({ isOpen, onClose }) {
                 </p>
                 <button
                   onClick={() => handleUpgrade('yearly')}
-                  disabled={loading}
-                  className="mt-6 w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="mt-6 w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition"
                 >
-                  {loading && selectedPlan === 'yearly' ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      Processing...
-                    </span>
-                  ) : (
-                    'Choose Yearly'
-                  )}
+                  Choose Yearly
                 </button>
               </div>
             </div>
