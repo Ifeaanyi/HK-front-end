@@ -3,7 +3,9 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import UpgradeModal from '../components/UpgradeModal';
+
 const API_URL = 'https://habit-king-production.up.railway.app/api/v1';
+
 export default function Dashboard() {
   const [habits, setHabits] = useState([]);
   const [todos, setTodos] = useState([]);
@@ -53,10 +55,13 @@ export default function Dashboard() {
     fetchTodos();
     fetchStreak();
     fetchMonthlyGoals();
-  }, [selectedDate]);
+  }, [selectedDate, currentMonth]);
+
   const getToken = () => localStorage.getItem('token');
+
   const fetchHabits = async () => {
     try {
+      // Get active habits
       const response = await axios.get(API_URL + '/habits', {
         headers: { Authorization: 'Bearer ' + getToken() }
       });
@@ -71,11 +76,42 @@ export default function Dashboard() {
         })
       );
       
-      setHabits(habitsWithLogs);
+      // For historical months, find logs from deleted habits
+      const selectedYear = currentMonth.getFullYear();
+      const selectedMonthNum = String(currentMonth.getMonth() + 1).padStart(2, '0');
+      const monthPrefix = `${selectedYear}-${selectedMonthNum}`;
+      
+      // Collect all logs that have habit_name (from deleted habits)
+      const allLogsWithNames = habitsWithLogs.flatMap(h => h.logs.filter(log => log.habit_name && log.log_date.startsWith(monthPrefix)));
+      
+      // Find habit IDs that are in logs but not in active habits
+      const activeHabitIds = new Set(habitsData.map(h => h.id));
+      const deletedHabitLogs = allLogsWithNames.filter(log => !activeHabitIds.has(log.habit_id));
+      
+      // Group deleted habit logs by habit_id
+      const deletedHabitsMap = new Map();
+      deletedHabitLogs.forEach(log => {
+        if (!deletedHabitsMap.has(log.habit_id)) {
+          deletedHabitsMap.set(log.habit_id, {
+            id: log.habit_id,
+            name: log.habit_name,
+            category: log.habit_category,
+            point_value: 1,
+            created_at: null,
+            deleted_at: new Date().toISOString(),
+            logs: []
+          });
+        }
+        deletedHabitsMap.get(log.habit_id).logs.push(log);
+      });
+      
+      // Merge active and deleted habits
+      setHabits([...habitsWithLogs, ...Array.from(deletedHabitsMap.values())]);
     } catch (error) {
       console.error('Error fetching habits:', error);
     }
   };
+
   const fetchTodos = async () => {
     try {
       const response = await axios.get(API_URL + '/todos', {
@@ -86,6 +122,7 @@ export default function Dashboard() {
       console.error('Error fetching todos:', error);
     }
   };
+
   const fetchStreak = async () => {
     try {
       const response = await axios.get(API_URL + '/streaks', {
@@ -96,6 +133,7 @@ export default function Dashboard() {
       console.error('Error fetching streak:', error);
     }
   };
+
   const fetchMonthlyGoals = async () => {
     try {
       setGoalsLoading(true);
@@ -109,11 +147,13 @@ export default function Dashboard() {
       setGoalsLoading(false);
     }
   };
+
   const createGoal = async () => {
     if (!newGoalText.trim()) {
       alert('Please enter a goal');
       return;
     }
+
     try {
       await axios.post(
         API_URL + '/monthly-goals',
@@ -127,6 +167,7 @@ export default function Dashboard() {
       alert(error.response?.data?.detail || 'Failed to create goal');
     }
   };
+
   const toggleGoal = async (goalId) => {
     try {
       const response = await axios.post(
@@ -145,8 +186,10 @@ export default function Dashboard() {
       alert(error.response?.data?.detail || 'Failed to update goal');
     }
   };
+
   const deleteGoal = async (goalId) => {
     if (!confirm('Delete this goal?')) return;
+
     try {
       await axios.delete(API_URL + '/monthly-goals/' + goalId, {
         headers: { Authorization: 'Bearer ' + getToken() }
@@ -157,15 +200,18 @@ export default function Dashboard() {
       alert(error.response?.data?.detail || 'Failed to delete goal');
     }
   };
+
   const startEditingGoal = (goal) => {
     setEditingGoalId(goal.id);
     setEditingGoalText(goal.goal_text);
   };
+
   const saveEditedGoal = async (goalId) => {
     if (!editingGoalText.trim()) {
       alert('Goal cannot be empty');
       return;
     }
+
     try {
       await axios.put(
         API_URL + '/monthly-goals/' + goalId,
@@ -180,15 +226,18 @@ export default function Dashboard() {
       alert(error.response?.data?.detail || 'Failed to update goal');
     }
   };
+
   const cancelEditing = () => {
     setEditingGoalId(null);
     setEditingGoalText('');
   };
+
   const createHabit = async (category) => {
     if (!newHabitName.trim()) {
       alert('Please enter a habit name');
       return;
     }
+
     try {
       await axios.post(
         API_URL + '/habits',
@@ -206,10 +255,12 @@ export default function Dashboard() {
       alert(error.response?.data?.detail || 'Failed to create habit');
     }
   };
+
   const deleteHabit = async (habitId) => {
     if (!confirm('Delete this habit? This cannot be undone.')) {
       return;
     }
+
     try {
       await axios.delete(API_URL + '/habits/' + habitId, {
         headers: { Authorization: 'Bearer ' + getToken() }
@@ -221,6 +272,7 @@ export default function Dashboard() {
       alert(error.response?.data?.detail || 'Failed to delete habit');
     }
   };
+
   const toggleHabit = async (habitId, date, currentStatus) => {
     const toggleKey = `${habitId}-${date}`;
     if (toggleLoading[toggleKey]) return;
@@ -242,6 +294,7 @@ export default function Dashboard() {
       setToggleLoading(prev => ({ ...prev, [toggleKey]: false }));
     }
   };
+
   const logStudyHours = async (habitId, date, hours) => {
     try {
       await axios.post(
@@ -255,69 +308,91 @@ export default function Dashboard() {
       alert(error.response?.data?.detail || 'Cannot modify past dates');
     }
   };
+
   const getHabitStatus = (habit) => {
     const log = habit.logs?.find(l => l.log_date === selectedDate);
     return log?.completed || false;
   };
+
   const changeMonth = (direction) => {
     const newMonth = new Date(currentMonth);
     newMonth.setMonth(newMonth.getMonth() + direction);
     setCurrentMonth(newMonth);
   };
+
   const getMonthName = () => {
     return currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   };
+
   const getDaysInMonth = () => {
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
     return new Date(year, month + 1, 0).getDate();
   };
+
   const canDeleteHabit = (createdAt) => {
     if (!createdAt) return false;
+
     const createdTime = new Date(createdAt + 'Z');
     const now = new Date();
     const hoursSinceCreation = (now - createdTime) / (1000 * 60 * 60);
+
     const currentDay = now.getDate();
     const isStartOfMonth = currentDay <= 3;
+
     return hoursSinceCreation <= 24 || isStartOfMonth;
   };
+
   const handleDragStart = (e, habit) => {
     setDraggedHabit(habit);
     e.dataTransfer.effectAllowed = 'move';
   };
+
   const handleDragOver = (e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
   };
+
   const handleDrop = (e, targetHabit) => {
     e.preventDefault();
+
     if (!draggedHabit || draggedHabit.id === targetHabit.id) {
       setDraggedHabit(null);
       return;
     }
+
     if (draggedHabit.category !== targetHabit.category) {
       alert('Can only reorder habits within the same section');
       setDraggedHabit(null);
       return;
     }
+
     const categoryHabits = habits.filter(h => h.category === draggedHabit.category);
     const otherHabits = habits.filter(h => h.category !== draggedHabit.category);
+
     const draggedIndex = categoryHabits.findIndex(h => h.id === draggedHabit.id);
     const targetIndex = categoryHabits.findIndex(h => h.id === targetHabit.id);
+
     const reordered = [...categoryHabits];
     const [removed] = reordered.splice(draggedIndex, 1);
     reordered.splice(targetIndex, 0, removed);
+
     setHabits([...otherHabits, ...reordered]);
     setDraggedHabit(null);
   };
+
   const teamHabits = habits.filter(h => h.category === 'Team');
   const personalHabits = habits.filter(h => h.category === 'Personal');
   const studyHabits = habits.filter(h => h.category === 'Study');
+
   const teamCompleted = teamHabits.filter(h => getHabitStatus(h)).length;
   const personalCompleted = personalHabits.filter(h => getHabitStatus(h)).length;
+
   const todayTodos = todos.filter(t => t.task_date === selectedDate);
   const todayTodosCompleted = todayTodos.filter(t => t.completed).length;
+
   const today = new Date().toISOString().split('T')[0];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
       <div className="bg-white shadow-sm border-b">
@@ -384,6 +459,7 @@ export default function Dashboard() {
           <p className="text-blue-100 mt-1">{user?.role_title || 'Tester'} • {user?.timezone || 'Africa/Lagos'}</p>
         </div>
       </div>
+
       {streak && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="bg-white rounded-lg shadow-md p-6 text-center">
@@ -393,6 +469,7 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between mb-4">
@@ -403,6 +480,7 @@ export default function Dashboard() {
             </div>
             {monthlyGoals?.points_awarded && <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-bold">🎉 +15 pts earned!</span>}
           </div>
+
           {monthlyGoals && (
             <div className={monthlyGoals.is_edit_period ? 'mb-4 p-3 rounded-lg text-sm bg-blue-50 text-blue-800 border border-blue-200' : 'mb-4 p-3 rounded-lg text-sm bg-gray-50 text-gray-600 border border-gray-200'}>
               {monthlyGoals.is_edit_period ? (
@@ -412,6 +490,7 @@ export default function Dashboard() {
               )}
             </div>
           )}
+
           {goalsLoading ? (
             <div className="text-center py-8 text-gray-500">Loading goals...</div>
           ) : (
@@ -442,6 +521,7 @@ export default function Dashboard() {
                     )}
                   </div>
                 ))}
+
                 {monthlyGoals && monthlyGoals.total_goals < 5 && Array.from({ length: 5 - monthlyGoals.total_goals }, (_, i) => (
                   <div key={'empty-' + i} className="flex items-center gap-3 p-3 rounded-lg border border-dashed border-gray-300 bg-gray-50">
                     <span className="text-gray-400 font-bold w-6">{monthlyGoals.total_goals + i + 1}.</span>
@@ -450,12 +530,14 @@ export default function Dashboard() {
                   </div>
                 ))}
               </div>
+
               {monthlyGoals?.is_edit_period && monthlyGoals?.total_goals < 5 && (
                 <div className="flex gap-3 mt-4">
                   <input type="text" value={newGoalText} onChange={(e) => setNewGoalText(e.target.value)} placeholder="Enter a new goal for this month..." className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500" maxLength={500} />
                   <button onClick={createGoal} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-sm">+ Add Goal</button>
                 </div>
               )}
+
               <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200 text-sm text-yellow-800">
                 <span className="font-bold">🏆 Bonus:</span> Complete all 5 goals this month to earn <strong>+15 points</strong> on the leaderboard!
               </div>
@@ -463,6 +545,7 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="mb-6">
           <div className="flex justify-between items-center mb-4">
@@ -487,11 +570,13 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
         <div className="mb-6 flex justify-between items-center">
           <button onClick={() => changeMonth(-1)} className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">← Previous Month</button>
           <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" />
           <button onClick={() => changeMonth(1)} className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Next Month →</button>
         </div>
+
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-xl font-bold text-gray-900 mb-4">{getMonthName()}</h3>
           
@@ -499,6 +584,7 @@ export default function Dashboard() {
             <button onClick={() => setShowPersonalForm(!showPersonalForm)} className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">+ Personal Habit ({personalHabits.length}/10)</button>
             <button onClick={() => setShowStudyForm(!showStudyForm)} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">+ Study Skill ({studyHabits.length}/5)</button>
           </div>
+
           {showPersonalForm && (
             <div className="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
               <h4 className="font-semibold mb-3">Add Personal Habit</h4>
@@ -509,6 +595,7 @@ export default function Dashboard() {
               </div>
             </div>
           )}
+
           {showStudyForm && (
             <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
               <h4 className="font-semibold mb-3">Add Study Skill</h4>
@@ -519,6 +606,7 @@ export default function Dashboard() {
               </div>
             </div>
           )}
+
           <div className="w-full overflow-x-auto">
             <table className="w-full border-collapse table-fixed">
               <thead>
@@ -558,6 +646,7 @@ export default function Dashboard() {
                     })}
                   </tr>
                 ))}
+
                 <tr className="bg-yellow-400 text-gray-900">
                   <td colSpan={getDaysInMonth() + 1} className="py-2 px-2 text-center font-bold text-xs">⭐ PERSONAL</td>
                 </tr>
@@ -587,6 +676,7 @@ export default function Dashboard() {
                     })}
                   </tr>
                 ))}
+
                 {studyHabits.length > 0 && (
                   <>
                     <tr className="bg-blue-500 text-white">
@@ -623,6 +713,7 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
       <UpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
     </div>
   );
