@@ -329,6 +329,22 @@ function Leaderboard() {
               >
                 Join Group
               </button>
+              {isGroupCreator && selectedGroup && (
+                <button
+                  onClick={async () => {
+                    if (!confirm('Make everyone in this group friends? This will create accepted friendships between all members.')) return;
+                    try {
+                      const response = await api.post('/groups/' + selectedGroup.id + '/auto-friend-all');
+                      alert('✅ ' + response.data.message + '! Everyone is now friends.');
+                    } catch (error) {
+                      alert('Failed: ' + (error.response?.data?.detail || 'Unknown error'));
+                    }
+                  }}
+                  className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition font-semibold text-sm"
+                >
+                  👥 Auto-Friend All
+                </button>
+              )}
             </div>
           </div>
           {/* Create Group Form */}
