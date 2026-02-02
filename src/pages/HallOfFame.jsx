@@ -229,13 +229,45 @@ function HallOfFame() {
               </div>
             </div>
           ) : (
-            <div className="text-center py-12">
-              <div className="text-8xl mb-4">🌟</div>
-              <h3 className="text-2xl font-bold text-gray-700 mb-3">Your Journey Begins</h3>
-              <p className="text-gray-500 text-lg max-w-md mx-auto">
-                "Every champion was once a contender that refused to give up."
-              </p>
-              <p className="text-yellow-600 font-semibold mt-4">Start your legacy today!</p>
+            <div>
+              {user_stats.best_month ? (
+                <div>
+                  <div className="text-center mb-6">
+                    <div className="text-6xl mb-2">📈</div>
+                    <h3 className="text-2xl font-bold text-gray-700">Your Best Performance</h3>
+                    <p className="text-gray-500">Keep pushing - your crown awaits!</p>
+                  </div>
+                  <div className="grid md:grid-cols-4 gap-4">
+                    <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl p-5 border-2 border-yellow-300">
+                      <div className="text-yellow-600 text-xs font-semibold mb-2">Best Month</div>
+                      <div className="text-2xl font-bold text-yellow-700">
+                        {formatMonth(user_stats.best_month.month)}
+                      </div>
+                    </div>
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-5 border-2 border-blue-300">
+                      <div className="text-blue-600 text-xs font-semibold mb-2">Total Points</div>
+                      <div className="text-4xl font-black text-blue-700">{user_stats.best_month.points}</div>
+                    </div>
+                    <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-5 border-2 border-green-300">
+                      <div className="text-green-600 text-xs font-semibold mb-2">Productivity</div>
+                      <div className="text-4xl font-black text-green-700">{user_stats.best_month.productivity}%</div>
+                    </div>
+                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-5 border-2 border-purple-300">
+                      <div className="text-purple-600 text-xs font-semibold mb-2">Activities</div>
+                      <div className="text-4xl font-black text-purple-700">{user_stats.best_month.total_activities}</div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="text-8xl mb-4">🌟</div>
+                  <h3 className="text-2xl font-bold text-gray-700 mb-3">Your Journey Begins</h3>
+                  <p className="text-gray-500 text-lg max-w-md mx-auto">
+                    "Every champion was once a contender that refused to give up."
+                  </p>
+                  <p className="text-yellow-600 font-semibold mt-4">Start your legacy today!</p>
+                </div>
+              )}
             </div>
           )}
         </div>
