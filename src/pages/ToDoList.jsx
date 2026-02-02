@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
+
 function ToDoList() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -13,20 +14,22 @@ function ToDoList() {
   const [newTaskDate, setNewTaskDate] = useState('');
   const [loading, setLoading] = useState(true);
   const [toggleLoading, setToggleLoading] = useState({});
+
   useEffect(() => {
     fetchTodos();
   }, []);
+
   const fetchTodos = async () => {
     try {
       const response = await api.get('/todos');
       setTodos(response.data.todos || []);
       setLoading(false);
-      console.log('Fetched todos:', response.data.todos);
     } catch (error) {
       console.error('Failed to fetch todos:', error);
       setLoading(false);
     }
   };
+
   const getMonthTodos = () => {
     const year = currentMonth.getFullYear();
     const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
@@ -36,6 +39,7 @@ function ToDoList() {
       return todoMonth === `${year}-${month}`;
     });
   };
+
   const calculateProductivity = () => {
     const monthTodos = getMonthTodos();
     if (monthTodos.length === 0) return 0;
@@ -43,6 +47,7 @@ function ToDoList() {
     const completed = monthTodos.filter(t => t.completed).length;
     return ((completed / monthTodos.length) * 100).toFixed(1);
   };
+
   const getProductivityBonus = () => {
     const productivity = parseFloat(calculateProductivity());
     
@@ -52,13 +57,14 @@ function ToDoList() {
     if (productivity >= 50) return 5;
     return 0;
   };
+
   const getNextLevelInfo = () => {
     const productivity = parseFloat(calculateProductivity());
     const monthTodos = getMonthTodos();
     const completed = monthTodos.filter(t => t.completed).length;
     
     if (productivity >= 85) {
-      return { message: "Maximum bonus reached! 🎉", tasksNeeded: 0 };
+      return { message: "MAXIMUM BONUS ACHIEVED", tasksNeeded: 0 };
     }
     
     let nextThreshold, nextBonus;
@@ -78,10 +84,11 @@ function ToDoList() {
     
     const tasksNeeded = Math.ceil((nextThreshold * monthTodos.length / 100) - completed);
     return {
-      message: `Complete ${tasksNeeded} more task${tasksNeeded > 1 ? 's' : ''} to reach ${nextThreshold}% → +${nextBonus}pts!`,
+      message: `${tasksNeeded} MORE TO ${nextThreshold}% → +${nextBonus}PTS`,
       tasksNeeded
     };
   };
+
   const addTodo = async (e) => {
     e.preventDefault();
     
@@ -95,17 +102,22 @@ function ToDoList() {
       setNewTaskDate('');
       setShowAddForm(false);
       fetchTodos();
-      console.log('Todo created successfully');
       
-      toast.success('Task added', {
+      toast.success('TASK ADDED', {
         duration: 2000,
         icon: '✓',
+        style: {
+          background: '#fff',
+          color: '#000',
+          border: '1px solid #e5e7eb',
+        },
       });
     } catch (error) {
       console.error('Failed to create todo:', error);
-      toast.error('Failed to add task');
+      toast.error('FAILED TO ADD TASK');
     }
   };
+
   const toggleTodo = async (todoId, currentStatus) => {
     if (toggleLoading[todoId]) return;
     
@@ -121,42 +133,45 @@ function ToDoList() {
       setTodos(todos.map(t => 
         t.id === todoId ? { ...t, completed: !currentStatus } : t
       ));
-      console.log('Todo toggled successfully');
       
       setTimeout(() => {
         const newBonus = getProductivityBonus();
         
         if (newBonus > oldBonus && !currentStatus) {
           if (newBonus === 20) {
-            toast.success('🎉 85%+ Productivity! +20 points', {
+            toast.success('85%+ PRODUCTIVITY • +20 POINTS', {
               duration: 4000,
               style: {
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: '#fff',
+                background: '#fff',
+                color: '#000',
+                border: '2px solid #10b981',
               },
             });
           } else if (newBonus === 15) {
-            toast.success('💪 75%+ Productivity! +15 points', {
+            toast.success('75%+ PRODUCTIVITY • +15 POINTS', {
               duration: 3000,
               style: {
-                background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                color: '#fff',
+                background: '#fff',
+                color: '#000',
+                border: '2px solid #3b82f6',
               },
             });
           } else if (newBonus === 10) {
-            toast.success('✨ 65%+ Productivity! +10 points', {
+            toast.success('65%+ PRODUCTIVITY • +10 POINTS', {
               duration: 3000,
               style: {
-                background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-                color: '#fff',
+                background: '#fff',
+                color: '#000',
+                border: '2px solid #f59e0b',
               },
             });
           } else if (newBonus === 5) {
-            toast.success('📈 50%+ Productivity! +5 points', {
+            toast.success('50%+ PRODUCTIVITY • +5 POINTS', {
               duration: 3000,
               style: {
-                background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-                color: '#fff',
+                background: '#fff',
+                color: '#000',
+                border: '2px solid #8b5cf6',
               },
             });
           }
@@ -165,249 +180,264 @@ function ToDoList() {
       
     } catch (error) {
       console.error('Failed to update todo:', error);
-      toast.error('Failed to update task');
+      toast.error('FAILED TO UPDATE');
     } finally {
       setToggleLoading(prev => ({ ...prev, [todoId]: false }));
     }
   };
+
   const deleteTodo = async (todoId) => {
     if (!confirm('Delete this task?')) return;
+    
     try {
       await api.delete(`/todos/${todoId}`);
-      
       setTodos(todos.filter(t => t.id !== todoId));
-      console.log('Todo deleted successfully');
       
-      toast.success('Task deleted', {
+      toast.success('TASK DELETED', {
         duration: 2000,
-        icon: '🗑️',
+        icon: '✓',
+        style: {
+          background: '#fff',
+          color: '#000',
+          border: '1px solid #e5e7eb',
+        },
       });
     } catch (error) {
       console.error('Failed to delete todo:', error);
-      toast.error('Failed to delete task');
+      toast.error('FAILED TO DELETE');
     }
   };
+
   const getTodayString = () => {
     const today = new Date();
     return today.toISOString().split('T')[0];
   };
-  const monthName = currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+  const monthName = currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase();
   const monthTodos = getMonthTodos();
   const productivity = calculateProductivity();
   const bonus = getProductivityBonus();
   const nextLevel = getNextLevelInfo();
   const todayString = getTodayString();
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-xl text-gray-600">Loading...</div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-2 border-gray-900 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-gray-400 text-xs tracking-widest">LOADING</p>
+        </div>
       </div>
     );
   }
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 py-3">
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <nav className="border-b border-gray-200 sticky top-0 z-20 bg-white/80 backdrop-blur-md">
+        <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-800">Habit King 👑</h1>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center">
+                <span className="text-white text-sm">📋</span>
+              </div>
+              <h1 className="text-lg font-bold text-gray-900 tracking-tight">TASKS</h1>
+            </div>
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate('/dashboard')}
-                className="text-blue-600 hover:text-blue-700 font-semibold text-sm"
+                className="text-gray-600 hover:text-gray-900 text-xs font-medium tracking-wide transition-colors"
               >
-                ← Back to Dashboard
+                ← DASHBOARD
               </button>
-              <span className="text-sm text-gray-600">{user?.full_name}</span>
+              <span className="text-xs text-gray-400 tracking-wide">{user?.full_name?.toUpperCase()}</span>
               <button
                 onClick={logout}
-                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition text-sm"
+                className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-all text-xs font-medium tracking-wide"
               >
-                Logout
+                LOGOUT
               </button>
             </div>
           </div>
         </div>
       </nav>
-      <div className="max-w-6xl mx-auto px-4 py-6">
-        <div className="bg-gradient-to-r from-orange-500 to-pink-600 rounded-xl p-6 text-white mb-6">
-          <h2 className="text-2xl font-bold mb-2">📋 {monthName} TO-DO LIST</h2>
-          <p className="text-orange-100">Track your tasks and boost your productivity score!</p>
-        </div>
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600 mb-2">{productivity}%</div>
-              <div className="text-sm text-gray-600">Productivity</div>
-              <div className="text-xs text-gray-500 mt-1">
-                {monthTodos.filter(t => t.completed).length}/{monthTodos.length} complete
-              </div>
-            </div>
-            
-            <div className="text-center">
-              <div className="text-4xl font-bold text-green-600 mb-2">+{bonus}pts</div>
-              <div className="text-sm text-gray-600">Current Bonus</div>
-              <div className="text-xs text-gray-500 mt-1">
-                {bonus === 20 ? 'Maximum!' : bonus === 15 ? 'Great!' : bonus === 10 ? 'Good!' : bonus === 5 ? 'Keep going!' : 'Add tasks!'}
-              </div>
-            </div>
-            
-            <div className="text-center">
-              <div className="text-lg font-semibold text-purple-600 mb-2 leading-tight">
-                {nextLevel.message}
-              </div>
-              <div className="text-xs text-gray-500 mt-2">💪 Next Level Goal</div>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl shadow p-4 mb-5">
-          <div className="flex justify-between items-center">
+
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        
+        {/* Month Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-2">
             <button
               onClick={() => {
                 const newDate = new Date(currentMonth);
                 newDate.setMonth(newDate.getMonth() - 1);
                 setCurrentMonth(newDate);
               }}
-              className="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm"
+              className="w-10 h-10 rounded-full border border-gray-300 hover:border-gray-900 flex items-center justify-center transition-all group"
             >
-              ← Previous Month
+              <span className="text-gray-400 group-hover:text-gray-900 transition-colors">←</span>
             </button>
-            <h3 className="text-lg font-bold">{monthName}</h3>
+            
+            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">{monthName}</h2>
+            
             <button
               onClick={() => {
                 const newDate = new Date(currentMonth);
                 newDate.setMonth(newDate.getMonth() + 1);
                 setCurrentMonth(newDate);
               }}
-              className="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm"
+              className="w-10 h-10 rounded-full border border-gray-300 hover:border-gray-900 flex items-center justify-center transition-all group"
             >
-              Next Month →
+              <span className="text-gray-400 group-hover:text-gray-900 transition-colors">→</span>
             </button>
           </div>
         </div>
-        <div className="mb-5">
+
+        {/* Stats Grid */}
+        <div className="grid md:grid-cols-3 gap-4 mb-8">
+          <div className="border border-gray-200 rounded-2xl p-6 hover:border-gray-900 transition-all">
+            <div className="text-xs text-gray-500 mb-2 tracking-widest">PRODUCTIVITY</div>
+            <div className="text-5xl font-bold text-gray-900 mb-1">{productivity}%</div>
+            <div className="text-xs text-gray-400">
+              {monthTodos.filter(t => t.completed).length} OF {monthTodos.length} COMPLETE
+            </div>
+          </div>
+          
+          <div className="border border-gray-200 rounded-2xl p-6 hover:border-gray-900 transition-all">
+            <div className="text-xs text-gray-500 mb-2 tracking-widest">BONUS</div>
+            <div className="text-5xl font-bold text-gray-900 mb-1">+{bonus}</div>
+            <div className="text-xs text-gray-400">
+              {bonus === 20 ? 'MAXIMUM' : bonus === 15 ? 'EXCELLENT' : bonus === 10 ? 'GOOD' : bonus === 5 ? 'KEEP GOING' : 'START NOW'}
+            </div>
+          </div>
+          
+          <div className="border border-gray-200 rounded-2xl p-6 hover:border-gray-900 transition-all">
+            <div className="text-xs text-gray-500 mb-2 tracking-widest">NEXT LEVEL</div>
+            <div className="text-lg font-bold text-gray-900 mb-1">{nextLevel.message}</div>
+            <div className="text-xs text-gray-400">PUSH HARDER</div>
+          </div>
+        </div>
+
+        {/* Add Task Button */}
+        <div className="mb-6">
           <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="bg-gradient-to-r from-orange-500 to-pink-600 text-white px-6 py-3 rounded-lg font-bold hover:from-orange-600 hover:to-pink-700 transition shadow-lg"
+            className="w-full border-2 border-dashed border-gray-300 hover:border-gray-900 rounded-2xl py-4 text-gray-400 hover:text-gray-900 transition-all font-medium text-sm tracking-wide"
           >
-            {showAddForm ? '✕ Cancel' : '+ Add New Task'}
+            {showAddForm ? '✕ CANCEL' : '+ NEW TASK'}
           </button>
         </div>
+
+        {/* Add Form */}
         {showAddForm && (
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <h3 className="text-lg font-bold mb-4">Add New Task</h3>
+          <div className="border border-gray-200 rounded-2xl p-6 mb-6">
             <form onSubmit={addTodo} className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold mb-2">Task Name</label>
+                <label className="block text-xs text-gray-500 mb-2 tracking-widest">TASK NAME</label>
                 <input
                   type="text"
                   required
                   value={newTaskName}
                   onChange={(e) => setNewTaskName(e.target.value)}
-                  className="w-full px-4 py-2 border rounded-lg text-sm"
-                  placeholder="e.g., Complete DeFy dashboard"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-gray-900 transition-all"
+                  placeholder="Enter task description"
                   maxLength={100}
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-semibold mb-2">Date</label>
+                <label className="block text-xs text-gray-500 mb-2 tracking-widest">DATE</label>
                 <input
                   type="date"
                   required
                   value={newTaskDate}
                   onChange={(e) => setNewTaskDate(e.target.value)}
-                  className="w-full px-4 py-2 border rounded-lg text-sm"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-gray-900 transition-all"
                 />
               </div>
               
               <button
                 type="submit"
-                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 font-semibold"
+                className="w-full bg-gray-900 text-white py-3 rounded-xl hover:bg-gray-800 font-medium text-xs tracking-widest transition-all"
               >
-                Add Task
+                ADD TASK
               </button>
             </form>
           </div>
         )}
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gradient-to-r from-orange-500 to-pink-600 text-white">
-              <tr>
-                <th className="p-4 text-left font-bold">Task</th>
-                <th className="p-4 text-center font-bold w-40">Date</th>
-                <th className="p-4 text-center font-bold w-24">Done</th>
-                <th className="p-4 text-center font-bold w-20">Delete</th>
-              </tr>
-            </thead>
-            <tbody>
-              {monthTodos.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="p-8 text-center text-gray-400 italic">
-                    No tasks for {monthName} yet. Click "Add New Task" to create one!
-                  </td>
-                </tr>
-              ) : (
-                monthTodos
-                  .sort((a, b) => new Date(a.task_date) - new Date(b.task_date))
-                  .map((todo, idx) => {
-                    const isToday = todo.task_date === todayString;
-                    const isLoading = toggleLoading[todo.id];
-                    return (
-                      <tr
-                        key={todo.id}
-                        className={`border-b ${
-                          isToday 
-                            ? 'bg-blue-50' 
-                            : idx % 2 === 0 
-                            ? 'bg-white' 
-                            : 'bg-gray-50'
-                        } ${
-                          todo.completed ? 'opacity-60' : ''
-                        } hover:bg-orange-50 transition`}
-                      >
-                        <td className="p-4">
-                          <div className={`font-semibold ${todo.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>
+
+        {/* Tasks List */}
+        <div className="space-y-2">
+          {monthTodos.length === 0 ? (
+            <div className="border border-dashed border-gray-300 rounded-2xl p-12 text-center">
+              <div className="text-4xl mb-4">📋</div>
+              <p className="text-gray-400 text-sm tracking-wide">NO TASKS FOR {monthName}</p>
+            </div>
+          ) : (
+            monthTodos
+              .sort((a, b) => new Date(a.task_date) - new Date(b.task_date))
+              .map((todo) => {
+                const isToday = todo.task_date === todayString;
+                const isLoading = toggleLoading[todo.id];
+                
+                return (
+                  <div
+                    key={todo.id}
+                    className={`border rounded-2xl p-4 transition-all ${
+                      isToday 
+                        ? 'border-gray-900 bg-gray-50' 
+                        : 'border-gray-200 hover:border-gray-400'
+                    } ${todo.completed ? 'opacity-40' : ''}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4 flex-1">
+                        <button
+                          onClick={() => toggleTodo(todo.id, todo.completed)}
+                          disabled={isLoading}
+                          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                            todo.completed 
+                              ? 'bg-gray-900 border-gray-900' 
+                              : 'border-gray-300 hover:border-gray-900'
+                          }`}
+                        >
+                          {todo.completed && <span className="text-white text-xs">✓</span>}
+                        </button>
+                        
+                        <div className="flex-1">
+                          <div className={`font-medium text-sm ${todo.completed ? 'line-through text-gray-400' : 'text-gray-900'}`}>
                             {todo.task_name}
                           </div>
-                        </td>
-                        <td className="p-4 text-center text-sm text-gray-600">
-                          {new Date(todo.task_date + 'T00:00:00').toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
-                        </td>
-                        <td className="p-4 text-center">
-                          <input
-                            type="checkbox"
-                            checked={todo.completed}
-                            onChange={() => toggleTodo(todo.id, todo.completed)}
-                            disabled={isLoading}
-                            className="w-6 h-6 cursor-pointer accent-green-600"
-                          />
-                        </td>
-                        <td className="p-4 text-center">
-                          <button
-                            onClick={() => deleteTodo(todo.id)}
-                            className="text-red-600 hover:text-red-800 font-bold text-xl transition"
-                            title="Delete task"
-                          >
-                            ✕
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })
-              )}
-            </tbody>
-          </table>
+                          <div className="text-xs text-gray-400 mt-1">
+                            {new Date(todo.task_date + 'T00:00:00').toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric'
+                            }).toUpperCase()}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <button
+                        onClick={() => deleteTodo(todo.id)}
+                        className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-all"
+                        title="Delete"
+                      >
+                        <span className="text-gray-400 hover:text-gray-900">✕</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+          )}
         </div>
+
+        {/* Tip */}
         {monthTodos.length > 0 && (
-          <div className="mt-5 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border-2 border-blue-200">
-            <div className="flex items-center gap-2 text-sm">
+          <div className="mt-8 border border-blue-200 bg-blue-50 rounded-2xl p-4">
+            <div className="flex items-center gap-3">
               <span className="text-2xl">💡</span>
-              <span className="text-gray-700">
-                <strong>TIP:</strong> Check at least 1 task today to maintain your streak! 🔥
+              <span className="text-xs text-gray-600 tracking-wide">
+                CHECK AT LEAST 1 TASK TODAY TO MAINTAIN YOUR STREAK
               </span>
             </div>
           </div>
@@ -416,4 +446,5 @@ function ToDoList() {
     </div>
   );
 }
+
 export default ToDoList;
