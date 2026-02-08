@@ -339,6 +339,11 @@ export default function Dashboard() {
 
     const currentDay = now.getDate();
     const isStartOfMonth = currentDay <= 3;
+    
+    // Grace period: 7 days from account creation
+  const userCreatedAt = new Date(user?.created_at + 'Z');
+  const daysSinceSignup = (now - userCreatedAt) / (1000 * 60 * 60 * 24);
+  const isNewUser = daysSinceSignup < 7;
 
     return hoursSinceCreation <= 24 || isStartOfMonth;
   };
