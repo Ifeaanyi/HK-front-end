@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
+
 function ToDoList() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -13,9 +14,11 @@ function ToDoList() {
   const [newTaskDate, setNewTaskDate] = useState('');
   const [loading, setLoading] = useState(true);
   const [toggleLoading, setToggleLoading] = useState({});
+
   useEffect(() => {
     fetchTodos();
   }, []);
+
   const fetchTodos = async () => {
     try {
       const response = await api.get('/todos');
@@ -27,6 +30,7 @@ function ToDoList() {
       setLoading(false);
     }
   };
+
   const getMonthTodos = () => {
     const year = currentMonth.getFullYear();
     const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
@@ -36,6 +40,7 @@ function ToDoList() {
       return todoMonth === `${year}-${month}`;
     });
   };
+
   const calculateProductivity = () => {
     const monthTodos = getMonthTodos();
     if (monthTodos.length === 0) return 0;
@@ -43,6 +48,7 @@ function ToDoList() {
     const completed = monthTodos.filter(t => t.completed).length;
     return ((completed / monthTodos.length) * 100).toFixed(1);
   };
+
   const getProductivityBonus = () => {
     const productivity = parseFloat(calculateProductivity());
     
@@ -52,6 +58,7 @@ function ToDoList() {
     if (productivity >= 50) return 5;
     return 0;
   };
+
   const getNextLevelInfo = () => {
     const productivity = parseFloat(calculateProductivity());
     const monthTodos = getMonthTodos();
@@ -82,6 +89,7 @@ function ToDoList() {
       tasksNeeded
     };
   };
+
   const addTodo = async (e) => {
     e.preventDefault();
     
@@ -106,6 +114,7 @@ function ToDoList() {
       toast.error('Failed to add task');
     }
   };
+
   const toggleTodo = async (todoId, currentStatus) => {
     if (toggleLoading[todoId]) return;
     
@@ -170,6 +179,7 @@ function ToDoList() {
       setToggleLoading(prev => ({ ...prev, [todoId]: false }));
     }
   };
+
   const deleteTodo = async (todoId) => {
     if (!confirm('Delete this task?')) return;
     try {
@@ -187,16 +197,21 @@ function ToDoList() {
       toast.error('Failed to delete task');
     }
   };
+
   const getTodayString = () => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
+    const userTz = user?.timezone || 'Africa/Lagos';
+    const now = new Date();
+    const userDate = new Date(now.toLocaleString('en-US', { timeZone: userTz }));
+    return userDate.toISOString().split('T')[0];
   };
+
   const monthName = currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   const monthTodos = getMonthTodos();
   const productivity = calculateProductivity();
   const bonus = getProductivityBonus();
   const nextLevel = getNextLevelInfo();
   const todayString = getTodayString();
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -204,6 +219,7 @@ function ToDoList() {
       </div>
     );
   }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm border-b sticky top-0 z-20">
@@ -228,11 +244,13 @@ function ToDoList() {
           </div>
         </div>
       </nav>
+
       <div className="max-w-6xl mx-auto px-4 py-6">
         <div className="bg-gradient-to-r from-orange-500 to-pink-600 rounded-xl p-6 text-white mb-6">
           <h2 className="text-2xl font-bold mb-2">📋 {monthName} TO-DO LIST</h2>
           <p className="text-orange-100">Track your tasks and boost your productivity score!</p>
         </div>
+
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
           <div className="grid md:grid-cols-3 gap-6">
             <div className="text-center">
@@ -259,6 +277,7 @@ function ToDoList() {
             </div>
           </div>
         </div>
+
         <div className="bg-white rounded-xl shadow p-4 mb-5">
           <div className="flex justify-between items-center">
             <button
@@ -284,6 +303,7 @@ function ToDoList() {
             </button>
           </div>
         </div>
+
         <div className="mb-5">
           <button
             onClick={() => setShowAddForm(!showAddForm)}
@@ -292,6 +312,7 @@ function ToDoList() {
             {showAddForm ? '✕ Cancel' : '+ Add New Task'}
           </button>
         </div>
+
         {showAddForm && (
           <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
             <h3 className="text-lg font-bold mb-4">Add New Task</h3>
@@ -329,6 +350,7 @@ function ToDoList() {
             </form>
           </div>
         )}
+
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <table className="w-full">
             <thead className="bg-gradient-to-r from-orange-500 to-pink-600 text-white">
@@ -402,6 +424,7 @@ function ToDoList() {
             </tbody>
           </table>
         </div>
+
         {monthTodos.length > 0 && (
           <div className="mt-5 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border-2 border-blue-200">
             <div className="flex items-center gap-2 text-sm">
@@ -416,4 +439,5 @@ function ToDoList() {
     </div>
   );
 }
+
 export default ToDoList;

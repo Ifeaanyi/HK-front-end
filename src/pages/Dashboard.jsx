@@ -345,7 +345,7 @@ export default function Dashboard() {
   const daysSinceSignup = (now - userCreatedAt) / (1000 * 60 * 60 * 24);
   const isNewUser = daysSinceSignup < 7;
 
-    return hoursSinceCreation <= 24 || isStartOfMonth;
+    return hoursSinceCreation <= 24 || isStartOfMonth || isNewUser;
   };
 
   const handleDragStart = (e, habit) => {
@@ -396,7 +396,13 @@ export default function Dashboard() {
   const todayTodos = todos.filter(t => t.task_date === selectedDate);
   const todayTodosCompleted = todayTodos.filter(t => t.completed).length;
 
-  const today = new Date().toISOString().split('T')[0];
+  const getUserToday = () => {
+  const userTz = user?.timezone || 'Africa/Lagos';
+  const now = new Date();
+  const userDate = new Date(now.toLocaleString('en-US', { timeZone: userTz }));
+  return userDate.toISOString().split('T')[0];
+};
+const today = getUserToday();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
