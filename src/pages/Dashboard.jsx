@@ -92,17 +92,22 @@ export default function Dashboard() {
       const deletedHabitsMap = new Map();
       deletedHabitLogs.forEach(log => {
         if (!deletedHabitsMap.has(log.habit_id)) {
-          deletedHabitsMap.set(log.habit_id, {
-            id: log.habit_id,
-            name: log.habit_name,
-            category: log.habit_category,
-            point_value: 1,
-            created_at: null,
-            deleted_at: new Date().toISOString(),
-            logs: []
-          });
+          const uniqueKey = `${log.habit_id}_${log.habit_name}`;
+if (!deletedHabitsMap.has(uniqueKey)) {
+  deletedHabitsMap.set(uniqueKey, {
+    id: uniqueKey,
+    name: log.habit_name,
+    category: log.habit_category,
+    point_value: 1,
+    created_at: null,
+    deleted_at: new Date().toISOString(),
+    logs: [],
+    is_historical: true
+  });
+}
+deletedHabitsMap.get(uniqueKey).logs.push(log);
         }
-        deletedHabitsMap.get(log.habit_id).logs.push(log);
+        
       });
       
       // Merge active and deleted habits
