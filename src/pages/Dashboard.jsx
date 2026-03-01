@@ -61,57 +61,67 @@ export default function Dashboard() {
 
   const fetchHabits = async () => {
     try {
-      // Get active habits
-      const response = await axios.get(API_URL + '/habits', {
-        headers: { Authorization: 'Bearer ' + getToken() }
-      });
-      const habitsData = response.data.habits;
-      
-      const habitsWithLogs = await Promise.all(
-        habitsData.map(async (habit) => {
-          const logsResponse = await axios.get(API_URL + '/habits/' + habit.id + '/logs', {
-            headers: { Authorization: 'Bearer ' + getToken() }
-          });
-          return { ...habit, logs: logsResponse.data.logs };
-        })
-      );
-      
-      // For historical months, find logs from deleted habits
       const selectedYear = currentMonth.getFullYear();
       const selectedMonthNum = String(currentMonth.getMonth() + 1).padStart(2, '0');
       const monthPrefix = `${selectedYear}-${selectedMonthNum}`;
       
-      // Collect all logs that have habit_name (from deleted habits)
-      const allLogsWithNames = habitsWithLogs.flatMap(h => h.logs.filter(log => log.habit_name && log.log_date.startsWith(monthPrefix)));
+      const userTz = user?.timezone || 'Africa/Lagos';
+      const now = new Date();
+      const userDate = new Date(now.toLocaleString('en-US', { timeZone: userTz }));
+      const currentYear = userDate.getFullYear();
+      const currentMonthNum = String(userDate.getMonth() + 1).padStart(2, '0');
+      const currentMonthPrefix = `${currentYear}-${currentMonthNum}`;
       
-      // Find habit IDs that are in logs but not in active habits
-      const activeHabitIds = new Set(habitsData.map(h => h.id));
-      const deletedHabitLogs = allLogsWithNames.filter(log => !activeHabitIds.has(log.habit_id));
+      const isCurrentMonth = monthPrefix === currentMonthPrefix;
       
-      // Group deleted habit logs by habit_id
-      const deletedHabitsMap = new Map();
-      deletedHabitLogs.forEach(log => {
-        if (!deletedHabitsMap.has(log.habit_id)) {
-          const uniqueKey = `${log.habit_id}_${log.habit_name}`;
-if (!deletedHabitsMap.has(uniqueKey)) {
-  deletedHabitsMap.set(uniqueKey, {
-    id: uniqueKey,
-    name: log.habit_name,
-    category: log.habit_category,
-    point_value: 1,
-    created_at: null,
-    deleted_at: new Date().toISOString(),
-    logs: [],
-    is_historical: true
-  });
-}
-deletedHabitsMap.get(uniqueKey).logs.push(log);
-        }
-        
+      const response = await axios.get(API_URL + '/habits', {
+        headers: { Authorization: 'Bearer ' + getToken() }
+      });
+      const allHabits = response.data.habits;
+      
+      const allLogsPromises = allHabits.map(async (habit) => {
+        const logsResponse = await axios.get(API_URL + '/habits/' + habit.id + '/logs', {
+          headers: { Authorization: 'Bearer ' + getToken() }
+        });
+        return { habitId: habit.id, habitData: habit, logs: logsResponse.data.logs };
       });
       
-      // Merge active and deleted habits
-      setHabits([...habitsWithLogs, ...Array.from(deletedHabitsMap.values())]);
+      const allLogsData = await Promise.all(allLogsPromises);
+      
+      if (isCurrentMonth) {
+        const habitsWithLogs = allLogsData.map(item => ({
+          ...item.habitData,
+          logs: item.logs
+        }));
+        setHabits(habitsWithLogs);
+      } else {
+        const monthLogs = allLogsData.flatMap(item => 
+          item.logs
+            .filter(log => log.log_date.startsWith(monthPrefix))
+            .map(log => ({ ...log, originalHabitId: item.habitId }))
+        );
+        
+        const habitMap = new Map();
+        
+        monthLogs.forEach(log => {
+          const uniqueKey = `${log.habit_id}_${log.habit_name}`;
+          
+          if (!habitMap.has(uniqueKey)) {
+            habitMap.set(uniqueKey, {
+              id: uniqueKey,
+              name: log.habit_name,
+              category: log.habit_category,
+              point_value: 1,
+              created_at: null,
+              logs: []
+            });
+          }
+          
+          habitMap.get(uniqueKey).logs.push(log);
+        });
+        
+        setHabits(Array.from(habitMap.values()));
+      }
     } catch (error) {
       console.error('Error fetching habits:', error);
     }
@@ -158,7 +168,6 @@ deletedHabitsMap.get(uniqueKey).logs.push(log);
       alert('Please enter a goal');
       return;
     }
-
     try {
       await axios.post(
         API_URL + '/monthly-goals',
@@ -194,7 +203,6 @@ deletedHabitsMap.get(uniqueKey).logs.push(log);
 
   const deleteGoal = async (goalId) => {
     if (!confirm('Delete this goal?')) return;
-
     try {
       await axios.delete(API_URL + '/monthly-goals/' + goalId, {
         headers: { Authorization: 'Bearer ' + getToken() }
@@ -216,7 +224,6 @@ deletedHabitsMap.get(uniqueKey).logs.push(log);
       alert('Goal cannot be empty');
       return;
     }
-
     try {
       await axios.put(
         API_URL + '/monthly-goals/' + goalId,
@@ -242,7 +249,6 @@ deletedHabitsMap.get(uniqueKey).logs.push(log);
       alert('Please enter a habit name');
       return;
     }
-
     try {
       await axios.post(
         API_URL + '/habits',
@@ -265,7 +271,6 @@ deletedHabitsMap.get(uniqueKey).logs.push(log);
     if (!confirm('Delete this habit? This cannot be undone.')) {
       return;
     }
-
     try {
       await axios.delete(API_URL + '/habits/' + habitId, {
         headers: { Authorization: 'Bearer ' + getToken() }
@@ -337,19 +342,16 @@ deletedHabitsMap.get(uniqueKey).logs.push(log);
 
   const canDeleteHabit = (createdAt) => {
     if (!createdAt) return false;
-
     const createdTime = new Date(createdAt + 'Z');
     const now = new Date();
     const hoursSinceCreation = (now - createdTime) / (1000 * 60 * 60);
-
     const currentDay = now.getDate();
     const isStartOfMonth = currentDay <= 3;
     
-    // Grace period: 7 days from account creation
-  const userCreatedAt = new Date(user?.created_at + 'Z');
-  const daysSinceSignup = (now - userCreatedAt) / (1000 * 60 * 60 * 24);
-  const isNewUser = daysSinceSignup < 7;
-
+    const userCreatedAt = new Date(user?.created_at + 'Z');
+    const daysSinceSignup = (now - userCreatedAt) / (1000 * 60 * 60 * 24);
+    const isNewUser = daysSinceSignup < 7;
+    
     return hoursSinceCreation <= 24 || isStartOfMonth || isNewUser;
   };
 
@@ -365,28 +367,22 @@ deletedHabitsMap.get(uniqueKey).logs.push(log);
 
   const handleDrop = (e, targetHabit) => {
     e.preventDefault();
-
     if (!draggedHabit || draggedHabit.id === targetHabit.id) {
       setDraggedHabit(null);
       return;
     }
-
     if (draggedHabit.category !== targetHabit.category) {
       alert('Can only reorder habits within the same section');
       setDraggedHabit(null);
       return;
     }
-
     const categoryHabits = habits.filter(h => h.category === draggedHabit.category);
     const otherHabits = habits.filter(h => h.category !== draggedHabit.category);
-
     const draggedIndex = categoryHabits.findIndex(h => h.id === draggedHabit.id);
     const targetIndex = categoryHabits.findIndex(h => h.id === targetHabit.id);
-
     const reordered = [...categoryHabits];
     const [removed] = reordered.splice(draggedIndex, 1);
     reordered.splice(targetIndex, 0, removed);
-
     setHabits([...otherHabits, ...reordered]);
     setDraggedHabit(null);
   };
@@ -394,20 +390,18 @@ deletedHabitsMap.get(uniqueKey).logs.push(log);
   const teamHabits = habits.filter(h => h.category === 'Team');
   const personalHabits = habits.filter(h => h.category === 'Personal');
   const studyHabits = habits.filter(h => h.category === 'Study');
-
   const teamCompleted = teamHabits.filter(h => getHabitStatus(h)).length;
   const personalCompleted = personalHabits.filter(h => getHabitStatus(h)).length;
-
   const todayTodos = todos.filter(t => t.task_date === selectedDate);
   const todayTodosCompleted = todayTodos.filter(t => t.completed).length;
 
   const getUserToday = () => {
-  const userTz = user?.timezone || 'Africa/Lagos';
-  const now = new Date();
-  const userDate = new Date(now.toLocaleString('en-US', { timeZone: userTz }));
-  return userDate.toISOString().split('T')[0];
-};
-const today = getUserToday();
+    const userTz = user?.timezone || 'Africa/Lagos';
+    const now = new Date();
+    const userDate = new Date(now.toLocaleString('en-US', { timeZone: userTz }));
+    return userDate.toISOString().split('T')[0];
+  };
+  const today = getUserToday();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
@@ -496,7 +490,6 @@ const today = getUserToday();
             </div>
             {monthlyGoals?.points_awarded && <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-bold">🎉 +15 pts earned!</span>}
           </div>
-
           {monthlyGoals && (
             <div className={monthlyGoals.is_edit_period ? 'mb-4 p-3 rounded-lg text-sm bg-blue-50 text-blue-800 border border-blue-200' : 'mb-4 p-3 rounded-lg text-sm bg-gray-50 text-gray-600 border border-gray-200'}>
               {monthlyGoals.is_edit_period ? (
@@ -506,7 +499,6 @@ const today = getUserToday();
               )}
             </div>
           )}
-
           {goalsLoading ? (
             <div className="text-center py-8 text-gray-500">Loading goals...</div>
           ) : (
@@ -537,7 +529,6 @@ const today = getUserToday();
                     )}
                   </div>
                 ))}
-
                 {monthlyGoals && monthlyGoals.total_goals < 5 && Array.from({ length: 5 - monthlyGoals.total_goals }, (_, i) => (
                   <div key={'empty-' + i} className="flex items-center gap-3 p-3 rounded-lg border border-dashed border-gray-300 bg-gray-50">
                     <span className="text-gray-400 font-bold w-6">{monthlyGoals.total_goals + i + 1}.</span>
@@ -546,14 +537,12 @@ const today = getUserToday();
                   </div>
                 ))}
               </div>
-
               {monthlyGoals?.is_edit_period && monthlyGoals?.total_goals < 5 && (
                 <div className="flex gap-3 mt-4">
                   <input type="text" value={newGoalText} onChange={(e) => setNewGoalText(e.target.value)} placeholder="Enter a new goal for this month..." className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500" maxLength={500} />
                   <button onClick={createGoal} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-sm">+ Add Goal</button>
                 </div>
               )}
-
               <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200 text-sm text-yellow-800">
                 <span className="font-bold">🏆 Bonus:</span> Complete all 5 goals this month to earn <strong>+15 points</strong> on the leaderboard!
               </div>
