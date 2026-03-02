@@ -231,7 +231,7 @@ export default function Dashboard() {
       await axios.delete(API_URL + '/habits/' + habitId, {
         headers: { Authorization: 'Bearer ' + getToken() }
       });
-      fetchHabits();
+      setHabits(prev => prev.filter(h => h.id !== habitId));
       alert('Habit deleted successfully');
     } catch (error) {
       console.error('Error deleting habit:', error);
