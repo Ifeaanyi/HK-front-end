@@ -61,67 +61,23 @@ export default function Dashboard() {
 
   const fetchHabits = async () => {
     try {
-      const selectedYear = currentMonth.getFullYear();
-      const selectedMonthNum = String(currentMonth.getMonth() + 1).padStart(2, '0');
-      const monthPrefix = `${selectedYear}-${selectedMonthNum}`;
-      
-      const userTz = user?.timezone || 'Africa/Lagos';
-      const now = new Date();
-      const userDate = new Date(now.toLocaleString('en-US', { timeZone: userTz }));
-      const currentYear = userDate.getFullYear();
-      const currentMonthNum = String(userDate.getMonth() + 1).padStart(2, '0');
-      const currentMonthPrefix = `${currentYear}-${currentMonthNum}`;
-      
-      const isCurrentMonth = monthPrefix === currentMonthPrefix;
-      
+      // Get ALL active habits (not deleted)
       const response = await axios.get(API_URL + '/habits', {
         headers: { Authorization: 'Bearer ' + getToken() }
       });
-      const allHabits = response.data.habits;
+      const habitsData = response.data.habits;
       
-      const allLogsPromises = allHabits.map(async (habit) => {
-        const logsResponse = await axios.get(API_URL + '/habits/' + habit.id + '/logs', {
-          headers: { Authorization: 'Bearer ' + getToken() }
-        });
-        return { habitId: habit.id, habitData: habit, logs: logsResponse.data.logs };
-      });
+      // Get logs for ALL habits
+      const habitsWithLogs = await Promise.all(
+        habitsData.map(async (habit) => {
+          const logsResponse = await axios.get(API_URL + '/habits/' + habit.id + '/logs', {
+            headers: { Authorization: 'Bearer ' + getToken() }
+          });
+          return { ...habit, logs: logsResponse.data.logs };
+        })
+      );
       
-      const allLogsData = await Promise.all(allLogsPromises);
-      
-      if (isCurrentMonth) {
-        const habitsWithLogs = allLogsData.map(item => ({
-          ...item.habitData,
-          logs: item.logs
-        }));
-        setHabits(habitsWithLogs);
-      } else {
-        const monthLogs = allLogsData.flatMap(item => 
-          item.logs
-            .filter(log => log.log_date.startsWith(monthPrefix))
-            .map(log => ({ ...log, originalHabitId: item.habitId }))
-        );
-        
-        const habitMap = new Map();
-        
-        monthLogs.forEach(log => {
-          const uniqueKey = `${log.habit_id}_${log.habit_name}`;
-          
-          if (!habitMap.has(uniqueKey)) {
-            habitMap.set(uniqueKey, {
-              id: uniqueKey,
-              name: log.habit_name,
-              category: log.habit_category,
-              point_value: 1,
-              created_at: null,
-              logs: []
-            });
-          }
-          
-          habitMap.get(uniqueKey).logs.push(log);
-        });
-        
-        setHabits(Array.from(habitMap.values()));
-      }
+      setHabits(habitsWithLogs);
     } catch (error) {
       console.error('Error fetching habits:', error);
     }
@@ -405,6 +361,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+      {/* REST OF YOUR JSX - KEEP EVERYTHING THE SAME FROM HERE */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
