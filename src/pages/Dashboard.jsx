@@ -356,7 +356,7 @@ const habitsForMonth = habits.filter(h => {
   const createdDate = h.created_at ? h.created_at.split('T')[0] : '2000-01-01';
   const deletedDate = h.deleted_at ? h.deleted_at.replace('T', ' ').split(' ')[0] : null;
   const wasCreatedBeforeMonthEnd = createdDate <= monthEnd;
-  const wasNotDeletedBeforeMonthStart = !deletedDate || deletedDate > monthStart;
+  const wasNotDeletedBeforeMonthStart = !deletedDate || (deletedDate > monthStart && monthStart < new Date().toISOString().split('T')[0].substring(0, 7) + '-01');
   return wasCreatedBeforeMonthEnd && wasNotDeletedBeforeMonthStart;
 });
 
