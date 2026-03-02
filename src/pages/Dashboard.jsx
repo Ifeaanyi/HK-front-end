@@ -343,9 +343,20 @@ export default function Dashboard() {
     setDraggedHabit(null);
   };
 
-  const teamHabits = habits.filter(h => h.category === 'Team');
-  const personalHabits = habits.filter(h => h.category === 'Personal');
-  const studyHabits = habits.filter(h => h.category === 'Study');
+  const monthStart = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-01`;
+const monthEnd = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(getDaysInMonth()).padStart(2, '0')}`;
+
+const habitsForMonth = habits.filter(h => {
+  const createdDate = h.created_at ? h.created_at.split('T')[0] : '2000-01-01';
+  const deletedDate = h.deleted_at ? h.deleted_at.split('T')[0] : null;
+  const wasCreatedBeforeMonthEnd = createdDate <= monthEnd;
+  const wasNotDeletedBeforeMonthStart = !deletedDate || deletedDate >= monthStart;
+  return wasCreatedBeforeMonthEnd && wasNotDeletedBeforeMonthStart;
+});
+
+const teamHabits = habitsForMonth.filter(h => h.category === 'Team');
+const personalHabits = habitsForMonth.filter(h => h.category === 'Personal');
+const studyHabits = habitsForMonth.filter(h => h.category === 'Study');
   const teamCompleted = teamHabits.filter(h => getHabitStatus(h)).length;
   const personalCompleted = personalHabits.filter(h => getHabitStatus(h)).length;
   const todayTodos = todos.filter(t => t.task_date === selectedDate);
