@@ -298,6 +298,11 @@ export default function Dashboard() {
 
   const canDeleteHabit = (createdAt) => {
     if (!createdAt) return false;
+    
+    const viewingCurrentMonth = currentMonth.getFullYear() === new Date().getFullYear() &&
+      currentMonth.getMonth() === new Date().getMonth();
+    if (!viewingCurrentMonth) return false;
+
     const createdTime = new Date(createdAt + 'Z');
     const now = new Date();
     const hoursSinceCreation = (now - createdTime) / (1000 * 60 * 60);
