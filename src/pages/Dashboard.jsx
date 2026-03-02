@@ -560,9 +560,13 @@ const studyHabits = habitsForMonth.filter(h => h.category === 'Study');
           <h3 className="text-xl font-bold text-gray-900 mb-4">{getMonthName()}</h3>
           
           <div className="mb-6 flex gap-4">
-            <button onClick={() => setShowPersonalForm(!showPersonalForm)} className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">+ Personal Habit ({personalHabits.length}/10)</button>
-            <button onClick={() => setShowStudyForm(!showStudyForm)} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">+ Study Skill ({studyHabits.length}/5)</button>
-          </div>
+    {currentMonth.getFullYear() === new Date().getFullYear() && currentMonth.getMonth() === new Date().getMonth() && (
+      <>
+        <button onClick={() => setShowPersonalForm(!showPersonalForm)} className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">+ Personal Habit ({personalHabits.filter(h => !h.deleted_at).length}/10)</button>
+        <button onClick={() => setShowStudyForm(!showStudyForm)} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">+ Study Skill ({studyHabits.filter(h => !h.deleted_at).length}/5)</button>
+      </>
+    )}
+</div>
 
           {showPersonalForm && (
             <div className="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
