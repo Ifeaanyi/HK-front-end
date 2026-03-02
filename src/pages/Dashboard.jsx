@@ -351,7 +351,7 @@ export default function Dashboard() {
   const monthStart = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-01`;
 const monthEnd = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(getDaysInMonth()).padStart(2, '0')}`;
 
-console.log('HABITS SAMPLE:', habits.map(h => ({ name: h.name, created_at: h.created_at, deleted_at: h.deleted_at })));
+
 const habitsForMonth = habits.filter(h => {
   const createdDate = h.created_at ? h.created_at.split('T')[0] : '2000-01-01';
   const deletedDate = h.deleted_at ? h.deleted_at.replace('T', ' ').split(' ')[0] : null;
