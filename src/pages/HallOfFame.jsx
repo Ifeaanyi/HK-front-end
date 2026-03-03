@@ -378,9 +378,25 @@ function HallOfFame() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-16">
-              <div className="text-8xl mb-6">📜</div>
-              <p className="text-gray-500 text-lg tracking-wide">NO CHAMPIONS YET • BE THE FIRST TO MAKE HISTORY</p>
+            <div className="text-center py-16 relative overflow-hidden">
+              <div className="absolute inset-0 flex items-center justify-center opacity-5">
+                <div className="text-[20rem] font-black text-white">?</div>
+              </div>
+              <div className="relative z-10">
+                <div className="w-24 h-24 mx-auto mb-6 rounded-full border-2 border-dashed border-gray-700 flex items-center justify-center">
+                  <span className="text-5xl">👁️</span>
+                </div>
+                <div className="text-xs font-bold text-gray-600 tracking-[0.4em] mb-3">SYSTEM ALERT</div>
+                <h3 className="text-3xl font-black text-white mb-3 tracking-tight">NO VICTOR DETECTED</h3>
+                <div className="w-16 h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent mx-auto mb-4"></div>
+                <p className="text-gray-500 text-sm tracking-widest max-w-sm mx-auto mb-8">
+                  THE ARENA IS SILENT. NO WARRIOR MET THE CRITERIA THIS CYCLE.
+                </p>
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 border border-gray-700 rounded-full">
+                  <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                  <span className="text-xs text-gray-400 tracking-widest font-bold">AWAITING NEXT CYCLE</span>
+                </div>
+              </div>
             </div>
           )}
         </div>
