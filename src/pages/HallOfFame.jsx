@@ -270,7 +270,7 @@ function HallOfFame() {
             <div className="bg-red-500/10 rounded-xl p-6 border border-red-500/30 hover:border-red-500/50 transition-all group">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-4xl">⚡</span>
-                <span className="text-xs font-bold text-red-400 bg-red-500/20 px-3 py-1 rounded-full">PEAK</span>
+                <span className="text-xs font-bold text-red-400 bg-red-500/20 px-3 py-1 rounded-full">Most Points Ever</span>
               </div>
               <div className="text-2xl font-black text-white mb-2">{records.highest_points.name || 'AWAITING CHAMPION'}</div>
               <div className="text-red-500 text-xl font-bold">
@@ -284,7 +284,7 @@ function HallOfFame() {
             <div className="bg-green-500/10 rounded-xl p-6 border border-green-500/30 hover:border-green-500/50 transition-all group">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-4xl">💯</span>
-                <span className="text-xs font-bold text-green-400 bg-green-500/20 px-3 py-1 rounded-full">PERFECTION</span>
+                <span className="text-xs font-bold text-green-400 bg-green-500/20 px-3 py-1 rounded-full">Highest Productivity %</span>
               </div>
               <div className="text-2xl font-black text-white mb-2">{records.perfect_productivity.name || 'AWAITING CHAMPION'}</div>
               <div className="text-green-500 text-xl font-bold">
@@ -298,7 +298,7 @@ function HallOfFame() {
             <div className="bg-blue-500/10 rounded-xl p-6 border border-blue-500/30 hover:border-blue-500/50 transition-all group">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-4xl">🎯</span>
-                <span className="text-xs font-bold text-blue-400 bg-blue-500/20 px-3 py-1 rounded-full">GRIND</span>
+                <span className="text-xs font-bold text-blue-400 bg-blue-500/20 px-3 py-1 rounded-full">Most Completed To-Dos</span>
               </div>
               <div className="text-2xl font-black text-white mb-2">{records.most_activities.name || 'AWAITING CHAMPION'}</div>
               <div className="text-blue-500 text-xl font-bold">
