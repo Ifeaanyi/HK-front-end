@@ -3,9 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import UpgradeModal from '../components/UpgradeModal';
-
 const API_URL = 'https://habit-king-production.up.railway.app/api/v1';
-
 export default function Dashboard() {
   const [habits, setHabits] = useState([]);
   const [todos, setTodos] = useState([]);
@@ -19,6 +17,8 @@ export default function Dashboard() {
   const [draggedHabit, setDraggedHabit] = useState(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [toggleLoading, setToggleLoading] = useState({});
+  const [shareLoading, setShareLoading] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   
   const [monthlyGoals, setMonthlyGoals] = useState(null);
   const [newGoalText, setNewGoalText] = useState('');
@@ -56,18 +56,14 @@ export default function Dashboard() {
     fetchStreak();
     fetchMonthlyGoals();
   }, [selectedDate, currentMonth]);
-
   const getToken = () => localStorage.getItem('token');
-
   const fetchHabits = async () => {
     try {
-      // Get ALL active habits (not deleted)
       const response = await axios.get(API_URL + '/habits', {
         headers: { Authorization: 'Bearer ' + getToken() }
       });
       const habitsData = response.data.habits;
       
-      // Get logs for ALL habits
       const habitsWithLogs = await Promise.all(
         habitsData.map(async (habit) => {
           const logsResponse = await axios.get(API_URL + '/habits/' + habit.id + '/logs', {
@@ -82,7 +78,6 @@ export default function Dashboard() {
       console.error('Error fetching habits:', error);
     }
   };
-
   const fetchTodos = async () => {
     try {
       const response = await axios.get(API_URL + '/todos', {
@@ -93,7 +88,6 @@ export default function Dashboard() {
       console.error('Error fetching todos:', error);
     }
   };
-
   const fetchStreak = async () => {
     try {
       const response = await axios.get(API_URL + '/streaks', {
@@ -104,7 +98,6 @@ export default function Dashboard() {
       console.error('Error fetching streak:', error);
     }
   };
-
   const fetchMonthlyGoals = async () => {
     try {
       setGoalsLoading(true);
@@ -118,7 +111,6 @@ export default function Dashboard() {
       setGoalsLoading(false);
     }
   };
-
   const createGoal = async () => {
     if (!newGoalText.trim()) {
       alert('Please enter a goal');
@@ -137,7 +129,6 @@ export default function Dashboard() {
       alert(error.response?.data?.detail || 'Failed to create goal');
     }
   };
-
   const toggleGoal = async (goalId) => {
     try {
       const response = await axios.post(
@@ -156,7 +147,6 @@ export default function Dashboard() {
       alert(error.response?.data?.detail || 'Failed to update goal');
     }
   };
-
   const deleteGoal = async (goalId) => {
     if (!confirm('Delete this goal?')) return;
     try {
@@ -169,12 +159,10 @@ export default function Dashboard() {
       alert(error.response?.data?.detail || 'Failed to delete goal');
     }
   };
-
   const startEditingGoal = (goal) => {
     setEditingGoalId(goal.id);
     setEditingGoalText(goal.goal_text);
   };
-
   const saveEditedGoal = async (goalId) => {
     if (!editingGoalText.trim()) {
       alert('Goal cannot be empty');
@@ -194,12 +182,10 @@ export default function Dashboard() {
       alert(error.response?.data?.detail || 'Failed to update goal');
     }
   };
-
   const cancelEditing = () => {
     setEditingGoalId(null);
     setEditingGoalText('');
   };
-
   const createHabit = async (category) => {
     if (!newHabitName.trim()) {
       alert('Please enter a habit name');
@@ -222,7 +208,6 @@ export default function Dashboard() {
       alert(error.response?.data?.detail || 'Failed to create habit');
     }
   };
-
   const deleteHabit = async (habitId) => {
     if (!confirm('Delete this habit? This cannot be undone.')) {
       return;
@@ -238,7 +223,6 @@ export default function Dashboard() {
       alert(error.response?.data?.detail || 'Failed to delete habit');
     }
   };
-
   const toggleHabit = async (habitId, date, currentStatus) => {
     const toggleKey = `${habitId}-${date}`;
     if (toggleLoading[toggleKey]) return;
@@ -260,7 +244,6 @@ export default function Dashboard() {
       setToggleLoading(prev => ({ ...prev, [toggleKey]: false }));
     }
   };
-
   const logStudyHours = async (habitId, date, hours) => {
     try {
       await axios.post(
@@ -274,58 +257,46 @@ export default function Dashboard() {
       alert(error.response?.data?.detail || 'Cannot modify past dates');
     }
   };
-
   const getHabitStatus = (habit) => {
     const log = habit.logs?.find(l => l.log_date === selectedDate);
     return log?.completed || false;
   };
-
   const changeMonth = (direction) => {
     const newMonth = new Date(currentMonth);
     newMonth.setMonth(newMonth.getMonth() + direction);
     setCurrentMonth(newMonth);
   };
-
   const getMonthName = () => {
     return currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   };
-
   const getDaysInMonth = () => {
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
     return new Date(year, month + 1, 0).getDate();
   };
-
   const canDeleteHabit = (createdAt) => {
     if (!createdAt) return false;
-    
     const viewingCurrentMonth = currentMonth.getFullYear() === new Date().getFullYear() &&
       currentMonth.getMonth() === new Date().getMonth();
     if (!viewingCurrentMonth) return false;
-
     const createdTime = new Date(createdAt + 'Z');
     const now = new Date();
     const hoursSinceCreation = (now - createdTime) / (1000 * 60 * 60);
     const currentDay = now.getDate();
     const isStartOfMonth = currentDay <= 3;
-    
     const userCreatedAt = new Date(user?.created_at + 'Z');
     const daysSinceSignup = (now - userCreatedAt) / (1000 * 60 * 60 * 24);
     const isNewUser = daysSinceSignup < 7;
-    
     return hoursSinceCreation <= 24 || isStartOfMonth || isNewUser;
   };
-
   const handleDragStart = (e, habit) => {
     setDraggedHabit(habit);
     e.dataTransfer.effectAllowed = 'move';
   };
-
   const handleDragOver = (e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
   };
-
   const handleDrop = (e, targetHabit) => {
     e.preventDefault();
     if (!draggedHabit || draggedHabit.id === targetHabit.id) {
@@ -347,27 +318,48 @@ export default function Dashboard() {
     setHabits([...otherHabits, ...reordered]);
     setDraggedHabit(null);
   };
-
+  const shareStats = async () => {
+    setShareLoading(true);
+    try {
+      const response = await axios.get(API_URL + '/stats/share-card', {
+        headers: { Authorization: 'Bearer ' + getToken() }
+      });
+      const s = response.data;
+      const rank = s.user_rank ? `#${s.user_rank} of ${s.total_members}` : null;
+      const text =
+`👑 HABIT KING — ${s.month.toUpperCase()}
+━━━━━━━━━━━━━━━━━━━━
+👤 ${s.user_name} | ${user?.role_title || ''}
+📊 Points:       ${s.total_points}
+✅ Productivity: ${s.todo_productivity}%
+🔥 Streak:       ${streak?.current_streak || 0} days${rank ? `\n🏅 Rank:         ${rank}` : ''}
+━━━━━━━━━━━━━━━━━━━━
+habitking.io`;
+      await navigator.clipboard.writeText(text);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 3000);
+    } catch (error) {
+      alert('Failed to load stats');
+    } finally {
+      setShareLoading(false);
+    }
+  };
   const monthStart = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-01`;
-const monthEnd = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(getDaysInMonth()).padStart(2, '0')}`;
-
-
-const habitsForMonth = habits.filter(h => {
-  const createdDate = h.created_at ? h.created_at.split('T')[0] : '2000-01-01';
-  const deletedDate = h.deleted_at ? h.deleted_at.replace('T', ' ').split(' ')[0] : null;
-  const wasCreatedBeforeMonthEnd = createdDate <= monthEnd;
-  const wasNotDeletedBeforeMonthStart = !deletedDate || (deletedDate > monthStart && monthStart < new Date().toISOString().split('T')[0].substring(0, 7) + '-01');
-  return wasCreatedBeforeMonthEnd && wasNotDeletedBeforeMonthStart;
-});
-
-const teamHabits = habitsForMonth.filter(h => h.category === 'Team');
-const personalHabits = habitsForMonth.filter(h => h.category === 'Personal');
-const studyHabits = habitsForMonth.filter(h => h.category === 'Study');
+  const monthEnd = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(getDaysInMonth()).padStart(2, '0')}`;
+  const habitsForMonth = habits.filter(h => {
+    const createdDate = h.created_at ? h.created_at.split('T')[0] : '2000-01-01';
+    const deletedDate = h.deleted_at ? h.deleted_at.replace('T', ' ').split(' ')[0] : null;
+    const wasCreatedBeforeMonthEnd = createdDate <= monthEnd;
+    const wasNotDeletedBeforeMonthStart = !deletedDate || (deletedDate > monthStart && monthStart < new Date().toISOString().split('T')[0].substring(0, 7) + '-01');
+    return wasCreatedBeforeMonthEnd && wasNotDeletedBeforeMonthStart;
+  });
+  const teamHabits = habitsForMonth.filter(h => h.category === 'Team');
+  const personalHabits = habitsForMonth.filter(h => h.category === 'Personal');
+  const studyHabits = habitsForMonth.filter(h => h.category === 'Study');
   const teamCompleted = teamHabits.filter(h => getHabitStatus(h)).length;
   const personalCompleted = personalHabits.filter(h => getHabitStatus(h)).length;
   const todayTodos = todos.filter(t => t.task_date === selectedDate);
   const todayTodosCompleted = todayTodos.filter(t => t.completed).length;
-
   const getUserToday = () => {
     const userTz = user?.timezone || 'Africa/Lagos';
     const now = new Date();
@@ -375,10 +367,8 @@ const studyHabits = habitsForMonth.filter(h => h.category === 'Study');
     return userDate.toISOString().split('T')[0];
   };
   const today = getUserToday();
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
-      {/* REST OF YOUR JSX - KEEP EVERYTHING THE SAME FROM HERE */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
@@ -389,6 +379,17 @@ const studyHabits = habitsForMonth.filter(h => h.category === 'Study');
               <button onClick={() => navigate('/friends')} className="px-4 py-2 text-sm font-medium text-white bg-purple-500 rounded-lg hover:bg-purple-600">👥 Friends</button>
               <button onClick={() => navigate('/settings')} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">⚙️ Settings</button>
               <button onClick={() => navigate('/rules')} className="px-4 py-2 text-sm font-medium text-white bg-indigo-500 rounded-lg hover:bg-indigo-600">📖 Rules</button>
+              <button
+                onClick={shareStats}
+                disabled={shareLoading}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 ${
+                  shareCopied
+                    ? 'bg-green-500 text-white scale-105'
+                    : 'bg-black text-yellow-400 border border-yellow-500 hover:bg-yellow-500 hover:text-black'
+                }`}
+              >
+                {shareLoading ? '⏳' : shareCopied ? '✅ Copied!' : '📤 Share Stats'}
+              </button>
               <div className="flex items-center gap-2">
                 <span className="text-gray-700">{user?.full_name || 'Test User'}</span>
                 {user?.subscription_tier === 'pro' ? (
@@ -402,7 +403,6 @@ const studyHabits = habitsForMonth.filter(h => h.category === 'Study');
           </div>
         </div>
       </div>
-      
       {showExpiryWarning && (
         <div className="bg-yellow-500 border-b-4 border-yellow-600">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
@@ -419,7 +419,6 @@ const studyHabits = habitsForMonth.filter(h => h.category === 'Study');
           </div>
         </div>
       )}
-      
       {subscriptionExpired && (
         <div className="bg-red-500 border-b-4 border-red-600">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
@@ -436,14 +435,12 @@ const studyHabits = habitsForMonth.filter(h => h.category === 'Study');
           </div>
         </div>
       )}
-      
       <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <h2 className="text-3xl font-bold">Welcome back, {user?.full_name || 'Test User'}! 👋</h2>
           <p className="text-blue-100 mt-1">{user?.role_title || 'Tester'} • {user?.timezone || 'Africa/Lagos'}</p>
         </div>
       </div>
-
       {streak && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="bg-white rounded-lg shadow-md p-6 text-center">
@@ -453,7 +450,6 @@ const studyHabits = habitsForMonth.filter(h => h.category === 'Study');
           </div>
         </div>
       )}
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between mb-4">
@@ -524,7 +520,6 @@ const studyHabits = habitsForMonth.filter(h => h.category === 'Study');
           )}
         </div>
       </div>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="mb-6">
           <div className="flex justify-between items-center mb-4">
@@ -549,25 +544,21 @@ const studyHabits = habitsForMonth.filter(h => h.category === 'Study');
             </div>
           </div>
         </div>
-
         <div className="mb-6 flex justify-between items-center">
           <button onClick={() => changeMonth(-1)} className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">← Previous Month</button>
           <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" />
           <button onClick={() => changeMonth(1)} className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Next Month →</button>
         </div>
-
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-xl font-bold text-gray-900 mb-4">{getMonthName()}</h3>
-          
           <div className="mb-6 flex gap-4">
-    {currentMonth.getFullYear() === new Date().getFullYear() && currentMonth.getMonth() === new Date().getMonth() && (
-      <>
-        <button onClick={() => setShowPersonalForm(!showPersonalForm)} className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">+ Personal Habit ({personalHabits.filter(h => !h.deleted_at).length}/10)</button>
-        <button onClick={() => setShowStudyForm(!showStudyForm)} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">+ Study Skill ({studyHabits.filter(h => !h.deleted_at).length}/5)</button>
-      </>
-    )}
-</div>
-
+            {currentMonth.getFullYear() === new Date().getFullYear() && currentMonth.getMonth() === new Date().getMonth() && (
+              <>
+                <button onClick={() => setShowPersonalForm(!showPersonalForm)} className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">+ Personal Habit ({personalHabits.filter(h => !h.deleted_at).length}/10)</button>
+                <button onClick={() => setShowStudyForm(!showStudyForm)} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">+ Study Skill ({studyHabits.filter(h => !h.deleted_at).length}/5)</button>
+              </>
+            )}
+          </div>
           {showPersonalForm && (
             <div className="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
               <h4 className="font-semibold mb-3">Add Personal Habit</h4>
@@ -578,7 +569,6 @@ const studyHabits = habitsForMonth.filter(h => h.category === 'Study');
               </div>
             </div>
           )}
-
           {showStudyForm && (
             <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
               <h4 className="font-semibold mb-3">Add Study Skill</h4>
@@ -589,7 +579,6 @@ const studyHabits = habitsForMonth.filter(h => h.category === 'Study');
               </div>
             </div>
           )}
-
           <div className="w-full overflow-x-auto">
             <table className="w-full border-collapse table-fixed">
               <thead>
@@ -629,7 +618,6 @@ const studyHabits = habitsForMonth.filter(h => h.category === 'Study');
                     })}
                   </tr>
                 ))}
-
                 <tr className="bg-yellow-400 text-gray-900">
                   <td colSpan={getDaysInMonth() + 1} className="py-2 px-2 text-center font-bold text-xs">⭐ PERSONAL</td>
                 </tr>
@@ -659,7 +647,6 @@ const studyHabits = habitsForMonth.filter(h => h.category === 'Study');
                     })}
                   </tr>
                 ))}
-
                 {studyHabits.length > 0 && (
                   <>
                     <tr className="bg-blue-500 text-white">
@@ -696,7 +683,6 @@ const studyHabits = habitsForMonth.filter(h => h.category === 'Study');
           </div>
         </div>
       </div>
-
       <UpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
     </div>
   );
