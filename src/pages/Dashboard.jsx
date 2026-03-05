@@ -297,7 +297,7 @@ export default function Dashboard() {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
   };
-  const handleDrop = (e, targetHabit) => {
+  const handleDrop = async (e, targetHabit) => {
     e.preventDefault();
     if (!draggedHabit || draggedHabit.id === targetHabit.id) {
       setDraggedHabit(null);
@@ -317,6 +317,17 @@ export default function Dashboard() {
     reordered.splice(targetIndex, 0, removed);
     setHabits([...otherHabits, ...reordered]);
     setDraggedHabit(null);
+
+    const habitIds = reordered.map(h => h.id);
+    try {
+      await axios.post(
+        API_URL + '/habits/reorder',
+        habitIds,
+        { headers: { Authorization: 'Bearer ' + getToken() } }
+      );
+    } catch (error) {
+      console.error('Error saving habit order:', error);
+    }
   };
   const shareStats = async () => {
     setShareLoading(true);
