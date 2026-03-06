@@ -14,14 +14,11 @@ function Login() {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     try {
       await login(email, password);
       navigate('/dashboard');
     } catch (err) {
       console.error('Login error:', err);
-      
-      // Handle different error formats
       if (err.response?.data?.detail) {
         if (typeof err.response.data.detail === 'string') {
           setError(err.response.data.detail);
@@ -39,22 +36,23 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+    <div style={{ backgroundColor: '#0A0F1E' }} className="min-h-screen flex items-center justify-center p-4">
+      <div style={{ backgroundColor: '#111827', borderColor: '#1E2A3A' }} className="rounded-2xl border p-8 w-full max-w-md">
+        
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Habit King 👑</h1>
-          <p className="text-gray-600">Welcome back! Log in to continue</p>
+          <img src="/logo.png" alt="Habit King" className="h-24 w-auto mx-auto mb-4" />
+          <p style={{ color: '#8A9BB0' }} className="text-sm">Welcome back. Log in to continue.</p>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
+          <div style={{ backgroundColor: '#1A0F0F', borderColor: '#4A1A1A', color: '#E07070' }} className="border px-4 py-3 rounded-lg mb-4 text-sm">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label style={{ color: '#8A9BB0' }} className="block text-xs font-medium mb-2 uppercase tracking-wider">
               Email
             </label>
             <input
@@ -62,13 +60,14 @@ function Login() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="john@example.com"
+              style={{ backgroundColor: '#0A0F1E', borderColor: '#1E2A3A', color: '#F5F0E8' }}
+              className="w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:border-yellow-600 transition"
+              placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label style={{ color: '#8A9BB0' }} className="block text-xs font-medium mb-2 uppercase tracking-wider">
               Password
             </label>
             <input
@@ -76,7 +75,8 @@ function Login() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              style={{ backgroundColor: '#0A0F1E', borderColor: '#1E2A3A', color: '#F5F0E8' }}
+              className="w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:border-yellow-600 transition"
               placeholder="••••••••"
             />
           </div>
@@ -84,18 +84,26 @@ function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ backgroundColor: '#C9A84C', color: '#0A0F1E' }}
+            className="w-full py-3 rounded-lg font-semibold text-sm tracking-wide hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed mt-2"
           >
             {loading ? 'Logging in...' : 'Log In'}
           </button>
         </form>
 
-        <p className="text-center mt-6 text-sm text-gray-600">
+        <p style={{ color: '#8A9BB0' }} className="text-center mt-6 text-sm">
           Don't have an account?{' '}
-          <Link to="/register" className="text-blue-600 hover:text-blue-700 font-semibold">
+          <Link to="/register" style={{ color: '#C9A84C' }} className="font-semibold hover:opacity-80 transition">
             Sign up
           </Link>
         </p>
+
+        <p className="text-center mt-3 text-sm">
+          <Link to="/forgot-password" style={{ color: '#8A9BB0' }} className="hover:opacity-80 transition">
+            Forgot password?
+          </Link>
+        </p>
+
       </div>
     </div>
   );
