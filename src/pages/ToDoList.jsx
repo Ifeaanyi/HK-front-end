@@ -19,8 +19,8 @@ const S = {
   greenDim: '#1A4A2A',
   greenBorder: '#00C853',
   red: '#FF5252',
-  blue: '#0D47A1',
-  blueHeader: '#1565C0',
+  blue: '#0A2E52',
+  blueHeader: '#0F3D6E',
   blueLight: '#42A5F5',
 };
 
