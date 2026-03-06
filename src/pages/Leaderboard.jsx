@@ -193,7 +193,7 @@ function Leaderboard() {
         {selectedGroup && dailyStats && isCurrentMonth() && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             {[
-              { label "Today's Leader", value: dailyStats.todays_leader?.full_name, sub: dailyStats.todays_leader?.total_points + ' points' },
+              { label: "Today's Leader", value: dailyStats.todays_leader?.full_name, sub: dailyStats.todays_leader?.total_points + ' points' },
               { label: 'Most Productive', value: dailyStats.most_productive_today?.full_name, sub: dailyStats.most_productive_today?.todo_productivity + '% productivity' },
             ].map(({ label, value, sub }) => (
               <div key={label} style={{ backgroundColor: S.surface, border: `1px solid ${S.border}` }} className="rounded-xl p-4">
