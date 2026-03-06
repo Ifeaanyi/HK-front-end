@@ -35,26 +35,21 @@ function Register() {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     try {
-      // Register user
-      const response = await api.post('/auth/register', formData);
-      
-      // Auto-login after registration
+      await api.post('/auth/register', formData);
+
       const loginFormData = new FormData();
       loginFormData.append('username', formData.email);
       loginFormData.append('password', formData.password);
-      
+
       const loginResponse = await api.post('/auth/login', loginFormData, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       });
-      
+
       localStorage.setItem('token', loginResponse.data.access_token);
       navigate('/dashboard');
-      
     } catch (err) {
       console.error('Registration error:', err);
-      
       if (err.response?.data?.detail) {
         if (typeof err.response.data.detail === 'string') {
           setError(err.response.data.detail);
@@ -74,29 +69,27 @@ function Register() {
   };
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+    <div style={{ backgroundColor: '#0A0F1E' }} className="min-h-screen flex items-center justify-center p-4">
+      <div style={{ backgroundColor: '#111827', borderColor: '#1E2A3A' }} className="rounded-2xl border p-8 w-full max-w-md">
+
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Habit King 👑</h1>
-          <p className="text-gray-600">Create your account and start building habits</p>
+          <img src="/logo.png" alt="Habit King" className="h-24 w-auto mx-auto mb-4" />
+          <p style={{ color: '#8A9BB0' }} className="text-sm">Create your account and start building habits.</p>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
+          <div style={{ backgroundColor: '#1A0F0F', borderColor: '#4A1A1A', color: '#E07070' }} className="border px-4 py-3 rounded-lg mb-4 text-sm">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label style={{ color: '#8A9BB0' }} className="block text-xs font-medium mb-2 uppercase tracking-wider">
               Full Name
             </label>
             <input
@@ -105,13 +98,14 @@ function Register() {
               required
               value={formData.full_name}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              style={{ backgroundColor: '#0A0F1E', borderColor: '#1E2A3A', color: '#F5F0E8' }}
+              className="w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:border-yellow-600 transition"
               placeholder="John Doe"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label style={{ color: '#8A9BB0' }} className="block text-xs font-medium mb-2 uppercase tracking-wider">
               Email
             </label>
             <input
@@ -120,14 +114,15 @@ function Register() {
               required
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="john@example.com"
+              style={{ backgroundColor: '#0A0F1E', borderColor: '#1E2A3A', color: '#F5F0E8' }}
+              className="w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:border-yellow-600 transition"
+              placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Role/Title
+            <label style={{ color: '#8A9BB0' }} className="block text-xs font-medium mb-2 uppercase tracking-wider">
+              Role / Title
             </label>
             <input
               type="text"
@@ -135,32 +130,32 @@ function Register() {
               required
               value={formData.role_title}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              style={{ backgroundColor: '#0A0F1E', borderColor: '#1E2A3A', color: '#F5F0E8' }}
+              className="w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:border-yellow-600 transition"
               placeholder="Data Scientist"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Country/Timezone
+            <label style={{ color: '#8A9BB0' }} className="block text-xs font-medium mb-2 uppercase tracking-wider">
+              Timezone
             </label>
             <select
               name="timezone"
               required
               value={formData.timezone}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              style={{ backgroundColor: '#0A0F1E', borderColor: '#1E2A3A', color: '#F5F0E8' }}
+              className="w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:border-yellow-600 transition"
             >
               {timezones.map(tz => (
-                <option key={tz} value={tz}>
-                  {tz.replace('_', ' ')}
-                </option>
+                <option key={tz} value={tz}>{tz.replace('_', ' ')}</option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label style={{ color: '#8A9BB0' }} className="block text-xs font-medium mb-2 uppercase tracking-wider">
               Password
             </label>
             <input
@@ -170,7 +165,8 @@ function Register() {
               minLength={6}
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              style={{ backgroundColor: '#0A0F1E', borderColor: '#1E2A3A', color: '#F5F0E8' }}
+              className="w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:border-yellow-600 transition"
               placeholder="••••••••"
             />
           </div>
@@ -178,18 +174,20 @@ function Register() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ backgroundColor: '#C9A84C', color: '#0A0F1E' }}
+            className="w-full py-3 rounded-lg font-semibold text-sm tracking-wide hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed mt-2"
           >
             {loading ? 'Creating account...' : 'Sign Up'}
           </button>
         </form>
 
-        <p className="text-center mt-6 text-sm text-gray-600">
+        <p style={{ color: '#8A9BB0' }} className="text-center mt-6 text-sm">
           Already have an account?{' '}
-          <Link to="/login" className="text-blue-600 hover:text-blue-700 font-semibold">
+          <Link to="/login" style={{ color: '#C9A84C' }} className="font-semibold hover:opacity-80 transition">
             Log in
           </Link>
         </p>
+
       </div>
     </div>
   );
