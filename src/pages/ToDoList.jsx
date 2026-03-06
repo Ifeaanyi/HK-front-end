@@ -260,10 +260,10 @@ function ToDoList() {
           <table className="w-full">
             <thead>
               <tr style={{ backgroundColor: S.blue, borderBottom: `1px solid ${S.border}` }}>
-                <th style={{ color: S.muted }} className="p-4 text-left text-xs uppercase tracking-wider">Task</th>
-                <th style={{ color: S.muted }} className="p-4 text-center text-xs uppercase tracking-wider w-40">Date <span style={{ color: S.border }} className="text-xs normal-case">(double-click to edit)</span></th>
-                <th style={{ color: S.muted }} className="p-4 text-center text-xs uppercase tracking-wider w-24">Done</th>
-                <th style={{ color: S.muted }} className="p-4 text-center text-xs uppercase tracking-wider w-20">Del</th>
+                <th style={{ color: S.text }} className="p-4 text-left text-xs uppercase tracking-wider font-bold">Task</th>
+                <th style={{ color: S.text }} className="p-4 text-center text-xs uppercase tracking-wider font-bold w-40">Date <span style={{ color: S.muted }} className="text-xs normal-case font-normal">(double-click)</span></th>
+                <th style={{ color: S.text }} className="p-4 text-center text-xs uppercase tracking-wider font-bold w-24">Done</th>
+                <th style={{ color: S.text }} className="p-4 text-center text-xs uppercase tracking-wider font-bold w-20">Del</th>
               </tr>
             </thead>
             <tbody>
@@ -288,7 +288,7 @@ function ToDoList() {
                           opacity: todo.completed ? 0.6 : 1
                         }}>
                         <td className="p-4">
-                          <span style={{ color: todo.completed ? S.muted : S.text }}
+                          <span style={{ color: todo.completed ? '#4A6A8A' : S.text, textDecorationColor: S.border }}
                             className={`text-sm font-medium ${todo.completed ? 'line-through' : ''}`}>
                             {todo.task_name}
                           </span>
