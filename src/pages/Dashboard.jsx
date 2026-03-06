@@ -432,11 +432,11 @@ habitking.io`;
       {/* HABIT TABLE */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex justify-between items-center mb-4">
-          <button onClick={() => changeMonth(-1)} style={{ backgroundColor: S.surface, border: `1px solid ${S.border}`, color: S.muted }} className="px-4 py-2 rounded-lg text-sm hover:border-yellow-600 transition">← Prev</button>
+          <button onClick={() => changeMonth(-1)} style={{ backgroundColor: S.gold, color: S.bg }} className="px-5 py-2 rounded-lg text-sm font-bold hover:opacity-90 transition">← Prev Month</button>
           <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)}
             style={{ backgroundColor: S.surface, border: `1px solid ${S.border}`, color: S.text }}
             className="px-4 py-2 rounded-lg text-sm focus:outline-none focus:border-yellow-600" />
-          <button onClick={() => changeMonth(1)} style={{ backgroundColor: S.surface, border: `1px solid ${S.border}`, color: S.muted }} className="px-4 py-2 rounded-lg text-sm hover:border-yellow-600 transition">Next →</button>
+          <button onClick={() => changeMonth(1)} style={{ backgroundColor: S.gold, color: S.bg }} className="px-5 py-2 rounded-lg text-sm font-bold hover:opacity-90 transition">Next Month →</button>
         </div>
 
         <div style={{ backgroundColor: S.surface, border: `1px solid ${S.border}` }} className="rounded-xl p-6">
