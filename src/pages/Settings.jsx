@@ -43,6 +43,19 @@ export default function Settings() {
 
   const getToken = () => localStorage.getItem('token');
 
+const handleStripeCheckout = async (plan) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/stripe/create-checkout?plan=${plan}`,
+      {},
+      { headers: { Authorization: 'Bearer ' + getToken() } }
+    );
+    window.location.href = response.data.url;
+  } catch (error) {
+    setMessage({ type: 'error', text: 'Failed to start checkout. Please try again.' });
+  }
+};
+
   useEffect(() => {
     fetchUserProfile();
   }, []);
@@ -156,10 +169,24 @@ export default function Settings() {
                     )}
                   </div>
                 ) : (
-                  <>
-                    <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700">Free Plan</span>
-                    <button type="button" onClick={() => navigate('/dashboard')} className="text-sm text-purple-600 hover:text-purple-700 font-medium">Upgrade to Pro →</button>
-                  </>
+                  <div className="flex flex-col gap-3 w-full">
+                    <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 w-fit">Free Plan</span>
+                    <p className="text-sm text-gray-600 font-medium">Upgrade to Pro to access groups, leaderboard, friends and more.</p>
+                    <div className="flex flex-col gap-2">
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Nigeria / Africa (Paystack)</p>
+                      <div className="flex gap-2">
+                        <button type="button" onClick={() => window.open('https://paystack.shop/pay/n8x6mqs2vq', '_blank')} className="text-xs px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">Monthly ₦4,500</button>
+                        <button type="button" onClick={() => window.open('https://paystack.shop/pay/l10ib7q9q9', '_blank')} className="text-xs px-3 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 font-medium">Yearly ₦40,000</button>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">International (Stripe)</p>
+                      <div className="flex gap-2">
+                        <button type="button" onClick={() => handleStripeCheckout('monthly')} className="text-xs px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">Monthly $5.00</button>
+                        <button type="button" onClick={() => handleStripeCheckout('yearly')} className="text-xs px-3 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 font-medium">Yearly $45.00</button>
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
