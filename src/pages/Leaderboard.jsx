@@ -205,12 +205,16 @@ function Leaderboard() {
             <div style={{ backgroundColor: S.surface, border: `1px solid ${S.border}` }} className="rounded-xl p-4">
               <p style={{ color: S.muted }} className="text-xs uppercase tracking-wider mb-2">Most Daily Wins</p>
               <div className="space-y-1">
-                {dailyStats.most_daily_wins?.slice(0, 3).map((w, i) => (
-                  <div key={i} className="flex justify-between">
-                    <span style={{ color: S.text }} className="text-xs">{getMedalEmoji(i)} {w.full_name}</span>
-                    <span style={{ color: S.muted }} className="text-xs">{w.days}d</span>
-                  </div>
-                ))}
+                {dailyStats.most_daily_wins && dailyStats.most_daily_wins.length > 0 ? (
+                  dailyStats.most_daily_wins.map((winner, index) => (
+                    <div key={index} className="flex justify-between items-center">
+                      <span style={{ color: S.text }} className="text-xs">{getMedalEmoji(index)} {winner.full_name}</span>
+                      <span style={{ color: S.muted }} className="text-xs">{winner.days} days</span>
+                    </div>
+                  ))
+                ) : (
+                  <p style={{ color: S.muted }} className="text-xs">No data yet</p>
+                )}
               </div>
             </div>
           </div>
