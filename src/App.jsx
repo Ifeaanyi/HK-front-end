@@ -12,6 +12,7 @@ import FriendDashboard from './pages/FriendDashboard';
 import FriendTodos from './pages/FriendTodos';
 import PaymentSuccess from './pages/PaymentSuccess';
 
+// v2
 function PrivateRoute({ children }) {
   const { user } = useAuth();
   return user ? children : <Navigate to="/login" />;
