@@ -30,7 +30,7 @@ function App() {
       <Route path="/friends" element={<PrivateRoute><Friends /></PrivateRoute>} />
       <Route path="/friends/:friendId/dashboard" element={<PrivateRoute><FriendDashboard /></PrivateRoute>} />
       <Route path="/friends/:friendId/todos" element={<PrivateRoute><FriendTodos /></PrivateRoute>} />
-      <Route path="/payment/success" element={<PrivateRoute><PaymentSuccess /></PrivateRoute>} />
+      <Route path="/payment/success" element={<PaymentSuccess />} />
       <Route path="/" element={<Navigate to="/dashboard" />} />
     </Routes>
   );
