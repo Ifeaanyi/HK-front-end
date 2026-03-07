@@ -10,6 +10,7 @@ import Settings from './pages/Settings';
 import Friends from './pages/Friends';
 import FriendDashboard from './pages/FriendDashboard';
 import FriendTodos from './pages/FriendTodos';
+import PaymentSuccess from './pages/PaymentSuccess';
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -29,6 +30,7 @@ function App() {
       <Route path="/friends" element={<PrivateRoute><Friends /></PrivateRoute>} />
       <Route path="/friends/:friendId/dashboard" element={<PrivateRoute><FriendDashboard /></PrivateRoute>} />
       <Route path="/friends/:friendId/todos" element={<PrivateRoute><FriendTodos /></PrivateRoute>} />
+      <Route path="/payment/success" element={<PrivateRoute><PaymentSuccess /></PrivateRoute>} />
       <Route path="/" element={<Navigate to="/dashboard" />} />
     </Routes>
   );
