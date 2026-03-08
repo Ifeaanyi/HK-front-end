@@ -5,6 +5,11 @@ export default function PaymentSuccess() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login?redirect=payment-success');
+      return;
+    }
     setTimeout(() => {
       navigate('/dashboard');
     }, 3000);
