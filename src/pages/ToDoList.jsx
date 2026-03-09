@@ -342,7 +342,7 @@ function ToDoList() {
                               autoFocus />
                           ) : (
                             <span
-                              onDoubleClick={() => { setEditingDateId(todo.id); setEditingDateValue(todo.task_date); }}
+                              onClick={() => { setEditingDateId(todo.id); setEditingDateValue(todo.task_date); }}
                               style={{ color: isToday ? S.goldBright : S.textSub, cursor: 'pointer', fontWeight: '600', fontSize: '13px' }}
                               className="hover:text-yellow-300 transition"
                               title="Double-click to edit date">
