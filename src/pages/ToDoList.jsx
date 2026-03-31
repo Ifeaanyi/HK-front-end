@@ -120,7 +120,8 @@ function ToDoList() {
     const val = dateValue || editingDateValue;
     if (!val) { setEditingDateId(null); return; }
     try {
-      await api.patch(`/todos/${todoId}`, { task_date: val });
+      const todo = todos.find(t => t.id === todoId);
+await api.patch(`/todos/${todoId}`, { task_date: val, completed: todo.completed });
       setTodos(todos.map(t => t.id === todoId ? { ...t, task_date: val } : t));
       toast.success('Date updated', { duration: 2000 });
     } catch (error) {
