@@ -3,7 +3,6 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
-
 const S = {
   bg: '#0A1628',
   surface: '#0F2040',
@@ -23,7 +22,6 @@ const S = {
   blueHeader: '#0F3D6E',
   blueLight: '#42A5F5',
 };
-
 function ToDoList() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -36,9 +34,7 @@ function ToDoList() {
   const [toggleLoading, setToggleLoading] = useState({});
   const [editingDateId, setEditingDateId] = useState(null);
   const [editingDateValue, setEditingDateValue] = useState('');
-
   useEffect(() => { fetchTodos(); }, []);
-
   const fetchTodos = async () => {
     try {
       const response = await api.get('/todos');
@@ -49,19 +45,16 @@ function ToDoList() {
       setLoading(false);
     }
   };
-
   const getMonthTodos = () => {
     const year = currentMonth.getFullYear();
     const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
     return todos.filter(todo => todo.task_date.substring(0, 7) === `${year}-${month}`);
   };
-
   const calculateProductivity = () => {
     const monthTodos = getMonthTodos();
     if (monthTodos.length === 0) return 0;
     return ((monthTodos.filter(t => t.completed).length / monthTodos.length) * 100).toFixed(1);
   };
-
   const getProductivityBonus = () => {
     const p = parseFloat(calculateProductivity());
     if (p >= 85) return 20;
@@ -70,7 +63,6 @@ function ToDoList() {
     if (p >= 50) return 5;
     return 0;
   };
-
   const getNextLevelInfo = () => {
     const productivity = parseFloat(calculateProductivity());
     const monthTodos = getMonthTodos();
@@ -84,7 +76,6 @@ function ToDoList() {
     const tasksNeeded = Math.ceil((nextThreshold * monthTodos.length / 100) - completed);
     return { message: `${tasksNeeded} more task${tasksNeeded > 1 ? 's' : ''} → ${nextThreshold}% → +${nextBonus}pts` };
   };
-
   const addTodo = async (e) => {
     e.preventDefault();
     try {
@@ -96,7 +87,6 @@ function ToDoList() {
       toast.error('Failed to add task');
     }
   };
-
   const toggleTodo = async (todoId, currentStatus) => {
     if (toggleLoading[todoId]) return;
     setToggleLoading(prev => ({ ...prev, [todoId]: true }));
@@ -116,7 +106,6 @@ function ToDoList() {
       setToggleLoading(prev => ({ ...prev, [todoId]: false }));
     }
   };
-
   const deleteTodo = async (todoId) => {
     if (!confirm('Delete this task?')) return;
     try {
@@ -127,12 +116,12 @@ function ToDoList() {
       toast.error('Failed to delete task');
     }
   };
-
-  const saveEditedDate = async (todoId) => {
-    if (!editingDateValue) { setEditingDateId(null); return; }
+  const saveEditedDate = async (todoId, dateValue) => {
+    const val = dateValue || editingDateValue;
+    if (!val) { setEditingDateId(null); return; }
     try {
-      await api.patch(`/todos/${todoId}`, { task_date: editingDateValue });
-      setTodos(todos.map(t => t.id === todoId ? { ...t, task_date: editingDateValue } : t));
+      await api.patch(`/todos/${todoId}`, { task_date: val });
+      setTodos(todos.map(t => t.id === todoId ? { ...t, task_date: val } : t));
       toast.success('Date updated', { duration: 2000 });
     } catch (error) {
       toast.error('Failed to update date');
@@ -141,20 +130,17 @@ function ToDoList() {
       setEditingDateValue('');
     }
   };
-
   const getTodayString = () => {
     const userTz = user?.timezone || 'Africa/Lagos';
     const now = new Date();
     return new Date(now.toLocaleString('en-US', { timeZone: userTz })).toISOString().split('T')[0];
   };
-
   const monthName = currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   const monthTodos = getMonthTodos();
   const productivity = calculateProductivity();
   const bonus = getProductivityBonus();
   const nextLevel = getNextLevelInfo();
   const todayString = getTodayString();
-
   if (loading) {
     return (
       <div style={{ backgroundColor: S.bg }} className="min-h-screen flex items-center justify-center">
@@ -162,11 +148,8 @@ function ToDoList() {
       </div>
     );
   }
-
   return (
     <div style={{ backgroundColor: S.bg, minHeight: '100vh' }}>
-
-      {/* NAVBAR */}
       <nav style={{ backgroundColor: S.surface, borderBottom: `1px solid ${S.borderBright}` }} className="sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <img src="/logo.png" alt="Habit King" className="h-16 w-auto" />
@@ -185,24 +168,17 @@ function ToDoList() {
           </div>
         </div>
       </nav>
-
       <div className="max-w-6xl mx-auto px-4 py-6">
-
-        {/* HEADER BANNER */}
         <div style={{ backgroundColor: S.blueHeader, border: `2px solid ${S.blueLight}` }} className="rounded-2xl p-8 mb-6">
           <h2 style={{ color: S.text }} className="text-3xl font-black mb-1 tracking-wide">{monthName.toUpperCase()} — TO-DO</h2>
           <p style={{ color: '#90CAF9' }} className="text-sm font-medium">Track your tasks and boost your productivity score.</p>
         </div>
-
-        {/* STATS ROW */}
         <div className="grid md:grid-cols-3 gap-4 mb-6">
-          {/* Productivity */}
           <div style={{ backgroundColor: S.surfaceAlt, border: `2px solid ${S.borderBright}` }} className="rounded-2xl p-6 text-center">
             <p style={{ color: S.goldBright }} className="text-5xl font-black">{productivity}%</p>
             <p style={{ color: S.text }} className="text-sm font-bold uppercase tracking-widest mt-2">Productivity</p>
             <p style={{ color: S.textSub }} className="text-sm mt-1">{monthTodos.filter(t => t.completed).length} / {monthTodos.length} complete</p>
           </div>
-          {/* Bonus */}
           <div style={{ backgroundColor: S.surfaceAlt, border: `2px solid ${S.greenBorder}` }} className="rounded-2xl p-6 text-center">
             <p style={{ color: S.green }} className="text-5xl font-black">+{bonus}pts</p>
             <p style={{ color: S.text }} className="text-sm font-bold uppercase tracking-widest mt-2">Current Bonus</p>
@@ -210,14 +186,11 @@ function ToDoList() {
               {bonus === 20 ? 'Maximum!' : bonus === 15 ? 'Great work!' : bonus === 10 ? 'Good!' : bonus === 5 ? 'Keep going!' : 'Add tasks to score'}
             </p>
           </div>
-          {/* Next Level */}
           <div style={{ backgroundColor: S.surfaceAlt, border: `2px solid ${S.borderBright}` }} className="rounded-2xl p-6 text-center flex flex-col justify-center">
             <p style={{ color: S.blueLight }} className="text-base font-bold leading-snug">{nextLevel.message}</p>
             <p style={{ color: S.textSub }} className="text-xs uppercase tracking-widest mt-2">Next Level Goal</p>
           </div>
         </div>
-
-        {/* MONTH NAV */}
         <div style={{ backgroundColor: S.surface, border: `1px solid ${S.borderBright}` }} className="rounded-xl p-4 mb-5 flex justify-between items-center">
           <button
             onClick={() => { const d = new Date(currentMonth); d.setMonth(d.getMonth() - 1); setCurrentMonth(d); }}
@@ -233,8 +206,6 @@ function ToDoList() {
             Next Month →
           </button>
         </div>
-
-        {/* ADD TASK BUTTON */}
         <div className="mb-5">
           <button
             onClick={() => setShowAddForm(!showAddForm)}
@@ -247,8 +218,6 @@ function ToDoList() {
             {showAddForm ? '✕ Cancel' : '+ Add New Task'}
           </button>
         </div>
-
-        {/* ADD FORM */}
         {showAddForm && (
           <div style={{ backgroundColor: S.surfaceAlt, border: `2px solid ${S.borderBright}` }} className="rounded-2xl p-6 mb-6">
             <h3 style={{ color: S.text }} className="text-sm font-black uppercase tracking-widest mb-4">New Task</h3>
@@ -263,7 +232,7 @@ function ToDoList() {
               <div>
                 <label style={{ color: S.textSub }} className="block text-xs font-bold uppercase tracking-wider mb-2">Date</label>
                 <input type="date" required value={newTaskDate} onChange={(e) => setNewTaskDate(e.target.value)}
-                  style={{ backgroundColor: S.bg, border: `1px solid ${S.borderBright}`, color: S.text }}
+                  style={{ backgroundColor: S.bg, border: `1px solid ${S.borderBright}`, color: S.text, colorScheme: 'dark' }}
                   className="w-full px-4 py-3 rounded-lg text-sm font-medium focus:outline-none focus:border-yellow-400 transition" />
               </div>
               <button type="submit"
@@ -274,8 +243,6 @@ function ToDoList() {
             </form>
           </div>
         )}
-
-        {/* TASK TABLE */}
         <div style={{ backgroundColor: S.surface, border: `2px solid ${S.borderBright}` }} className="rounded-2xl overflow-hidden">
           <table className="w-full">
             <thead>
@@ -283,7 +250,7 @@ function ToDoList() {
                 <th style={{ color: S.text }} className="p-4 text-left text-sm font-black uppercase tracking-wider">Task</th>
                 <th style={{ color: S.text }} className="p-4 text-center text-sm font-black uppercase tracking-wider w-44">
                   Date
-                  <span style={{ color: '#90CAF9' }} className="block text-xs font-normal normal-case tracking-normal">double-click to edit</span>
+                  <span style={{ color: '#90CAF9' }} className="block text-xs font-normal normal-case tracking-normal">click to edit</span>
                 </th>
                 <th style={{ color: S.text }} className="p-4 text-center text-sm font-black uppercase tracking-wider w-24">Done</th>
                 <th style={{ color: S.text }} className="p-4 text-center text-sm font-black uppercase tracking-wider w-20">Del</th>
@@ -309,7 +276,6 @@ function ToDoList() {
                           backgroundColor: isToday ? '#0A2A4A' : idx % 2 === 0 ? S.surface : S.surfaceAlt,
                           borderBottom: `1px solid ${S.border}`,
                         }}>
-                        {/* TASK NAME */}
                         <td className="p-4">
                           <div className="flex items-center gap-3">
                             {todo.completed && (
@@ -327,17 +293,14 @@ function ToDoList() {
                             </span>
                           </div>
                         </td>
-                        {/* DATE */}
                         <td className="p-4 text-center">
                           {isEditingDate ? (
                             <input type="date" value={editingDateValue}
-                              onChange={(e) => setEditingDateValue(e.target.value)}
-                              onBlur={() => saveEditedDate(todo.id)}
+                              onChange={(e) => { setEditingDateValue(e.target.value); saveEditedDate(todo.id, e.target.value); }}
                               onKeyDown={(e) => {
-                                if (e.key === 'Enter') saveEditedDate(todo.id);
                                 if (e.key === 'Escape') { setEditingDateId(null); setEditingDateValue(''); }
                               }}
-                              style={{ backgroundColor: S.bg, border: `2px solid ${S.goldBright}`, color: S.text }}
+                              style={{ backgroundColor: S.bg, border: `2px solid ${S.goldBright}`, color: S.text, colorScheme: 'dark' }}
                               className="px-2 py-1 rounded-lg text-xs focus:outline-none"
                               autoFocus />
                           ) : (
@@ -345,12 +308,11 @@ function ToDoList() {
                               onClick={() => { setEditingDateId(todo.id); setEditingDateValue(todo.task_date); }}
                               style={{ color: isToday ? S.goldBright : S.textSub, cursor: 'pointer', fontWeight: '600', fontSize: '13px' }}
                               className="hover:text-yellow-300 transition"
-                              title="Double-click to edit date">
+                              title="Click to edit date">
                               {new Date(todo.task_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                             </span>
                           )}
                         </td>
-                        {/* TOGGLE */}
                         <td className="p-4 text-center">
                           <button
                             onClick={() => toggleTodo(todo.id, todo.completed)}
@@ -374,7 +336,6 @@ function ToDoList() {
                             {todo.completed ? '✓' : ''}
                           </button>
                         </td>
-                        {/* DELETE */}
                         <td className="p-4 text-center">
                           <button
                             onClick={() => deleteTodo(todo.id)}
@@ -397,16 +358,13 @@ function ToDoList() {
             </tbody>
           </table>
         </div>
-
         {monthTodos.length > 0 && (
           <div style={{ backgroundColor: S.surfaceAlt, border: `1px solid ${S.borderBright}` }} className="mt-5 rounded-xl p-4">
             <p style={{ color: S.textSub }} className="text-sm font-medium">Check at least 1 task today to maintain your streak.</p>
           </div>
         )}
-
       </div>
     </div>
   );
 }
-
 export default ToDoList;
