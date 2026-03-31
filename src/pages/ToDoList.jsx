@@ -295,14 +295,21 @@ function ToDoList() {
                         </td>
                         <td className="p-4 text-center">
                           {isEditingDate ? (
-                            <input type="date" value={editingDateValue}
-                              onChange={(e) => { setEditingDateValue(e.target.value); saveEditedDate(todo.id, e.target.value); }}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Escape') { setEditingDateId(null); setEditingDateValue(''); }
-                              }}
-                              style={{ backgroundColor: S.bg, border: `2px solid ${S.goldBright}`, color: S.text, colorScheme: 'dark' }}
-                              className="px-2 py-1 rounded-lg text-xs focus:outline-none"
-                              autoFocus />
+                            <div className="flex items-center gap-1 justify-center">
+                              <input type="date" value={editingDateValue}
+                                onChange={(e) => setEditingDateValue(e.target.value)}
+                                style={{ backgroundColor: S.bg, border: `2px solid ${S.goldBright}`, color: S.text, colorScheme: 'dark' }}
+                                className="px-2 py-1 rounded-lg text-xs focus:outline-none"
+                                autoFocus />
+                              <button onClick={() => saveEditedDate(todo.id, editingDateValue)}
+                                style={{ backgroundColor: S.green, color: '#0A0F1E', border: 'none', borderRadius: '4px', padding: '2px 8px', fontWeight: 'bold', cursor: 'pointer', fontSize: '12px' }}>
+                                ✓
+                              </button>
+                              <button onClick={() => { setEditingDateId(null); setEditingDateValue(''); }}
+                                style={{ backgroundColor: 'transparent', color: S.red, border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 'bold' }}>
+                                ✕
+                              </button>
+                            </div>
                           ) : (
                             <span
                               onClick={() => { setEditingDateId(todo.id); setEditingDateValue(todo.task_date); }}
