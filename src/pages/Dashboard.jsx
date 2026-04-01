@@ -446,13 +446,13 @@ habitking.io`;
               {currentMonth.getFullYear() === new Date().getFullYear() && currentMonth.getMonth() === new Date().getMonth() && (
                 <>
                   <button onClick={() => setShowPersonalForm(!showPersonalForm)}
-                    style={{ backgroundColor: 'transparent', border: `1px solid ${S.border}`, color: S.muted }}
-                    className="px-3 py-1.5 text-xs rounded-lg hover:border-yellow-600 hover:text-yellow-500 transition">
+                    style={{ backgroundColor: '#1A2400', border: `1px solid ${S.gold}`, color: S.gold }}
+                    className="px-3 py-1.5 text-xs rounded-lg transition">
                     + Personal ({habits.filter(h => h.category === 'Personal' && !h.deleted_at).length}/10)
                   </button>
                   <button onClick={() => setShowStudyForm(!showStudyForm)}
-                    style={{ backgroundColor: 'transparent', border: `1px solid ${S.border}`, color: S.muted }}
-                    className="px-3 py-1.5 text-xs rounded-lg hover:border-yellow-600 hover:text-yellow-500 transition">
+                    style={{ backgroundColor: '#1A2400', border: `1px solid ${S.gold}`, color: S.gold }}
+                    className="px-3 py-1.5 text-xs rounded-lg transition">
                     + Study ({habits.filter(h => h.category === 'Study' && !h.deleted_at).length}/5)
                   </button>
                 </>
