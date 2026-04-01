@@ -448,12 +448,12 @@ habitking.io`;
                   <button onClick={() => setShowPersonalForm(!showPersonalForm)}
                     style={{ backgroundColor: 'transparent', border: `1px solid ${S.border}`, color: S.muted }}
                     className="px-3 py-1.5 text-xs rounded-lg hover:border-yellow-600 hover:text-yellow-500 transition">
-                    + Personal ({personalHabits.filter(h => !h.deleted_at).length}/10)
+                    + Personal ({habits.filter(h => h.category === 'Personal' && !h.deleted_at).length}/10)
                   </button>
                   <button onClick={() => setShowStudyForm(!showStudyForm)}
                     style={{ backgroundColor: 'transparent', border: `1px solid ${S.border}`, color: S.muted }}
                     className="px-3 py-1.5 text-xs rounded-lg hover:border-yellow-600 hover:text-yellow-500 transition">
-                    + Study ({studyHabits.filter(h => !h.deleted_at).length}/5)
+                    + Study ({habits.filter(h => h.category === 'Study' && !h.deleted_at).length}/5)
                   </button>
                 </>
               )}
