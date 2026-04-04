@@ -2,9 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-
 const API_URL = 'https://habit-king-production.up.railway.app/api/v1';
-
 const TIMEZONES = [
   { value: "Africa/Lagos", label: "Africa/Lagos (WAT)" },
   { value: "Africa/Johannesburg", label: "Africa/Johannesburg (SAST)" },
@@ -31,6 +29,8 @@ const TIMEZONES = [
   { value: "Pacific/Auckland", label: "Pacific/Auckland (NZST)" },
 ];
 
+const AFRICAN_TIMEZONES = ['Africa/Lagos','Africa/Johannesburg','Africa/Cairo','Africa/Nairobi'];
+
 export default function Settings() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -40,21 +40,23 @@ export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
-
   const getToken = () => localStorage.getItem('token');
 
-const handleStripeCheckout = async (plan) => {
-  try {
-    const response = await axios.post(
-      `${API_URL}/stripe/create-checkout?plan=${plan}`,
-      {},
-      { headers: { Authorization: 'Bearer ' + getToken() } }
-    );
-    window.location.href = response.data.url;
-  } catch (error) {
-    setMessage({ type: 'error', text: 'Failed to start checkout. Please try again.' });
-  }
-};
+  const isAfrican = AFRICAN_TIMEZONES.includes(timezone);
+console.log('timezone state:', timezone, 'isAfrican:', isAfrican);
+
+  const handleStripeCheckout = async (plan) => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/stripe/create-checkout?plan=${plan}`,
+        {},
+        { headers: { Authorization: 'Bearer ' + getToken() } }
+      );
+      window.location.href = response.data.url;
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Failed to start checkout. Please try again.' });
+    }
+  };
 
   useEffect(() => {
     fetchUserProfile();
@@ -162,34 +164,43 @@ const handleStripeCheckout = async (plan) => {
                       <div>
                         <p className="text-xs text-gray-600">Expires: {new Date(user.subscription_end_date).toLocaleDateString()}</p>
                         <div className="flex gap-2 mt-2">
-                          <button type="button" onClick={() => window.open('https://paystack.shop/pay/n8x6mqs2vq', '_blank')} className="text-xs px-3 py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700">Monthly ₦4,500</button>
-                          <button type="button" onClick={() => window.open('https://paystack.shop/pay/l10ib7q9q9', '_blank')} className="text-xs px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Yearly ₦33,000</button>
+                          {isAfrican ? (
+                            <>
+                              <button type="button" onClick={() => window.open('https://paystack.shop/pay/n8x6mqs2vq', '_blank')} className="text-xs px-3 py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700">Renew Monthly ₦4,500</button>
+                              <button type="button" onClick={() => window.open('https://paystack.shop/pay/l10ib7q9q9', '_blank')} className="text-xs px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Renew Yearly ₦33,000</button>
+                            </>
+                          ) : (
+                            <>
+                              <button type="button" onClick={() => handleStripeCheckout('monthly')} className="text-xs px-3 py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700">Renew Monthly $5.00</button>
+                              <button type="button" onClick={() => handleStripeCheckout('yearly')} className="text-xs px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Renew Yearly $45.00</button>
+                            </>
+                          )}
                         </div>
                       </div>
                     )}
                   </div>
                 ) : (
                   <div className="flex flex-col gap-3 w-full">
-    <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 w-fit">Free Plan</span>
-    <p className="text-sm text-gray-600 font-medium">Upgrade to Pro to access groups, leaderboard, friends and more.</p>
-    {['Africa/Lagos','Africa/Johannesburg','Africa/Cairo','Africa/Nairobi'].includes(timezone) ? (
-      <div className="flex flex-col gap-2">
-        <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Subscribe (Paystack)</p>
-        <div className="flex gap-2">
-          <button type="button" onClick={() => window.open('https://paystack.shop/pay/n8x6mqs2vq', '_blank')} className="text-xs px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">Monthly ₦4,500</button>
-          <button type="button" onClick={() => window.open('https://paystack.shop/pay/l10ib7q9q9', '_blank')} className="text-xs px-3 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 font-medium">Yearly ₦40,000</button>
-        </div>
-      </div>
-    ) : (
-      <div className="flex flex-col gap-2">
-        <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Subscribe (Card)</p>
-        <div className="flex gap-2">
-          <button type="button" onClick={() => handleStripeCheckout('monthly')} className="text-xs px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">Monthly $5.00</button>
-          <button type="button" onClick={() => handleStripeCheckout('yearly')} className="text-xs px-3 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 font-medium">Yearly $45.00</button>
-        </div>
-      </div>
-    )}
-  </div>
+                    <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 w-fit">Free Plan</span>
+                    <p className="text-sm text-gray-600 font-medium">Upgrade to Pro to access groups, leaderboard, friends and more.</p>
+                    {isAfrican ? (
+                      <div className="flex flex-col gap-2">
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Subscribe (Paystack)</p>
+                        <div className="flex gap-2">
+                          <button type="button" onClick={() => window.open('https://paystack.shop/pay/n8x6mqs2vq', '_blank')} className="text-xs px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">Monthly ₦4,500</button>
+                          <button type="button" onClick={() => window.open('https://paystack.shop/pay/l10ib7q9q9', '_blank')} className="text-xs px-3 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 font-medium">Yearly ₦40,000</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-2">
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Subscribe (Card)</p>
+                        <div className="flex gap-2">
+                          <button type="button" onClick={() => handleStripeCheckout('monthly')} className="text-xs px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">Monthly $5.00</button>
+                          <button type="button" onClick={() => handleStripeCheckout('yearly')} className="text-xs px-3 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 font-medium">Yearly $45.00</button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
