@@ -16,6 +16,7 @@ import PaymentCallback from './pages/PaymentCallback'
 import Settings from './pages/Settings'
 import Rules from './pages/Rules'
 import PaymentSuccess from './pages/PaymentSuccess'
+import Onboarding from './pages/Onboarding'
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token')
@@ -40,6 +41,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/rules" element={<ProtectedRoute><Rules /></ProtectedRoute>} />
           <Route path="/payment/success" element={<PaymentSuccess />} />
+          <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
           <Route path="/" element={<Navigate to="/dashboard" />} />
         </Routes>
       </BrowserRouter>
