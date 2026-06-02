@@ -20,6 +20,9 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.get('/users/me');
       setUser(response.data);
+      if (!response.data.onboarding_completed) {
+        window.location.href = '/onboarding';
+      }
     } catch (error) {
       console.error('Failed to fetch user:', error);
       localStorage.removeItem('token');
