@@ -21,7 +21,7 @@ const HABIT_PACKS = [
     label: 'Professional',
     icon: '💼',
     desc: 'For career-focused individuals',
-    habits: ['1hr deep work', '30min learning', 'Plan tomorrow', 'No meetings before 10am'],
+    habits: ['No work chitchat', '30min learning', 'Sleep early', 'No meetings before 10am'],
   },
   {
     id: 'fitness',
