@@ -47,7 +47,7 @@ function Register() {
       });
 
       localStorage.setItem('token', loginResponse.data.access_token);
-      navigate('/dashboard');
+      navigate('/onboarding');
     } catch (err) {
       console.error('Registration error:', err);
       if (err.response?.data?.detail) {
