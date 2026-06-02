@@ -60,9 +60,25 @@ export default function Onboarding() {
   const handleFinish = async () => {
     setLoading(true);
     try {
+      if (selectedPack && selectedPack.habits.length > 0) {
+        for (const habitName of selectedPack.habits) {
+          try {
+            await api.post('/habits', { name: habitName, category: 'Personal', point_value: 1 });
+          } catch (e) {
+            // continue even if one fails
+          }
+        }
+      }
+      if (goal.trim()) {
+        try {
+          await api.post('/monthly-goals', { goal_text: goal.trim() });
+        } catch (e) {
+          // silent fail
+        }
+      }
       await api.post('/users/complete-onboarding');
     } catch (e) {
-      // silent fail — still navigate
+      // silent fail
     } finally {
       setLoading(false);
       navigate('/dashboard');
