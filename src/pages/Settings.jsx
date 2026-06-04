@@ -43,7 +43,6 @@ export default function Settings() {
   const getToken = () => localStorage.getItem('token');
 
   const isAfrican = AFRICAN_TIMEZONES.includes(timezone);
-console.log('timezone state:', timezone, 'isAfrican:', isAfrican);
 
   const handleStripeCheckout = async (plan) => {
     try {
