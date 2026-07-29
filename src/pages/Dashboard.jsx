@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import UpgradeModal from '../components/UpgradeModal';
+import { requestNotificationPermission } from '../firebase';
 
 const API_URL = 'https://habit-king-production.up.railway.app/api/v1';
 
@@ -55,6 +56,24 @@ export default function Dashboard() {
   useEffect(() => {
     fetchHabits(); fetchTodos(); fetchStreak(); fetchMonthlyGoals();
   }, [selectedDate, currentMonth]);
+
+  // Ask for notification permission once, then save the device token to backend
+  useEffect(() => {
+    if (!user) return;
+    if (localStorage.getItem('pushAsked')) return;
+    localStorage.setItem('pushAsked', 'true');
+    (async () => {
+      try {
+        const fcmToken = await requestNotificationPermission();
+        if (fcmToken) {
+          await axios.post(API_URL + '/users/push-token', { token: fcmToken }, { headers: { Authorization: 'Bearer ' + getToken() } });
+          console.log('Push token saved');
+        }
+      } catch (err) {
+        console.error('Push setup failed:', err);
+      }
+    })();
+  }, [user]);
 
   const getToken = () => localStorage.getItem('token');
 
