@@ -57,16 +57,17 @@ export default function Dashboard() {
     fetchHabits(); fetchTodos(); fetchStreak(); fetchMonthlyGoals();
   }, [selectedDate, currentMonth]);
 
-  // Ask for notification permission once, then save the device token to backend
+  // Ask for notification permission. Only mark "done" once actually granted,
+  // so an accidental dismissal doesn't lock the user out forever.
   useEffect(() => {
     if (!user) return;
-    if (localStorage.getItem('pushAsked')) return;
-    localStorage.setItem('pushAsked', 'true');
+    if (localStorage.getItem('pushGranted')) return;
     (async () => {
       try {
         const fcmToken = await requestNotificationPermission();
         if (fcmToken) {
           await axios.post(API_URL + '/users/push-token', { token: fcmToken }, { headers: { Authorization: 'Bearer ' + getToken() } });
+          localStorage.setItem('pushGranted', 'true');
           console.log('Push token saved');
         }
       } catch (err) {
