@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { requestNotificationPermission } from '../firebase';
 const API_URL = 'https://habit-king-production.up.railway.app/api/v1';
 const TIMEZONES = [
   { value: "Africa/Lagos", label: "Africa/Lagos (WAT)" },
@@ -41,8 +42,25 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const getToken = () => localStorage.getItem('token');
-
   const isAfrican = AFRICAN_TIMEZONES.includes(timezone);
+
+  const [notifStatus, setNotifStatus] = useState('');
+  const enableNotifications = async () => {
+    setNotifStatus('working');
+    try {
+      const fcmToken = await requestNotificationPermission();
+      if (fcmToken) {
+        await axios.post(API_URL + '/users/push-token', { token: fcmToken }, { headers: { Authorization: 'Bearer ' + getToken() } });
+        localStorage.setItem('pushGranted', 'true');
+        setNotifStatus('success');
+      } else {
+        setNotifStatus('denied');
+      }
+    } catch (err) {
+      console.error('Notification enable failed:', err);
+      setNotifStatus('error');
+    }
+  };
 
   const handleStripeCheckout = async (plan) => {
     try {
@@ -202,6 +220,16 @@ export default function Settings() {
                   </div>
                 )}
               </div>
+            </div>
+            <div className="pt-4 border-t border-gray-200">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Notifications</label>
+              <p className="text-sm text-gray-600 mb-3">Get alerts when someone passes you, your streak is at risk, and more.</p>
+              <button type="button" onClick={enableNotifications} disabled={notifStatus === 'working'}
+                className="text-sm px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:bg-gray-400">
+                {notifStatus === 'working' ? 'Enabling...' : notifStatus === 'success' ? '✓ Notifications On' : 'Enable Notifications'}
+              </button>
+              {notifStatus === 'denied' && <p className="text-xs text-red-600 mt-2">Permission was blocked. Enable notifications for this site in your browser settings, then try again.</p>}
+              {notifStatus === 'error' && <p className="text-xs text-red-600 mt-2">Something went wrong. Please try again.</p>}
             </div>
             <div className="pt-4">
               <button type="submit" disabled={saving} className={saving ? 'w-full py-3 px-4 rounded-lg font-semibold text-white transition bg-gray-400 cursor-not-allowed' : 'w-full py-3 px-4 rounded-lg font-semibold text-white transition bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700'}>
