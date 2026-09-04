@@ -74,6 +74,22 @@ export default function Settings() {
       setMessage({ type: 'error', text: 'Failed to start checkout. Please try again.' });
     }
   };
+  const handlePaystackCheckout = async (plan) => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/payments/initialize`,
+        { plan },
+        { headers: { Authorization: 'Bearer ' + getToken() } }
+      );
+      if (response.data.authorization_url) {
+        window.location.href = response.data.authorization_url;
+      } else {
+        setMessage({ type: 'error', text: 'Failed to start payment. Please try again.' });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Failed to start payment. Please try again.' });
+    }
+  };
 
   useEffect(() => {
     fetchUserProfile();
@@ -183,8 +199,8 @@ export default function Settings() {
                         <div className="flex gap-2 mt-2">
                           {isAfrican ? (
                             <>
-                              <button type="button" onClick={() => window.open('https://paystack.shop/pay/n8x6mqs2vq', '_blank')} className="text-xs px-3 py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700">Renew Monthly ₦4,500</button>
-                              <button type="button" onClick={() => window.open('https://paystack.shop/pay/l10ib7q9q9', '_blank')} className="text-xs px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Renew Yearly ₦33,000</button>
+                              <button type="button" onClick={() => handlePaystackCheckout('monthly')} className="text-xs px-3 py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700">Renew Monthly ₦4,500</button>
+                              <button type="button" onClick={() => handlePaystackCheckout('yearly')} className="text-xs px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Renew Yearly ₦33,000</button>
                             </>
                           ) : (
                             <>
@@ -204,8 +220,8 @@ export default function Settings() {
                       <div className="flex flex-col gap-2">
                         <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Subscribe (Paystack)</p>
                         <div className="flex gap-2">
-                          <button type="button" onClick={() => window.open('https://paystack.shop/pay/n8x6mqs2vq', '_blank')} className="text-xs px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">Monthly ₦4,500</button>
-                          <button type="button" onClick={() => window.open('https://paystack.shop/pay/l10ib7q9q9', '_blank')} className="text-xs px-3 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 font-medium">Yearly ₦40,000</button>
+                          <button type="button" onClick={() => handlePaystackCheckout('monthly')} className="text-xs px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">Monthly ₦4,500</button>
+                          <button type="button" onClick={() => handlePaystackCheckout('yearly')} className="text-xs px-3 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 font-medium">Yearly ₦40,000</button>
                         </div>
                       </div>
                     ) : (

@@ -13,11 +13,27 @@ export default function UpgradeModal({ isOpen, onClose }) {
 
   const handleUpgrade = async (plan) => {
     if (isAfrican) {
-      const links = {
-        monthly: 'https://paystack.shop/pay/n8x6mqs2vq',
-        yearly: 'https://paystack.shop/pay/l10ib7q9q9'
-      };
-      window.open(links[plan], '_blank');
+      setLoading(true);
+      try {
+        const response = await fetch(`${API_URL}/payments/initialize`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + getToken()
+          },
+          body: JSON.stringify({ plan })
+        });
+        const data = await response.json();
+        if (data.authorization_url) {
+          window.location.href = data.authorization_url;
+        } else {
+          alert(data.detail || 'Failed to start payment. Please try again.');
+          setLoading(false);
+        }
+      } catch (error) {
+        alert('Failed to start payment. Please try again.');
+        setLoading(false);
+      }
     } else {
       try {
         const response = await fetch(`${API_URL}/stripe/create-checkout?plan=${plan}`, {
