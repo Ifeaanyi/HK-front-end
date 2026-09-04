@@ -199,7 +199,7 @@ export default function Dashboard() {
     const createdTime = new Date(createdAt + 'Z');
     const now = new Date();
     const hoursSinceCreation = (now - createdTime) / (1000 * 60 * 60);
-    const isStartOfMonth = now.getDate() <= 3;
+    const isStartOfMonth = now.getDate() <= 5;
     const daysSinceSignup = (now - new Date(user?.created_at + 'Z')) / (1000 * 60 * 60 * 24);
     return hoursSinceCreation <= 24 || isStartOfMonth || daysSinceSignup < 7;
   };
