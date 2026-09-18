@@ -12,13 +12,14 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Fires when a notification arrives and the app is CLOSED or in the background
+// Fires when a message arrives and the app is CLOSED or in the background.
+// We read title/body/icon from the DATA payload so our icon is always used.
 messaging.onBackgroundMessage((payload) => {
-  const title = payload.notification?.title || "Habit King";
+  const title = payload.data?.title || "Habit King";
   const options = {
-    body: payload.notification?.body || "",
+    body: payload.data?.body || "",
     icon: "/logo.png",
-    badge: "/logo.png",
+    tag: "habit-king",
   };
   self.registration.showNotification(title, options);
 });
