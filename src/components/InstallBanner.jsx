@@ -21,8 +21,13 @@ export default function InstallBanner() {
       window.navigator.standalone === true;
     if (isStandalone) return;
 
-    // If user dismissed before, don't show again
-    if (localStorage.getItem('installDismissed')) return;
+    // If dismissed recently, stay hidden until the cooldown passes
+    const dismissedAt = localStorage.getItem('installDismissedAt');
+    if (dismissedAt) {
+      const hoursSince = (Date.now() - Number(dismissedAt)) / (1000 * 60 * 60);
+      const COOLDOWN_HOURS = 1;
+      if (hoursSince < COOLDOWN_HOURS) return;
+    }
 
     // Detect iPhone / iPad
     const ios = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
@@ -53,7 +58,7 @@ export default function InstallBanner() {
 
   const dismiss = () => {
     setShow(false);
-    localStorage.setItem('installDismissed', 'true');
+    localStorage.setItem('installDismissedAt', String(Date.now()));
   };
 
   if (!show) return null;
