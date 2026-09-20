@@ -319,7 +319,67 @@ function Leaderboard() {
 
         {/* LEADERBOARD TABLE */}
         {selectedGroup && leaderboard.length > 0 && (
-          <div style={{ backgroundColor: S.surface, border: `1px solid ${S.border}` }} className="rounded-2xl overflow-hidden">
+          <>
+          {/* MOBILE CARDS (phones) */}
+          <div className="md:hidden space-y-3">
+            {leaderboard.map((person, index) => {
+              const isCurrentUser = person.user_id === user?.id;
+              const isWinner = currentWinner && currentWinner.user_id === person.user_id;
+              return (
+                <div key={person.user_id}
+                  style={{
+                    backgroundColor: isCurrentUser ? '#0D2A4A' : isWinner ? '#1A1400' : S.surface,
+                    border: `1px solid ${isWinner ? S.gold : isCurrentUser ? S.blueLight : S.border}`
+                  }}
+                  className="rounded-xl p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className={index < 3 ? 'text-2xl' : 'text-base'} style={{ color: S.muted }}>{getMedalEmoji(index)}</span>
+                      <div className="min-w-0">
+                        <div style={{ color: S.text }} className="font-bold text-sm truncate">
+                          {isWinner && <span style={{ color: S.gold }} className="mr-1">👑</span>}
+                          {person.full_name}
+                          {isCurrentUser && <span style={{ color: S.blueLight }} className="ml-1 text-xs">(You)</span>}
+                        </div>
+                        <div style={{ color: S.muted }} className="text-xs truncate">{person.role_title}</div>
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <div style={{ color: S.gold }} className="text-2xl font-black leading-none">{person.total_points}</div>
+                      <div style={{ color: S.muted }} className="text-xs">total pts</div>
+                    </div>
+                  </div>
+                  <div style={{ borderTop: `1px solid ${S.border}` }} className="mt-3 pt-3 flex justify-between text-center">
+                    <div>
+                      <div style={{ color: S.blueLight }} className="text-sm font-bold">{person.habit_points}</div>
+                      <div style={{ color: S.muted }} className="text-xs">Habits</div>
+                    </div>
+                    <div>
+                      <div style={{ color: '#6A9FBF' }} className="text-sm font-bold">{person.study_hours}</div>
+                      <div style={{ color: S.muted }} className="text-xs">Study hrs</div>
+                    </div>
+                    <div>
+                      <div style={{ color: '#6DBF8A' }} className="text-sm font-bold">{person.todo_productivity}%</div>
+                      <div style={{ color: S.muted }} className="text-xs">To-Do</div>
+                    </div>
+                    {person.streak_bonus > 0 && (
+                      <div>
+                        <div style={{ color: S.gold }} className="text-sm font-bold">+{person.streak_bonus}</div>
+                        <div style={{ color: S.muted }} className="text-xs">Streak</div>
+                      </div>
+                    )}
+                  </div>
+                  {isGroupCreator && !isCurrentUser && (
+                    <button onClick={() => removeMember(person.user_id, person.full_name)}
+                      style={{ color: '#E07070' }} className="text-xs mt-2 hover:opacity-80 transition">Remove from group</button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* DESKTOP TABLE */}
+          <div style={{ backgroundColor: S.surface, border: `1px solid ${S.border}` }} className="hidden md:block rounded-2xl overflow-hidden">
             <table className="w-full">
               <thead>
                 <tr style={{ backgroundColor: S.blue, borderBottom: `1px solid ${S.border}` }}>
@@ -390,6 +450,7 @@ function Leaderboard() {
               </tbody>
             </table>
           </div>
+          </>
         )}
 
         {/* EMPTY STATES */}
