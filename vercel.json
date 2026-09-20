@@ -1,8 +1,10 @@
 {
   "rewrites": [
-    {
-      "source": "/((?!manifest.json|firebase-messaging-sw.js|.*\\.png|.*\\.svg|.*\\.ico|.*\\.json).*)",
-      "destination": "/index.html"
-    }
+    { "source": "/manifest.json", "destination": "/manifest.json" },
+    { "source": "/firebase-messaging-sw.js", "destination": "/firebase-messaging-sw.js" },
+    { "source": "/icon-192.png", "destination": "/icon-192.png" },
+    { "source": "/icon-512.png", "destination": "/icon-512.png" },
+    { "source": "/logo.png", "destination": "/logo.png" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
