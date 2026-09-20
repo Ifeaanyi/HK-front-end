@@ -321,10 +321,23 @@ function Leaderboard() {
         {selectedGroup && leaderboard.length > 0 && (
           <>
           {/* MOBILE CARDS (phones) */}
-          <div className="md:hidden space-y-3">
+          <div className="md:hidden">
+            {/* header row */}
+            <div className="flex items-center gap-3 px-4 pb-2">
+              <span style={{ color: S.muted }} className="text-[10px] uppercase tracking-wider w-6 flex-shrink-0">#</span>
+              <span style={{ color: S.muted }} className="text-[10px] uppercase tracking-wider flex-1">Name</span>
+              <span style={{ color: S.muted }} className="text-[10px] uppercase tracking-wider flex-shrink-0">Total</span>
+            </div>
+            <div className="space-y-3">
             {leaderboard.map((person, index) => {
               const isCurrentUser = person.user_id === user?.id;
               const isWinner = currentWinner && currentWinner.user_id === person.user_id;
+              const parts = [
+                `${person.habit_points} habits`,
+                `${person.study_hours} study hrs`,
+                `${person.todo_productivity}% to-do`,
+              ];
+              if (person.streak_bonus > 0) parts.push(`+${person.streak_bonus} streak`);
               return (
                 <div key={person.user_id}
                   style={{
@@ -332,42 +345,20 @@ function Leaderboard() {
                     border: `1px solid ${isWinner ? S.gold : isCurrentUser ? S.blueLight : S.border}`
                   }}
                   className="rounded-xl p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span className={index < 3 ? 'text-2xl' : 'text-base'} style={{ color: S.muted }}>{getMedalEmoji(index)}</span>
-                      <div className="min-w-0">
-                        <div style={{ color: S.text }} className="font-bold text-sm truncate">
-                          {isWinner && <span style={{ color: S.gold }} className="mr-1">👑</span>}
-                          {person.full_name}
-                          {isCurrentUser && <span style={{ color: S.blueLight }} className="ml-1 text-xs">(You)</span>}
-                        </div>
-                        <div style={{ color: S.muted }} className="text-xs truncate">{person.role_title}</div>
+                  <div className="flex items-center gap-3">
+                    <span className={index < 3 ? 'text-xl w-6 text-center flex-shrink-0' : 'text-sm w-6 text-center flex-shrink-0'} style={{ color: S.muted }}>{getMedalEmoji(index)}</span>
+                    <div className="flex-1 min-w-0">
+                      <div style={{ color: S.text }} className="font-semibold text-sm truncate">
+                        {isWinner && <span style={{ color: S.gold }} className="mr-1">👑</span>}
+                        {person.full_name}
+                        {isCurrentUser && <span style={{ color: S.blueLight }} className="ml-1 text-xs font-normal">You</span>}
                       </div>
+                      <div style={{ color: S.muted }} className="text-xs truncate">{person.role_title}</div>
                     </div>
-                    <div className="text-right flex-shrink-0">
-                      <div style={{ color: S.gold }} className="text-2xl font-black leading-none">{person.total_points}</div>
-                      <div style={{ color: S.muted }} className="text-xs">total pts</div>
-                    </div>
+                    <div style={{ color: S.gold }} className="text-xl font-black leading-none flex-shrink-0">{person.total_points}</div>
                   </div>
-                  <div style={{ borderTop: `1px solid ${S.border}` }} className="mt-3 pt-3 flex justify-between text-center">
-                    <div>
-                      <div style={{ color: S.blueLight }} className="text-sm font-bold">{person.habit_points}</div>
-                      <div style={{ color: S.muted }} className="text-xs">Habits</div>
-                    </div>
-                    <div>
-                      <div style={{ color: '#6A9FBF' }} className="text-sm font-bold">{person.study_hours}</div>
-                      <div style={{ color: S.muted }} className="text-xs">Study hrs</div>
-                    </div>
-                    <div>
-                      <div style={{ color: '#6DBF8A' }} className="text-sm font-bold">{person.todo_productivity}%</div>
-                      <div style={{ color: S.muted }} className="text-xs">To-Do</div>
-                    </div>
-                    {person.streak_bonus > 0 && (
-                      <div>
-                        <div style={{ color: S.gold }} className="text-sm font-bold">+{person.streak_bonus}</div>
-                        <div style={{ color: S.muted }} className="text-xs">Streak</div>
-                      </div>
-                    )}
+                  <div style={{ color: S.muted, borderTop: `1px solid ${S.border}` }} className="text-xs mt-3 pt-2">
+                    {parts.join(' · ')}
                   </div>
                   {isGroupCreator && !isCurrentUser && (
                     <button onClick={() => removeMember(person.user_id, person.full_name)}
@@ -376,6 +367,7 @@ function Leaderboard() {
                 </div>
               );
             })}
+            </div>
           </div>
 
           {/* DESKTOP TABLE */}
