@@ -152,31 +152,29 @@ function Leaderboard() {
       <div className="max-w-7xl mx-auto px-4 py-6">
 
         {/* HEADER BANNER */}
-        <div style={{ backgroundColor: S.blue, border: `1px solid ${S.blueLight}` }} className="rounded-2xl p-8 mb-6">
-          <div className="flex items-center justify-between">
+        <div style={{ backgroundColor: S.blue, border: `1px solid ${S.blueLight}` }} className="rounded-2xl p-4 md:p-8 mb-6">
+          <div className="text-center mb-4">
+            <h2 style={{ color: S.text }} className="text-xl md:text-3xl font-bold mb-1">{displayMonth.toUpperCase()} LEADERBOARD</h2>
+            {selectedGroup && <p style={{ color: S.muted }} className="text-xs md:text-sm">{selectedGroup.name} · {leaderboard.length} Participants</p>}
+          </div>
+          <div className="flex items-center justify-center gap-2 flex-wrap">
             <button onClick={goToPreviousMonth}
               style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: S.text }}
-              className="px-4 py-2 rounded-xl text-sm font-bold hover:bg-opacity-20 transition">
+              className="px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm font-bold hover:bg-opacity-20 transition">
               ← Prev
             </button>
-            <div className="text-center">
-              <h2 style={{ color: S.text }} className="text-3xl font-bold mb-1">{displayMonth.toUpperCase()} LEADERBOARD</h2>
-              {selectedGroup && <p style={{ color: S.muted }} className="text-sm">{selectedGroup.name} · {leaderboard.length} Participants</p>}
-            </div>
-            <div className="flex items-center gap-2">
-              <button onClick={goToNextMonth} disabled={isCurrentMonth()}
-                style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: isCurrentMonth() ? S.muted : S.text }}
-                className="px-4 py-2 rounded-xl text-sm font-bold transition disabled:cursor-not-allowed">
-                Next →
+            <button onClick={goToNextMonth} disabled={isCurrentMonth()}
+              style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: isCurrentMonth() ? S.muted : S.text }}
+              className="px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition disabled:cursor-not-allowed">
+              Next →
+            </button>
+            {selectedGroup && (
+              <button onClick={() => navigate('/hall-of-fame/' + selectedGroup.id)}
+                style={{ backgroundColor: S.gold, color: S.bg }}
+                className="px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm font-bold hover:opacity-90 transition">
+                Hall of Fame
               </button>
-              {selectedGroup && (
-                <button onClick={() => navigate('/hall-of-fame/' + selectedGroup.id)}
-                  style={{ backgroundColor: S.gold, color: S.bg }}
-                  className="px-4 py-2 rounded-xl text-sm font-bold hover:opacity-90 transition">
-                  Hall of Fame
-                </button>
-              )}
-            </div>
+            )}
           </div>
         </div>
 
