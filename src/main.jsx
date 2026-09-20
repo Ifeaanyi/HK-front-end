@@ -17,6 +17,7 @@ import Settings from './pages/Settings'
 import Rules from './pages/Rules'
 import PaymentSuccess from './pages/PaymentSuccess'
 import Onboarding from './pages/Onboarding'
+import InstallBanner from './components/InstallBanner'
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token')
@@ -27,6 +28,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AuthProvider>
       <BrowserRouter>
+        <InstallBanner />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
