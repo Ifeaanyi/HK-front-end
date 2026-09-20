@@ -2,6 +2,7 @@
   "name": "Habit King",
   "short_name": "Habit King",
   "description": "Track habits, compete on the leaderboard, become the Habit King.",
+  "id": "/dashboard",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#0D1B2A",
@@ -12,13 +13,13 @@
       "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
