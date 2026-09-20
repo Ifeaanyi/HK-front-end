@@ -121,7 +121,7 @@ const studyHabits = habitsForMonth.filter(h => h.category === 'Study');
             <table className="w-full border-collapse table-fixed">
               <thead>
                 <tr>
-                  <th className="text-left py-1 px-1 text-xs font-medium text-gray-600 w-40">Habit</th>
+                  <th className="text-left py-1 px-1 text-xs font-medium text-gray-600 w-40" style={{ position: 'sticky', left: 0, backgroundColor: 'white', zIndex: 10 }}>Habit</th>
                   {Array.from({ length: getDaysInMonth() }, (_, i) => {
                     const year = currentMonth.getFullYear();
                     const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
@@ -138,7 +138,7 @@ const studyHabits = habitsForMonth.filter(h => h.category === 'Study');
                 </tr>
                 {teamHabits.map((habit) => (
                   <tr key={habit.id} className="border-b hover:bg-gray-50">
-                    <td className="py-1 px-1 font-medium text-gray-900 text-xs break-words">{habit.name}</td>
+                    <td className="py-1 px-1 font-medium text-gray-900 text-xs break-words w-40" style={{ position: 'sticky', left: 0, backgroundColor: 'white', zIndex: 5 }}>{habit.name}</td>
                     {Array.from({ length: getDaysInMonth() }, (_, i) => {
                       const year = currentMonth.getFullYear();
                       const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
