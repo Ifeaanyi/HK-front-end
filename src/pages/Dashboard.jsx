@@ -508,7 +508,7 @@ habitking.io`;
             <table className="w-full border-collapse table-fixed">
               <thead>
                 <tr>
-                  <th style={{ color: S.muted, borderBottom: `1px solid ${S.border}` }} className="text-left py-2 px-1 text-xs font-medium w-40">Habit</th>
+                  <th style={{ color: S.muted, borderBottom: `1px solid ${S.border}`, position: 'sticky', left: 0, backgroundColor: S.surface, zIndex: 10 }} className="text-left py-2 px-1 text-xs font-medium w-40">Habit</th>
                   {Array.from({ length: getDaysInMonth() }, (_, i) => {
                     const year = currentMonth.getFullYear();
                     const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
@@ -527,7 +527,7 @@ habitking.io`;
                 </tr>
                 {teamHabits.map((habit) => (
                   <tr key={habit.id} style={{ borderBottom: `1px solid ${S.border}` }} className="hover:bg-opacity-50">
-                    <td style={{ color: S.text }} className="py-1.5 px-1 text-xs break-words">{habit.name}</td>
+                    <td style={{ color: S.text, position: 'sticky', left: 0, backgroundColor: S.surface, zIndex: 5 }} className="py-1.5 px-1 text-xs break-words w-40">{habit.name}</td>
                     {Array.from({ length: getDaysInMonth() }, (_, i) => {
                       const date = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`;
                       const log = habit.logs?.find(l => l.log_date === date);
@@ -550,7 +550,7 @@ habitking.io`;
                 </tr>
                 {personalHabits.map((habit) => (
                   <tr key={habit.id} style={{ borderBottom: `1px solid ${S.border}` }} className="cursor-move" draggable onDragStart={(e) => handleDragStart(e, habit)} onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, habit)}>
-                    <td style={{ color: S.text }} className="py-1.5 px-1 text-xs">
+                    <td style={{ color: S.text, position: 'sticky', left: 0, backgroundColor: S.surface, zIndex: 5 }} className="py-1.5 px-1 text-xs w-40">
                       <div className="flex items-center gap-1">
                         <span style={{ color: S.border }} className="text-xs">☰</span>
                         <span className="flex-1 break-words">{habit.name}</span>
