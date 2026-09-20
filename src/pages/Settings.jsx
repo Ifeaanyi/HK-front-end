@@ -46,6 +46,16 @@ export default function Settings() {
 
   const [notifStatus, setNotifStatus] = useState('');
   const enableNotifications = async () => {
+    // On iPhone/iPad, notifications only work inside the INSTALLED app (not Safari).
+    const isIOS = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+    const isInstalled =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true;
+    if (isIOS && !isInstalled) {
+      setNotifStatus('ios-install');
+      return;
+    }
+
     setNotifStatus('working');
     try {
       const fcmToken = await requestNotificationPermission();
@@ -246,6 +256,7 @@ export default function Settings() {
               </button>
               {notifStatus === 'denied' && <p className="text-xs text-red-600 mt-2">Permission was blocked. Enable notifications for this site in your browser settings, then try again.</p>}
               {notifStatus === 'error' && <p className="text-xs text-red-600 mt-2">Something went wrong. Please try again.</p>}
+              {notifStatus === 'ios-install' && <p className="text-xs text-yellow-600 mt-2">On iPhone, first add Habit King to your home screen (tap Share → Add to Home Screen), then open it from there and enable notifications.</p>}
             </div>
             <div className="pt-4">
               <button type="submit" disabled={saving} className={saving ? 'w-full py-3 px-4 rounded-lg font-semibold text-white transition bg-gray-400 cursor-not-allowed' : 'w-full py-3 px-4 rounded-lg font-semibold text-white transition bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700'}>
