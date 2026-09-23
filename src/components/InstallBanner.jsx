@@ -21,13 +21,7 @@ export default function InstallBanner() {
       window.navigator.standalone === true;
     if (isStandalone) return;
 
-    // If dismissed recently, stay hidden until the cooldown passes
-    const dismissedAt = localStorage.getItem('installDismissedAt');
-    if (dismissedAt) {
-      const hoursSince = (Date.now() - Number(dismissedAt)) / (1000 * 60 * 60);
-      const COOLDOWN_HOURS = 1;
-      if (hoursSince < COOLDOWN_HOURS) return;
-    }
+
 
     // Detect iPhone / iPad
     const ios = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
