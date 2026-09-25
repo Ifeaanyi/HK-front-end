@@ -523,7 +523,7 @@ habitking.io`;
               </thead>
               <tbody>
                 <tr style={{ backgroundColor: '#1A1400' }}>
-                  <td colSpan={getDaysInMonth() + 1} style={{ color: S.gold, borderTop: `1px solid #2A2400`, borderBottom: `1px solid #2A2400` }} className="py-2 px-3 text-xs font-bold uppercase tracking-widest">Team Habits</td>
+                  <td colSpan={getDaysInMonth() + 1} style={{ color: S.gold, borderTop: `1px solid #2A2400`, borderBottom: `1px solid #2A2400`, padding: 0 }} className="text-xs font-bold uppercase tracking-widest"><div style={{ position: 'sticky', left: 0, display: 'inline-block' }} className="py-2 px-3">Team Habits</div></td>
                 </tr>
                 {teamHabits.map((habit) => (
                   <tr key={habit.id} style={{ borderBottom: `1px solid ${S.border}` }} className="hover:bg-opacity-50">
