@@ -82,10 +82,7 @@ export default function InstallBanner() {
           Install
         </button>
       )}
-      <button onClick={dismiss}
-        style={{ background: 'transparent', border: 'none', color: S.muted, fontSize: 20, flexShrink: 0, lineHeight: 1, padding: '0 4px' }}>
-        ×
-      </button>
+
     </div>
   );
 }
