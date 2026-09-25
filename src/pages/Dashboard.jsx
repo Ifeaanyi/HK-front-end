@@ -80,14 +80,8 @@ export default function Dashboard() {
 
   const fetchHabits = async () => {
     try {
-      const response = await axios.get(API_URL + '/habits', { headers: { Authorization: 'Bearer ' + getToken() } });
-      const habitsWithLogs = await Promise.all(
-        response.data.habits.map(async (habit) => {
-          const logsResponse = await axios.get(API_URL + '/habits/' + habit.id + '/logs', { headers: { Authorization: 'Bearer ' + getToken() } });
-          return { ...habit, logs: logsResponse.data.logs };
-        })
-      );
-      setHabits(habitsWithLogs);
+      const response = await axios.get(API_URL + '/habits-with-logs', { headers: { Authorization: 'Bearer ' + getToken() } });
+      setHabits(response.data.habits);
     } catch (error) { console.error('Error fetching habits:', error); }
   };
 
