@@ -581,7 +581,7 @@ habitking.io`;
                     </tr>
                     {studyHabits.map((habit) => (
                       <tr key={habit.id} style={{ borderBottom: `1px solid ${S.border}` }} className="cursor-move" draggable onDragStart={(e) => handleDragStart(e, habit)} onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, habit)}>
-                        <td style={{ color: S.text }} className="py-1.5 px-1 text-xs">
+                        <td style={{ color: S.text, position: 'sticky', left: 0, backgroundColor: S.surface, zIndex: 5 }} className="py-1.5 px-1 text-xs w-40">
                           <div className="flex items-center gap-1">
                             <span style={{ color: S.border }} className="text-xs">☰</span>
                             <span className="flex-1 break-words">{habit.name}</span>
