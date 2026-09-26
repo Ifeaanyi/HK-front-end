@@ -1,6 +1,10 @@
 importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js");
 
+// Take control immediately when a new version deploys (auto-update for users)
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+
 firebase.initializeApp({
   apiKey: "AIzaSyAfCZX886yOJIyfFPEiRTKdRxsvAepYtg4",
   authDomain: "habit-king-app.firebaseapp.com",
