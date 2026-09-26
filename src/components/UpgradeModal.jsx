@@ -12,39 +12,26 @@ export default function UpgradeModal({ isOpen, onClose }) {
   const getToken = () => localStorage.getItem('token');
 
   const handleUpgrade = async (plan) => {
-    if (isAfrican) {
-      setLoading(true);
-      try {
-        const response = await fetch(`${API_URL}/payments/initialize`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: 'Bearer ' + getToken()
-          },
-          body: JSON.stringify({ plan })
-        });
-        const data = await response.json();
-        if (data.authorization_url) {
-          window.location.href = data.authorization_url;
-        } else {
-          alert(data.detail || 'Failed to start payment. Please try again.');
-          setLoading(false);
-        }
-      } catch (error) {
-        alert('Failed to start payment. Please try again.');
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/payments/initialize`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + getToken()
+        },
+        body: JSON.stringify({ plan })
+      });
+      const data = await response.json();
+      if (data.authorization_url) {
+        window.location.href = data.authorization_url;
+      } else {
+        alert(data.detail || 'Failed to start payment. Please try again.');
         setLoading(false);
       }
-    } else {
-      try {
-        const response = await fetch(`${API_URL}/stripe/create-checkout?plan=${plan}`, {
-          method: 'POST',
-          headers: { Authorization: 'Bearer ' + getToken() }
-        });
-        const data = await response.json();
-        window.location.href = data.url;
-      } catch (error) {
-        alert('Failed to start checkout. Please try again.');
-      }
+    } catch (error) {
+      alert('Failed to start payment. Please try again.');
+      setLoading(false);
     }
   };
 
@@ -68,7 +55,7 @@ export default function UpgradeModal({ isOpen, onClose }) {
               <div className="text-center">
                 <h3 className="text-lg font-bold text-gray-900">Monthly</h3>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold text-gray-900">{isAfrican ? '₦4,500' : '$5.00'}</span>
+                  <span className="text-4xl font-bold text-gray-900">₦4,500</span>
                   <span className="text-gray-500">/month</span>
                 </div>
                 <p className="text-sm text-gray-500 mt-2">Billed monthly</p>
@@ -84,11 +71,11 @@ export default function UpgradeModal({ isOpen, onClose }) {
               <div className="text-center">
                 <h3 className="text-lg font-bold text-gray-900">Yearly</h3>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold text-gray-900">{isAfrican ? '₦33,000' : '$45.00'}</span>
+                  <span className="text-4xl font-bold text-gray-900">₦33,000</span>
                   <span className="text-gray-500">/year</span>
                 </div>
                 <p className="text-sm text-gray-500 mt-2">
-                  {isAfrican ? <><span className="line-through">₦54,000</span> Save ₦21,000</> : <><span className="line-through">$60.00</span> Save $15.00</>}
+                  <><span className="line-through">₦54,000</span> Save ₦21,000</>
                 </p>
                 <button onClick={() => handleUpgrade('yearly')} className="mt-6 w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition">
                   Choose Yearly
@@ -108,7 +95,7 @@ export default function UpgradeModal({ isOpen, onClose }) {
             </div>
           </div>
           <div className="mt-6 text-center text-sm text-gray-500">
-            <p>🔒 Secure payment powered by {isAfrican ? 'Paystack' : 'Stripe'}</p>
+            <p>🔒 Secure payment powered by Paystack</p>
             <p className="mt-1">Cancel anytime from your dashboard</p>
           </div>
         </div>
