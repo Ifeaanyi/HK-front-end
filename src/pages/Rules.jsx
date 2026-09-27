@@ -8,7 +8,7 @@ export default function Rules() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-white shadow-sm border-b"> 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <h1 className="text-2xl font-bold text-gray-900">Habit King 👑</h1>
@@ -207,7 +207,7 @@ export default function Rules() {
               <ul className="text-sm text-gray-600 space-y-1">
                 <li>• To-Do productivity ≥ 65%</li>
                 <li>• Missed days ≤ 3</li>
-                <li>• Total activities ≥ 130</li>
+                <li>• Total activities ≥ 90</li>
               </ul>
             </div>
             <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
@@ -244,7 +244,7 @@ export default function Rules() {
               <p className="text-sm text-gray-600">Track hours spent learning. Maximum 5 study skills. Points = hours logged.</p>
             </div>
             <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
-              <p className="text-sm text-yellow-800"><strong>🗑️ Delete Window:</strong> Personal and Study habits can be deleted within 24 hours of creation, or during the first 3 days of any month.</p>
+              <p className="text-sm text-yellow-800"><strong>🗑️ Delete Window:</strong> Personal and Study habits can be deleted within 24 hours of creation, or during the first 5 days of any month.</p>
             </div>
           </div>
         </div>
