@@ -8,7 +8,7 @@ const S = {
   dim: '#3A4A5A',
 };
 
-// Each tip: the sentence, with {g}...{/g} marking the gold-highlighted part(s)
+// Each tip: {g}...{/g} marks the gold-highlighted part(s)
 const TIPS = [
   'A {g}14-day streak{/g} earns +5 bonus points. Push to {g}30 days{/g} for a massive +20.',
   'Complete all {g}5 monthly goals{/g} and grab a +15 point bonus.',
@@ -21,7 +21,6 @@ const TIPS = [
 ];
 
 function renderTip(tip) {
-  // Split on the {g}...{/g} markers and colour those parts gold
   const parts = tip.split(/(\{g\}.*?\{\/g\})/g);
   return parts.map((part, i) => {
     if (part.startsWith('{g}')) {
@@ -33,31 +32,39 @@ function renderTip(tip) {
 }
 
 export default function DidYouKnow() {
-  const [show, setShow] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
   const [index, setIndex] = useState(0);
+  const [fade, setFade] = useState(true);
 
   useEffect(() => {
-    const today = new Date().toISOString().split('T')[0];
-    const lastShown = localStorage.getItem('tipLastShownDate');
-
-    // Only show once per day
-    if (lastShown === today) return;
-
-    // Rotate to the next tip each day
-    const lastIndex = parseInt(localStorage.getItem('tipIndex') || '-1', 10);
-    const nextIndex = (lastIndex + 1) % TIPS.length;
-    setIndex(nextIndex);
-    setShow(true);
-    localStorage.setItem('tipIndex', String(nextIndex));
-    localStorage.setItem('tipLastShownDate', today);
+    // Start on a rotating tip so it's not always the same one on open
+    const start = parseInt(localStorage.getItem('tipIndex') || '-1', 10);
+    setIndex((start + 1) % TIPS.length);
   }, []);
 
-  if (!show) return null;
+  useEffect(() => {
+    if (dismissed) return;
+    const interval = setInterval(() => {
+      // fade out, switch, fade in
+      setFade(false);
+      setTimeout(() => {
+        setIndex((prev) => {
+          const next = (prev + 1) % TIPS.length;
+          localStorage.setItem('tipIndex', String(next));
+          return next;
+        });
+        setFade(true);
+      }, 300);
+    }, 8000); // cycle every 8 seconds
+    return () => clearInterval(interval);
+  }, [dismissed]);
+
+  if (dismissed) return null;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
       <div style={{ backgroundColor: S.surface, border: `1px solid ${S.border}` }} className="rounded-2xl p-6 relative max-w-2xl mx-auto">
-        <button onClick={() => setShow(false)}
+        <button onClick={() => setDismissed(true)}
           style={{ position: 'absolute', top: 16, right: 18, color: S.dim, fontSize: 18, lineHeight: 1, background: 'transparent', border: 'none' }}>
           ×
         </button>
@@ -67,13 +74,13 @@ export default function DidYouKnow() {
           <span style={{ color: S.gold, fontSize: 11, fontWeight: 600, letterSpacing: '0.12em' }} className="uppercase">Did You Know</span>
         </div>
 
-        <div style={{ color: S.text, fontSize: 16, lineHeight: 1.5, fontWeight: 500 }}>
+        <div style={{ color: S.text, fontSize: 16, lineHeight: 1.5, fontWeight: 500, minHeight: 48, opacity: fade ? 1 : 0, transition: 'opacity 0.3s ease' }}>
           {renderTip(TIPS[index])}
         </div>
 
         <div className="flex gap-1.5 mt-4">
           {TIPS.map((_, i) => (
-            <div key={i} style={{ width: 20, height: 3, borderRadius: 2, backgroundColor: i === index ? S.gold : S.border }}></div>
+            <div key={i} style={{ width: 20, height: 3, borderRadius: 2, backgroundColor: i === index ? S.gold : S.border, transition: 'background-color 0.3s ease' }}></div>
           ))}
         </div>
       </div>
