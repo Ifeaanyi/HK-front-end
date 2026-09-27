@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
+import KingsCoach from '../components/KingsCoach';
 
 const S = {
   bg: '#0A0F1E',
@@ -52,6 +53,7 @@ export default function Onboarding() {
   const [selectedPack, setSelectedPack] = useState(null);
   const [goal, setGoal] = useState('');
   const [loading, setLoading] = useState(false);
+  const [coachMode, setCoachMode] = useState(false);
 
   const handlePackSelect = (pack) => {
     setSelectedPack(pack);
@@ -152,15 +154,43 @@ export default function Onboarding() {
           </div>
         )}
 
-        {/* STEP 2 — Pick a habit pack */}
-        {step === 2 && (
+        {/* STEP 2 — Pick a habit pack (or use King's Coach) */}
+        {step === 2 && coachMode && (
+          <div>
+            <h2 style={{ color: S.text }} className="text-xl font-black mb-4 tracking-tight">
+              Design with King's Coach
+            </h2>
+            <KingsCoach
+              onDone={() => { setCoachMode(false); setStep(3); }}
+              onCancel={() => setCoachMode(false)}
+            />
+          </div>
+        )}
+
+        {step === 2 && !coachMode && (
           <div>
             <h2 style={{ color: S.text }} className="text-xl font-black mb-1 tracking-tight">
-              Pick your habit pack
+              How do you want to start?
             </h2>
             <p style={{ color: S.muted }} className="text-sm mb-6">
-              Choose a starter pack or build your own. You can always change habits later.
+              Let King's Coach design habits made for you, or pick a starter pack.
             </p>
+
+            <button
+              onClick={() => setCoachMode(true)}
+              style={{ backgroundColor: '#1A1400', border: `1px solid ${S.gold}`, color: S.text }}
+              className="w-full p-4 rounded-xl text-left transition hover:opacity-90 mb-5"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">👑</span>
+                <div>
+                  <p style={{ color: S.gold }} className="text-sm font-bold">Design with King's Coach</p>
+                  <p style={{ color: S.muted }} className="text-xs">Answer 3 quick questions, get habits built for you</p>
+                </div>
+              </div>
+            </button>
+
+            <p style={{ color: S.muted }} className="text-xs uppercase tracking-wider mb-3">Or pick a pack</p>
             <div className="space-y-3 mb-8">
               {HABIT_PACKS.map((pack) => (
                 <button
