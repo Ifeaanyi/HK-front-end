@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import UpgradeModal from '../components/UpgradeModal';
 import { requestNotificationPermission } from '../firebase';
+import DidYouKnow from '../components/DidYouKnow';
 
 const API_URL = 'https://habit-king-production.up.railway.app/api/v1';
 
@@ -308,6 +309,9 @@ habitking.io`;
           </div>
         </div>
       </div>
+
+      {/* DID YOU KNOW TIP */}
+      <DidYouKnow />
 
       {/* EXPIRY WARNINGS */}
       {showExpiryWarning && (
