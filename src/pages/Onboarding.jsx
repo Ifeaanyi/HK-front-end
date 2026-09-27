@@ -176,21 +176,35 @@ export default function Onboarding() {
               Let King's Coach design habits made for you, or pick a starter pack.
             </p>
 
-            <button
+            <div
               onClick={() => setCoachMode(true)}
-              style={{ backgroundColor: '#1A1400', border: `1px solid ${S.gold}`, color: S.text }}
-              className="w-full p-4 rounded-xl text-left transition hover:opacity-90 mb-5"
+              style={{
+                position: 'relative',
+                background: 'linear-gradient(135deg, #1A1400 0%, #241a00 100%)',
+                border: `1.5px solid ${S.gold}`,
+                boxShadow: '0 0 24px rgba(201,168,76,0.15)',
+                cursor: 'pointer',
+              }}
+              className="rounded-2xl p-5 mb-6 hover:opacity-95 transition"
             >
+              <div style={{ position: 'absolute', top: '-9px', left: '20px', backgroundColor: S.gold, color: S.bg }}
+                className="text-[10px] font-black tracking-wider px-2.5 py-0.5 rounded-md">
+                RECOMMENDED
+              </div>
               <div className="flex items-center gap-3">
-                <span className="text-2xl">👑</span>
-                <div>
-                  <p style={{ color: S.gold }} className="text-sm font-bold">Design with King's Coach</p>
-                  <p style={{ color: S.muted }} className="text-xs">Answer 3 quick questions, get habits built for you</p>
+                <span className="text-3xl">👑</span>
+                <div className="flex-1">
+                  <p style={{ color: S.goldBright }} className="text-base font-black">Design with King's Coach</p>
+                  <p style={{ color: S.muted }} className="text-xs mt-0.5 leading-relaxed">Answer 3 quick questions and get habits built around your life, using proven science.</p>
                 </div>
               </div>
-            </button>
+              <div style={{ backgroundColor: S.gold, color: S.bg }}
+                className="mt-4 text-center py-3 rounded-xl text-sm font-black">
+                Start with the Coach →
+              </div>
+            </div>
 
-            <p style={{ color: S.muted }} className="text-xs uppercase tracking-wider mb-3">Or pick a pack</p>
+            <p style={{ color: S.muted }} className="text-center text-xs uppercase tracking-wider mb-4">— Or pick a pack —</p>
             <div className="space-y-3 mb-8">
               {HABIT_PACKS.map((pack) => (
                 <button
