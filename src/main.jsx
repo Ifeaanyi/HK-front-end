@@ -24,6 +24,23 @@ const ProtectedRoute = ({ children }) => {
   return token ? children : <Navigate to="/login" />
 }
 
+// Auto-reload when a new app version is deployed (so users don't run stale code)
+if ('serviceWorker' in navigator) {
+  let refreshing = false
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) return
+    refreshing = true
+    window.location.reload()
+  })
+
+  // Check for a new version every 60 seconds
+  setInterval(() => {
+    navigator.serviceWorker.getRegistration().then((reg) => {
+      if (reg) reg.update()
+    })
+  }, 60000)
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AuthProvider>
