@@ -169,14 +169,14 @@ export default function Rules() {
             <div className="flex items-start gap-3">
               <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">1</span>
               <div>
-                <p className="font-semibold text-gray-800">Edit Period: 1st - 4th of each month</p>
+                <p className="font-semibold text-gray-800">Edit Period: 1st - 8th of each month</p>
                 <p className="text-sm text-gray-600">Create, edit, or delete your goals during this window</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">2</span>
               <div>
-                <p className="font-semibold text-gray-800">Locked Period: 5th onwards</p>
+                <p className="font-semibold text-gray-800">Locked Period: 9th onwards</p>
                 <p className="text-sm text-gray-600">Goals are locked - you can only mark them complete or incomplete</p>
               </div>
             </div>
