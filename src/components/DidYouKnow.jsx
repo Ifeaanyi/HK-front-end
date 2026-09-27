@@ -32,7 +32,10 @@ function renderTip(tip) {
 }
 
 export default function DidYouKnow() {
-  const [dismissed, setDismissed] = useState(false);
+  const today = new Date().toISOString().split('T')[0];
+  const [dismissed, setDismissed] = useState(
+    localStorage.getItem('tipDismissedDate') === today
+  );
   const [index, setIndex] = useState(0);
   const [fade, setFade] = useState(true);
 
@@ -64,7 +67,7 @@ export default function DidYouKnow() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
       <div style={{ backgroundColor: S.surface, border: `1px solid ${S.border}` }} className="rounded-2xl p-6 relative max-w-2xl mx-auto">
-        <button onClick={() => setDismissed(true)}
+        <button onClick={() => { setDismissed(true); localStorage.setItem('tipDismissedDate', today); }}
           style={{ position: 'absolute', top: 16, right: 18, color: S.dim, fontSize: 18, lineHeight: 1, background: 'transparent', border: 'none' }}>
           ×
         </button>
