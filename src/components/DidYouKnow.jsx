@@ -18,6 +18,13 @@ const TIPS = [
   'Keep your streak: complete {g}all Team habits{/g}, 1 Personal habit, and 1 To-Do each day.',
   'Study hours count too — {g}1 hour logged = 1 point{/g}.',
   'You can edit your monthly goals from the {g}1st to the 8th{/g}. After that, they lock.',
+  "Team habits are your {g}group's shared habits{/g} — everyone in the group tracks them daily. Complete them all to keep your streak alive.",
+  'Personal habits are your own custom ones — add up to {g}10{/g} things you want to build in your life.',
+  'Study hours track time spent {g}learning a skill{/g} — a course, reading, practice. Not your day job. Every hour = 1 point.',
+  '"Activities" means your {g}to-do items{/g}. To win the crown, you need {g}90+ to-dos{/g} logged in a month.',
+  'The Hall of Fame is your trophy room — every {g}past champion{/g} and all-time record lives there.',
+  'Pro members can be in up to {g}2 groups{/g} — compete with different circles of friends.',
+  'Create your own group, invite your friends, and compete on your own leaderboard.',
 ];
 
 function renderTip(tip) {
