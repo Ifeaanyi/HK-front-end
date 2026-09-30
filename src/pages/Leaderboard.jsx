@@ -307,11 +307,24 @@ function Leaderboard() {
           )}
 
           {selectedGroup && (
-            <div style={{ backgroundColor: S.bg, border: `1px solid ${S.border}` }} className="mt-4 p-3 rounded-lg flex items-center gap-3">
-              <p style={{ color: S.muted }} className="text-xs">Invite code:</p>
-              <code style={{ backgroundColor: S.surface, border: `1px solid ${S.border}`, color: S.gold }} className="px-3 py-1 rounded font-mono text-sm font-bold">{selectedGroup.invite_code}</code>
-              <button onClick={() => { navigator.clipboard.writeText(selectedGroup.invite_code); alert('Copied!'); }}
-                style={{ color: S.muted }} className="text-xs hover:text-yellow-500 transition">Copy</button>
+            <div style={{ backgroundColor: S.bg, border: `1px solid ${S.border}` }} className="mt-4 p-3 rounded-lg">
+              <div className="flex items-center gap-3 flex-wrap">
+                <button
+                  onClick={() => {
+                    const link = 'https://habitking.io/join/' + selectedGroup.invite_code;
+                    navigator.clipboard.writeText(link);
+                    alert('Invite link copied! Share it with friends.');
+                  }}
+                  style={{ backgroundColor: S.gold, color: S.bg }}
+                  className="text-xs px-4 py-2 rounded-lg font-bold hover:opacity-90 transition">
+                  Copy invite link
+                </button>
+                <span style={{ color: S.muted }} className="text-xs">or share code:</span>
+                <code style={{ backgroundColor: S.surface, border: `1px solid ${S.border}`, color: S.gold }} className="px-3 py-1 rounded font-mono text-sm font-bold">{selectedGroup.invite_code}</code>
+                <button onClick={() => { navigator.clipboard.writeText(selectedGroup.invite_code); alert('Code copied!'); }}
+                  style={{ color: S.muted }} className="text-xs hover:text-yellow-500 transition">Copy code</button>
+              </div>
+              <p style={{ color: S.muted }} className="text-xs mt-2">Friends who tap your link can request to join — you approve them here.</p>
             </div>
           )}
         </div>
