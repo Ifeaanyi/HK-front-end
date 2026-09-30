@@ -78,7 +78,8 @@ function Register() {
 
         <div className="text-center mb-8">
           <img src="/logo.png" alt="Habit King" className="h-24 w-auto mx-auto mb-4" />
-          <p style={{ color: '#8A9BB0' }} className="text-sm">Create your account and start building habits.</p>
+          <p style={{ color: '#F5F0E8' }} className="text-base font-semibold">Every champion starts with day one.</p>
+          <p style={{ color: '#8A9BB0' }} className="text-sm mt-1">Build the habits that build you. Your first month is on us.</p>
         </div>
 
         {error && (
@@ -171,13 +172,18 @@ function Register() {
             />
           </div>
 
+          <div style={{ backgroundColor: '#1A1400', border: '1px solid #C9A84C' }} className="rounded-lg p-3 text-center mt-2">
+            <p style={{ color: '#E8C060' }} className="text-xs font-bold">Your first month of Pro — free</p>
+            <p style={{ color: '#8A9BB0' }} className="text-xs mt-0.5">Groups, leaderboard and your King's Coach, unlocked from day one.</p>
+          </div>
+
           <button
             type="submit"
             disabled={loading}
             style={{ backgroundColor: '#C9A84C', color: '#0A0F1E' }}
             className="w-full py-3 rounded-lg font-semibold text-sm tracking-wide hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed mt-2"
           >
-            {loading ? 'Creating account...' : 'Sign Up'}
+            {loading ? 'Start my journey' : 'Start my journey'}
           </button>
         </form>
 
