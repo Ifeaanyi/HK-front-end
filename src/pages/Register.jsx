@@ -47,7 +47,15 @@ function Register() {
       });
 
       localStorage.setItem('token', loginResponse.data.access_token);
-      navigate('/onboarding');
+
+      // If they arrived via a group invite link, send them to complete the join
+      const pendingCode = localStorage.getItem('pendingJoinCode');
+      if (pendingCode) {
+        localStorage.removeItem('pendingJoinCode');
+        navigate('/join/' + pendingCode);
+      } else {
+        navigate('/onboarding');
+      }
     } catch (err) {
       console.error('Registration error:', err);
       if (err.response?.data?.detail) {
