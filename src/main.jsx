@@ -68,7 +68,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="/join/:code" element={<JoinGroup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/coach-test" element={<ProtectedRoute><CoachTest /></ProtectedRoute>} />
+
           <Route path="/" element={<Navigate to="/dashboard" />} />
         </Routes>
       </BrowserRouter>
