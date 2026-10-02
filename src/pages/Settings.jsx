@@ -263,6 +263,37 @@ export default function Settings() {
               </button>
             </div>
           </form>
+
+          <div className="pt-6 mt-6 border-t border-red-200">
+            <h3 className="text-sm font-bold text-red-600 uppercase tracking-wider mb-2">Danger Zone</h3>
+            {!showDeleteConfirm ? (
+              <>
+                <p className="text-sm text-gray-600 mb-3">Permanently delete your account and all your data. This cannot be undone.</p>
+                <button type="button" onClick={() => setShowDeleteConfirm(true)}
+                  className="text-sm px-4 py-2 border border-red-400 text-red-600 rounded-lg hover:bg-red-50 font-medium">
+                  Delete My Account
+                </button>
+              </>
+            ) : (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-sm text-red-800 font-semibold mb-2">This will permanently delete your account, habits, streaks and history.</p>
+                <p className="text-sm text-gray-700 mb-3">Type <strong>DELETE</strong> below to confirm.</p>
+                <input type="text" value={deleteConfirmText} onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  placeholder="Type DELETE"
+                  className="w-full px-4 py-2 border border-red-300 rounded-lg text-sm focus:outline-none focus:border-red-500 mb-3" />
+                <div className="flex gap-3">
+                  <button type="button" onClick={handleDeleteAccount} disabled={deleteConfirmText !== 'DELETE' || deleting}
+                    className={deleteConfirmText === 'DELETE' && !deleting ? 'text-sm px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold' : 'text-sm px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-bold'}>
+                    {deleting ? 'Deleting...' : 'Permanently Delete'}
+                  </button>
+                  <button type="button" onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmText(''); }}
+                    className="text-sm px-4 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 font-medium">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
         <div className="mt-6 bg-blue-50 rounded-lg p-4 border border-blue-200">
           <div className="flex items-start gap-2 text-sm text-blue-800">
