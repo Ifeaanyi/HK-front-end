@@ -145,12 +145,16 @@ export default function Dashboard() {
 
   const cancelEditing = () => { setEditingGoalId(null); setEditingGoalText(''); };
 
+  const [creatingHabit, setCreatingHabit] = useState(false);
   const createHabit = async (category) => {
     if (!newHabitName.trim()) { alert('Please enter a habit name'); return; }
+    if (creatingHabit) return; // prevent double-submit duplicates
+    setCreatingHabit(true);
     try {
       await axios.post(API_URL + '/habits', { name: newHabitName, category, point_value: 1 }, { headers: { Authorization: 'Bearer ' + getToken() } });
       setNewHabitName(''); setShowPersonalForm(false); setShowStudyForm(false); fetchHabits();
     } catch (error) { alert(error.response?.data?.detail || 'Failed to create habit'); }
+    finally { setCreatingHabit(false); }
   };
 
   const deleteHabit = async (habitId) => {
@@ -244,8 +248,16 @@ habitking.io`;
   const monthEnd = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(getDaysInMonth()).padStart(2, '0')}`;
   const habitsForMonth = habits.filter(h => {
     const createdDate = h.created_at ? h.created_at.split('T')[0] : '2000-01-01';
-    const deletedDate = h.deleted_at ? h.deleted_at.replace('T', ' ').split(' ')[0] : null;
-    return createdDate <= monthEnd && (!deletedDate || (deletedDate > monthStart && monthStart < new Date().toISOString().split('T')[0].substring(0, 7) + '-01'));
+    if (createdDate > monthEnd) return false; // created after this month - never show
+
+    // Not deleted -> show
+    if (!h.deleted_at) return true;
+
+    // Deleted: only show for this month if it actually had activity this month
+    const hasActivityThisMonth = (h.logs || []).some(l =>
+      l.log_date >= monthStart && l.log_date <= monthEnd && (l.completed || l.hours > 0)
+    );
+    return hasActivityThisMonth;
   });
 
   const teamHabits = habitsForMonth.filter(h => h.category === 'Team');
