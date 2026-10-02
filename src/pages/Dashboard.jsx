@@ -145,6 +145,19 @@ export default function Dashboard() {
 
   const cancelEditing = () => { setEditingGoalId(null); setEditingGoalText(''); };
 
+  const [editingHabitId, setEditingHabitId] = useState(null);
+  const [editingHabitName, setEditingHabitName] = useState('');
+
+  const startEditHabit = (habit) => { setEditingHabitId(habit.id); setEditingHabitName(habit.name); };
+  const cancelEditHabit = () => { setEditingHabitId(null); setEditingHabitName(''); };
+  const saveEditHabit = async (habitId) => {
+    if (!editingHabitName.trim()) { alert('Habit name cannot be empty'); return; }
+    try {
+      await axios.patch(API_URL + '/habits/' + habitId, { name: editingHabitName.trim() }, { headers: { Authorization: 'Bearer ' + getToken() } });
+      setEditingHabitId(null); setEditingHabitName(''); fetchHabits();
+    } catch (error) { alert(error.response?.data?.detail || 'Failed to edit habit'); }
+  };
+
   const [creatingHabit, setCreatingHabit] = useState(false);
   const createHabit = async (category) => {
     if (!newHabitName.trim()) { alert('Please enter a habit name'); return; }
@@ -561,11 +574,22 @@ habitking.io`;
                 {personalHabits.map((habit) => (
                   <tr key={habit.id} style={{ borderBottom: `1px solid ${S.border}` }} className="cursor-move" draggable onDragStart={(e) => handleDragStart(e, habit)} onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, habit)}>
                     <td style={{ color: S.text, position: 'sticky', left: 0, backgroundColor: S.surface, zIndex: 5 }} className="py-1.5 px-1 text-xs w-40">
-                      <div className="flex items-center gap-1">
-                        <span style={{ color: S.border }} className="text-xs">☰</span>
-                        <span className="flex-1 break-words">{habit.name}</span>
-                        {canDeleteHabit(habit.created_at) && <button onClick={() => deleteHabit(habit.id)} style={{ color: '#E07070' }} className="text-xs flex-shrink-0">✕</button>}
-                      </div>
+                      {editingHabitId === habit.id ? (
+                        <div className="flex items-center gap-1">
+                          <input value={editingHabitName} onChange={(e) => setEditingHabitName(e.target.value)} maxLength={50}
+                            style={{ backgroundColor: S.bg, border: `1px solid ${S.gold}`, color: S.text }}
+                            className="flex-1 w-full px-1 py-0.5 rounded text-xs focus:outline-none" />
+                          <button onClick={() => saveEditHabit(habit.id)} style={{ color: '#6DBF6D' }} className="text-xs flex-shrink-0">✓</button>
+                          <button onClick={cancelEditHabit} style={{ color: S.muted }} className="text-xs flex-shrink-0">✕</button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          <span style={{ color: S.border }} className="text-xs">☰</span>
+                          <span className="flex-1 break-words">{habit.name}</span>
+                          {canDeleteHabit(habit.created_at) && <button onClick={() => startEditHabit(habit)} style={{ color: S.muted }} className="text-xs flex-shrink-0">✎</button>}
+                          {canDeleteHabit(habit.created_at) && <button onClick={() => deleteHabit(habit.id)} style={{ color: '#E07070' }} className="text-xs flex-shrink-0">✕</button>}
+                        </div>
+                      )}
                     </td>
                     {Array.from({ length: getDaysInMonth() }, (_, i) => {
                       const date = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`;
@@ -592,11 +616,22 @@ habitking.io`;
                     {studyHabits.map((habit) => (
                       <tr key={habit.id} style={{ borderBottom: `1px solid ${S.border}` }} className="cursor-move" draggable onDragStart={(e) => handleDragStart(e, habit)} onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, habit)}>
                         <td style={{ color: S.text, position: 'sticky', left: 0, backgroundColor: S.surface, zIndex: 5 }} className="py-1.5 px-1 text-xs w-40">
-                          <div className="flex items-center gap-1">
-                            <span style={{ color: S.border }} className="text-xs">☰</span>
-                            <span className="flex-1 break-words">{habit.name}</span>
-                            {canDeleteHabit(habit.created_at) && <button onClick={() => deleteHabit(habit.id)} style={{ color: '#E07070' }} className="text-xs flex-shrink-0">✕</button>}
-                          </div>
+                          {editingHabitId === habit.id ? (
+                            <div className="flex items-center gap-1">
+                              <input value={editingHabitName} onChange={(e) => setEditingHabitName(e.target.value)} maxLength={50}
+                                style={{ backgroundColor: S.bg, border: `1px solid ${S.gold}`, color: S.text }}
+                                className="flex-1 w-full px-1 py-0.5 rounded text-xs focus:outline-none" />
+                              <button onClick={() => saveEditHabit(habit.id)} style={{ color: '#6DBF6D' }} className="text-xs flex-shrink-0">✓</button>
+                              <button onClick={cancelEditHabit} style={{ color: S.muted }} className="text-xs flex-shrink-0">✕</button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1">
+                              <span style={{ color: S.border }} className="text-xs">☰</span>
+                              <span className="flex-1 break-words">{habit.name}</span>
+                              {canDeleteHabit(habit.created_at) && <button onClick={() => startEditHabit(habit)} style={{ color: S.muted }} className="text-xs flex-shrink-0">✎</button>}
+                              {canDeleteHabit(habit.created_at) && <button onClick={() => deleteHabit(habit.id)} style={{ color: '#E07070' }} className="text-xs flex-shrink-0">✕</button>}
+                            </div>
+                          )}
                         </td>
                         {Array.from({ length: getDaysInMonth() }, (_, i) => {
                           const date = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`;
