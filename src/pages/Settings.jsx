@@ -45,6 +45,22 @@ export default function Settings() {
   const isAfrican = AFRICAN_TIMEZONES.includes(timezone);
 
   const [notifStatus, setNotifStatus] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== 'DELETE') return;
+    setDeleting(true);
+    try {
+      await axios.delete(API_URL + '/users/me', { headers: { Authorization: 'Bearer ' + getToken() } });
+      localStorage.clear();
+      window.location.href = '/login';
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Could not delete account. Please try again.' });
+      setDeleting(false);
+    }
+  };
   const enableNotifications = async () => {
     // On iPhone/iPad, notifications only work inside the INSTALLED app (not Safari).
     const isIOS = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
