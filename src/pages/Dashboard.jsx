@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import UpgradeModal from '../components/UpgradeModal';
 import { requestNotificationPermission } from '../firebase';
 import DidYouKnow from '../components/DidYouKnow';
+import KingsCoachChat from '../components/KingsCoachChat';
 
 const API_URL = 'https://habit-king-production.up.railway.app/api/v1';
 
@@ -40,6 +41,8 @@ export default function Dashboard() {
   const [showExpiryWarning, setShowExpiryWarning] = useState(false);
   const [daysUntilExpiry, setDaysUntilExpiry] = useState(0);
   const [subscriptionExpired, setSubscriptionExpired] = useState(false);
+  const [showCoach, setShowCoach] = useState(false);
+  const [coachHasNote, setCoachHasNote] = useState(false);
 
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -57,6 +60,16 @@ export default function Dashboard() {
   useEffect(() => {
     fetchHabits(); fetchTodos(); fetchStreak(); fetchMonthlyGoals();
   }, [selectedDate, currentMonth]);
+
+  useEffect(() => {
+    if (user?.subscription_tier !== 'pro') return;
+    (async () => {
+      try {
+        const res = await axios.get(API_URL + '/coach/has-note', { headers: { Authorization: 'Bearer ' + getToken() } });
+        setCoachHasNote(res.data.has_note);
+      } catch (e) { /* silent */ }
+    })();
+  }, [user]);
 
   // Ask for notification permission. Only mark "done" once actually granted,
   // so an accidental dismissal doesn't lock the user out forever.
@@ -315,6 +328,14 @@ habitking.io`;
                 className="px-3 py-1.5 text-xs font-medium rounded-lg transition">
                 {shareLoading ? 'Loading...' : shareCopied ? 'Copied!' : 'Share Stats'}
               </button>
+              {user?.subscription_tier === 'pro' && (
+                <button onClick={() => setShowCoach(true)}
+                  style={{ backgroundColor: S.gold, color: S.bg, position: 'relative' }}
+                  className="px-3 py-1.5 text-xs font-bold rounded-lg hover:opacity-90 transition">
+                  👑 King's Coach
+                  {coachHasNote && <span style={{ position: 'absolute', top: '-4px', right: '-4px', width: '10px', height: '10px', backgroundColor: '#E07070', borderRadius: '50%' }}></span>}
+                </button>
+              )}
               <div style={{ color: S.text }} className="text-xs font-medium px-2">{user?.full_name}</div>
               {user?.subscription_tier === 'pro' ? (
                 <span style={{ backgroundColor: '#1A1A0A', border: `1px solid ${S.gold}`, color: S.gold }} className="px-3 py-1 rounded-full text-xs font-bold">PRO</span>
@@ -334,6 +355,24 @@ habitking.io`;
           </div>
         </div>
       </div>
+
+      {/* KING'S COACH BANNER */}
+      {user?.subscription_tier === 'pro' && coachHasNote && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+          <button onClick={() => setShowCoach(true)}
+            style={{ backgroundColor: '#1A1400', border: `1px solid ${S.gold}`, width: '100%' }}
+            className="rounded-2xl p-4 flex items-center justify-between max-w-2xl mx-auto hover:opacity-90 transition">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">👑</span>
+              <div className="text-left">
+                <p style={{ color: S.gold }} className="text-sm font-bold">King's Coach has a note for you</p>
+                <p style={{ color: S.muted }} className="text-xs">Tap to see what I noticed about your week.</p>
+              </div>
+            </div>
+            <span style={{ color: S.gold }} className="text-sm">→</span>
+          </button>
+        </div>
+      )}
 
       {/* DID YOU KNOW TIP */}
       <DidYouKnow />
@@ -656,6 +695,7 @@ habitking.io`;
       </div>
 
       <UpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
+      {showCoach && <KingsCoachChat onClose={() => setShowCoach(false)} />}
     </div>
   );
 }
