@@ -18,6 +18,8 @@ import Rules from './pages/Rules'
 import PaymentSuccess from './pages/PaymentSuccess'
 import Onboarding from './pages/Onboarding'
 import JoinGroup from './pages/JoinGroup'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 import InstallBanner from './components/InstallBanner'
 
 const ProtectedRoute = ({ children }) => {
@@ -63,6 +65,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="/payment/success" element={<PaymentSuccess />} />
           <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
           <Route path="/join/:code" element={<JoinGroup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/" element={<Navigate to="/dashboard" />} />
         </Routes>
       </BrowserRouter>
