@@ -10,21 +10,37 @@ const S = {
 
 // Each tip: {g}...{/g} marks the gold-highlighted part(s)
 const TIPS = [
-  'A {g}14-day streak{/g} earns +5 bonus points. Push to {g}30 days{/g} for a massive +20.',
-  'Complete all {g}5 monthly goals{/g} and grab a +15 point bonus.',
-  'Hit {g}85% to-do productivity{/g} for +20 bonus points — even 50% earns you +5.',
-  'To win the crown: {g}65% productivity{/g}, 3 or fewer missed days, and {g}90+ activities{/g}.',
-  'Your daily sheet locks at {g}11:59 PM{/g} your time. Log before then.',
-  'Keep your streak: complete {g}all Team habits{/g}, 1 Personal habit, and 1 To-Do each day.',
-  'Study hours count too — {g}1 hour logged = 1 point{/g}.',
-  'You can edit your monthly goals from the {g}1st to the 8th{/g}. After that, they lock.',
+  // What things are
   "Team habits are your {g}group's shared habits{/g} — everyone in the group tracks them daily. Complete them all to keep your streak alive.",
   'Personal habits are your own custom ones — add up to {g}10{/g} things you want to build in your life.',
   'Study hours track time spent {g}learning a skill{/g} — a course, reading, practice. Not your day job. Every hour = 1 point.',
-  '"Activities" means your {g}to-do items{/g}. To win the crown, you need {g}90+ to-dos{/g} logged in a month.',
-  'The Hall of Fame is your trophy room — every {g}past champion{/g} and all-time record lives there.',
+  '"Activities" means your {g}to-do items{/g} — added, whether done or not.',
+
+  // How points work
+  'Study hours count — {g}1 hour logged = 1 point{/g}.',
+  'Hit {g}85% to-do productivity{/g} for +20 bonus points — even 50% earns you +5.',
+  'A {g}14-day streak{/g} earns +5 bonus points. Push to {g}30 days{/g} for a massive +20.',
+  'Keep your streak alive: complete {g}all Team habits{/g}, 1 Personal habit, and 1 To-Do each day.',
+  'Complete all {g}5 monthly goals{/g} and grab a +15 point bonus.',
+
+  // How to win (sequence)
+  'To win the crown: {g}65% productivity{/g}, 3 or fewer missed days, and {g}90+ activities{/g}.',
+  'Most points does not always win — if the leader misses any criteria, the crown {g}passes to the next person{/g} who meets them all.',
+  'Even in 2nd or 3rd, you can {g}take the crown{/g} if those above you fall short on the criteria and you meet them.',
+
+  // Managing habits
+  'Drag and drop your {g}Personal and Study habits{/g} to reorder them however you like.',
+  'Tap the {g}pencil icon{/g} to rename a habit — your ticks stay. Only during the edit window.',
+  'Edit your monthly goals from the {g}1st to the 8th{/g}. After that, they lock.',
+  'Your daily sheet locks at {g}11:59 PM{/g} your time. Log before then.',
+
+  // Groups & growth
   'Pro members can be in up to {g}2 groups{/g} — compete with different circles of friends.',
   'Create your own group, invite your friends, and compete on your own leaderboard.',
+  'New members get their {g}first month of Pro free{/g} — invite a friend and they start fully unlocked.',
+
+  // Trophy room
+  'The Hall of Fame is your trophy room — every {g}past champion{/g} and all-time record lives there.',
 ];
 
 function renderTip(tip) {
