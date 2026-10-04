@@ -53,8 +53,13 @@ export default function KingsCoachChat({ onClose }) {
     setLoading(true);
     try {
       const res = await api.post('/coach/chat', { message: text, history: newHistory });
-      setMessages([...newHistory, { role: 'assistant', content: res.data.reply }]);
+      const updated = [...newHistory, { role: 'assistant', content: res.data.reply }];
+      setMessages(updated);
       setUsed(res.data.messages_used);
+      // Save memory in the background after each exchange (reliable, not dependent on how they close)
+      if (updated.length >= 4) {
+        api.post('/coach/save-memory', { history: updated }).catch(() => {});
+      }
     } catch (e) {
       const msg = e.response?.status === 429
         ? "You've used all 10 messages today. Come back tomorrow 👑"
