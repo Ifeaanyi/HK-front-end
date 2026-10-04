@@ -7,6 +7,16 @@ const S = {
 };
 
 export default function KingsCoachChat({ onClose }) {
+  const saveAndClose = async () => {
+    // Save durable memories from this conversation (fire and forget)
+    try {
+      const current = messagesRef.current;
+      if (current && current.length >= 2) {
+        api.post('/coach/save-memory', { history: current });
+      }
+    } catch (e) { /* silent */ }
+    onClose();
+  };
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -14,6 +24,7 @@ export default function KingsCoachChat({ onClose }) {
   const [used, setUsed] = useState(0);
   const [limit, setLimit] = useState(10);
   const endRef = useRef(null);
+  const messagesRef = useRef([]);
 
   useEffect(() => {
     (async () => {
@@ -31,6 +42,7 @@ export default function KingsCoachChat({ onClose }) {
   }, []);
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, loading]);
+  useEffect(() => { messagesRef.current = messages; }, [messages]);
 
   const send = async () => {
     const text = input.trim();
@@ -65,7 +77,7 @@ export default function KingsCoachChat({ onClose }) {
               <p style={{ color: S.muted }} className="text-xs">{limit - used} messages left today</p>
             </div>
           </div>
-          <button onClick={onClose} style={{ color: S.muted }} className="text-2xl leading-none">×</button>
+          <button onClick={saveAndClose} style={{ color: S.muted }} className="text-2xl leading-none">×</button>
         </div>
 
         {/* Messages */}
