@@ -63,6 +63,12 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (user?.subscription_tier !== 'pro') return;
+    // After viewing a note, don't show the banner again for 10 days
+    const lastViewed = localStorage.getItem('coachNoteViewedAt');
+    if (lastViewed) {
+      const daysSince = (Date.now() - Number(lastViewed)) / (1000 * 60 * 60 * 24);
+      if (daysSince < 10) return;
+    }
     (async () => {
       try {
         const res = await axios.get(API_URL + '/coach/has-note', { headers: { Authorization: 'Bearer ' + getToken() } });
@@ -359,7 +365,7 @@ habitking.io`;
       {/* KING'S COACH BANNER */}
       {user?.subscription_tier === 'pro' && coachHasNote && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-          <button onClick={() => setShowCoach(true)}
+          <button onClick={() => { setShowCoach(true); setCoachHasNote(false); localStorage.setItem('coachNoteViewedAt', String(Date.now())); }}
             style={{ backgroundColor: '#1A1400', border: `1px solid ${S.gold}`, width: '100%' }}
             className="rounded-2xl p-4 flex items-center justify-between max-w-2xl mx-auto hover:opacity-90 transition">
             <div className="flex items-center gap-3">
