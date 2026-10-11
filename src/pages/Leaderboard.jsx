@@ -30,8 +30,25 @@ function Leaderboard() {
   const [newGroupName, setNewGroupName] = useState('');
   const [inviteCode, setInviteCode] = useState('');
   const [selectedMonth, setSelectedMonth] = useState(new Date());
+  const [friendIds, setFriendIds] = useState([]);
 
-  useEffect(() => { fetchGroups(); }, []);
+  useEffect(() => { fetchGroups(); fetchFriendIds(); }, []);
+
+  const fetchFriendIds = async () => {
+    try {
+      const res = await api.get('/friends');
+      setFriendIds((res.data.friends || []).map(f => f.id));
+    } catch (e) { /* silent */ }
+  };
+
+  const goToPerson = (person) => {
+    if (person.user_id === user?.id) { navigate('/dashboard'); return; }
+    if (friendIds.includes(person.user_id)) {
+      navigate('/friends/' + person.user_id + '/dashboard');
+    } else {
+      alert(`You're not friends with ${person.full_name} yet. Add them on the Friends page to see their progress.`);
+    }
+  };
 
   useEffect(() => {
     if (selectedGroup) {
@@ -228,7 +245,7 @@ function Leaderboard() {
                 <p style={{ color: S.text }} className="font-bold mb-2">Primary Path</p>
                 <p style={{ color: S.muted }}>· 65%+ productivity</p>
                 <p style={{ color: S.muted }}>· 3 or fewer missed days</p>
-                <p style={{ color: S.muted }}>· 130+ activities</p>
+                <p style={{ color: S.muted }}>· 90+ activities</p>
               </div>
               <div style={{ backgroundColor: '#0A1A0A', border: `1px solid #2A5A2A` }} className="rounded-lg p-3">
                 <p style={{ color: S.text }} className="font-bold mb-2">Bonus Path</p>
@@ -359,10 +376,10 @@ function Leaderboard() {
                   className="rounded-xl p-4">
                   <div className="flex items-center gap-3">
                     <span className={index < 3 ? 'text-xl w-6 text-center flex-shrink-0' : 'text-sm w-6 text-center flex-shrink-0'} style={{ color: S.muted }}>{getMedalEmoji(index)}</span>
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0" onClick={() => goToPerson(person)} style={{ cursor: 'pointer' }}>
                       <div style={{ color: S.text }} className="font-semibold text-sm truncate">
                         {isWinner && <span style={{ color: S.gold }} className="mr-1">👑</span>}
-                        {person.full_name}
+                        <span style={{ textDecoration: 'underline', textDecorationColor: S.border }}>{person.full_name}</span>
                         {isCurrentUser && <span style={{ color: S.blueLight }} className="ml-1 text-xs font-normal">You</span>}
                       </div>
                       <div style={{ color: S.muted }} className="text-xs truncate">{person.role_title}</div>
@@ -414,9 +431,9 @@ function Leaderboard() {
                       <td className="p-4">
                         <div className="flex items-center gap-2">
                           {isWinner && <span style={{ color: S.gold }}>👑</span>}
-                          <div>
-                            <div style={{ color: S.text }} className="font-semibold text-sm">
-                              {person.full_name}
+                          <div onClick={() => goToPerson(person)} style={{ cursor: 'pointer' }}>
+                            <div style={{ color: S.text }} className="font-semibold text-sm hover:text-yellow-500 transition">
+                              <span style={{ textDecoration: 'underline', textDecorationColor: S.border }}>{person.full_name}</span>
                               {isCurrentUser && <span style={{ color: S.blueLight }} className="ml-2 text-xs">(You)</span>}
                               {isWinner && <span style={{ color: S.gold }} className="ml-2 text-xs font-bold">KING</span>}
                             </div>
@@ -478,7 +495,7 @@ function Leaderboard() {
         <div style={{ backgroundColor: S.surface, border: `1px solid ${S.border}` }} className="mt-6 rounded-xl p-4">
           <p style={{ color: S.muted }} className="text-xs uppercase tracking-widest mb-3">How Points Work</p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs" style={{ color: S.muted }}>
-            <span>· Habits: Team (2pts) + Personal (1pt)</span>
+            <span>· Habits: Team (1pt) + Personal (1pt)</span>
             <span>· Study: 1hr = 1pt, 30min = 0.5pt</span>
             <span>· To-Do: % completed</span>
             <span>· 7-day streak: +2pts</span>
